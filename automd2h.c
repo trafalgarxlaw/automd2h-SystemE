@@ -2,7 +2,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
-
+// sys calls
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #define USAGE "\n\
 Usage: [-h|--help] [-r|--num-rows VALUE] [-c|--num-cols VALUE]\n\
@@ -58,16 +60,38 @@ struct Arguments {
     bool Default;                   /**< Default Args  */
     int num_files;
     int num_directories;
+    char option1,option2;
+    
 };
 
 struct Arguments *parse_arguments(int argc, char *argv[]) {
     struct Arguments *arguments = malloc(sizeof(struct Arguments));
+    char option1[3];
+    char option2[3];
+    if (argc>2 && argc<4)
+    {
+                printf("here \n");
 
-    // Default argument
-    char option = 'n';
+        strcpy(option1, argv[1]);
+        strcpy(option2, argv[2]);
+        arguments->option1 =option1[1];
+        arguments->option2 =option2[1];
 
+        arguments->status = OK;
+    }else if (argc == 2)
+    {
+        printf("here \n");
+        strcpy(option1, argv[1]);
+        arguments->option1 =option1[1];
+        arguments->status = OK;
+    }
+    else
+    {
+        arguments->status = WRONG_VALUE;
+    }
+    
     // Parse options
-    switch (option)
+    switch (arguments->option1)
     {
     case 'n':
         /* code */
@@ -80,13 +104,11 @@ struct Arguments *parse_arguments(int argc, char *argv[]) {
     return arguments;
 }
 
-void print_args(int argc, char const *argv[]){
+void print_args(struct Arguments *arguments){
     printf("Arguments : \n");
-    for (int i = 1; i < argc; i++)
-    {
-        /* code */
-        printf("%s\n",argv[i]);
-    }
+    printf("Arg1 : %c \n",arguments->option1);
+    printf("Arg2 : %c \n",arguments->option2);
+
 
 }
 
@@ -94,14 +116,14 @@ void free_arguments(struct Arguments *arguments) {
     free(arguments);
 }
 
-int main(int argc, char const *argv[])
+int main(int argc, char *argv[])
 {
-    printf(USAGE);
-    // struct Arguments *arguments = parse_arguments(argc, argv); //takes the arguments in the structure
-    //     if (arguments->status != OK) {  //if it fails
-    //     return arguments->status;
-    //     }
-    print_args(argc,argv);
+    //printf(USAGE);
+    struct Arguments *arguments = parse_arguments(argc, argv); //takes the arguments in the structure
+    if (arguments->status != OK) {  //if it fails
+        return arguments->status;
+    }
+    print_args(arguments);
 
     return 0;
 }
