@@ -6,6 +6,9 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+# define OPTION_MAX_LENGHT 3
+# define ONE_ARGUMENT 2
+# define TREE_ARGUMENT 4
 #define USAGE "\n\
 Usage: [-h|--help] [-r|--num-rows VALUE] [-c|--num-cols VALUE]\n\
     [-n|--num_steps VALUE] [-t|--type STRING] [-a|--allowed-cells STRING]\n\
@@ -27,8 +30,6 @@ automd2h convertit les fichiers au format Markdown en fichiers au format HTML.\n
                               Combiné avec -n, l'option -t n'affiche que les fichiers \n\
                               sources effectivement à convertir.\n\
 "
-
-
 
 
 /**
@@ -65,22 +66,21 @@ struct Arguments {
 };
 
 struct Arguments *parse_arguments(int argc, char *argv[]) {
+    
     struct Arguments *arguments = malloc(sizeof(struct Arguments));
-    char option1[3];
-    char option2[3];
-    if (argc>2 && argc<4)
-    {
-                printf("here \n");
+    char option1[OPTION_MAX_LENGHT];
+    char option2[OPTION_MAX_LENGHT];
 
+    if (argc>ONE_ARGUMENT && argc<TREE_ARGUMENT)
+    {
         strcpy(option1, argv[1]);
         strcpy(option2, argv[2]);
         arguments->option1 =option1[1];
         arguments->option2 =option2[1];
 
         arguments->status = OK;
-    }else if (argc == 2)
+    }else if (argc == ONE_ARGUMENT)
     {
-        printf("here \n");
         strcpy(option1, argv[1]);
         arguments->option1 =option1[1];
         arguments->status = OK;
@@ -112,6 +112,7 @@ void print_args(struct Arguments *arguments){
 
 }
 
+// To review
 void free_arguments(struct Arguments *arguments) {
     free(arguments);
 }
