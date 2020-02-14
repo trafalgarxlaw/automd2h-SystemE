@@ -10,12 +10,11 @@ automd2h convertit les fichiers au format Markdown en fichiers au format HTML.
 
 Si fichier est un fichier régulier, celui-ci est converti en HTML avec l'outil pandoc. Le fichier HTML est placé dans le même répertoire et a le même nom que le fichier original avec l'extension .html ajoutée. Si l'extension originale du fichier est .md, alors celle-ci est retirée du nom du fichier cible et est remplacée par .html.
 
-Exemple: automd2h foo.txt bar.md baz/foo.bar.md crée les fichiers foo.txt.html, bar.html et baz/foo.bar.html
+**Exemple: automd2h foo.txt bar.md baz/foo.bar.md crée les fichiers foo.txt.html, bar.html et baz/foo.bar.html**
 
 Si fichier est un répertoire, automd2h cherche les fichiers .md de ce répertoire. Chacun de ces fichiers sources est converti et le fichier cible .html est placé dans le même répertoire et a le même nom que le fichier .md source, seule l'extension change.
 
-Exemple: automd2h baz trouve baz/foo.bar.md et crée le fichier baz/foo.bar.html.
-
+**Exemple: automd2h baz trouve baz/foo.bar.md et crée le fichier baz/foo.bar.html.**
 Option -t
 Avec l'option -t. La date de dernière modification des fichiers est utilisée pour savoir s'il faut reconvertir. Si le fichier source est plus récent que le ficher .html cible associé, ou si le fichier .html cible n'existe pas, alors il y a conversion. Si la date est identique ou si le fichier .html cible est plus récent, alors il n'y a pas de conversion.
 
@@ -27,14 +26,14 @@ Combiné avec -n, l'option -t n'affiche que les fichiers sources effectivement �
 Option -r
 L'option -r visite les répertoires récursivement et cherche les fichiers dont l'extension est .md pour les convertir.
 
-Exemple: automd2h -r . va trouver bar.md et baz/foo.bar.md et créer les fichiers bar.html et baz/foo.bar.html. Par contre foo.txt n'est pas considéré, car l'extension n'est pas la bonne.
+**Exemple: automd2h -r . va trouver bar.md et baz/foo.bar.md et créer les fichiers bar.html et baz/foo.bar.html. Par contre foo.txt n'est pas considéré, car l'extension n'est pas la bonne.**
 
 Note: dans la recherche récursive, les liens symboliques vers des fichiers .md sont suivis mais les liens symboliques vers des répertoires ne sont pas suivis.
 
 Option -w
 Avec l'option -w, automd2h bloque et surveille les modifications des fichiers et des répertoires passés en argument. Lors de la modification d'un fichier source, celui-ci est automatiquement reconverti. Si dans un répertoire surveillé un fichier .md apparait, est modifié, est déplacé ou est renommé, celui-ci aussi est automatiquement converti.
 
-Exemple: automd2h -w bar.md baz ne fait rien, bloque et attend les modifications des fichiers. Si bar.md ou baz/foo.bar.md est modifié, il sera reconverti, si un nouveau fichier baz/new.md apparait il sera aussi reconverti. Par contre, les modifications ou création de baz/foo.txt ne sont pas considérées car l'extension n'est pas la bonne. De même pour ./foo.md ou baz/subdir/foo.md qui ne sont pas dans un répertoire surveillé.
+**Exemple: automd2h -w bar.md baz ne fait rien, bloque et attend les modifications des fichiers. Si bar.md ou baz/foo.bar.md est modifié, il sera reconverti, si un nouveau fichier baz/new.md apparait il sera aussi reconverti. Par contre, les modifications ou création de baz/foo.txt ne sont pas considérées car l'extension n'est pas la bonne. De même pour ./foo.md ou baz/subdir/foo.md qui ne sont pas dans un répertoire surveillé.**
 
 Note: En mode surveillance (-w), le programme se ne termine pas et doit être terminé manuellement (avec Ctrl-C par exemple).
 
@@ -42,14 +41,14 @@ Combiné avec -n, l'option -w attend indéfiniment et affiche les fichiers à co
 
 Combiné avec -r, l'option -w surveille aussi les sous-répertoires. Si dans un répertoire surveillé un sous-répertoire apparait, celui-ci ainsi que ses sous-répertoires sont surveillés.
 
-Exemple: automd2h -w -r . va attendre les modifications des fichiers bar.md et baz/foo.bar.md. Les nouveaux fichiers .md dans . et dans bar seront aussi convertis. Les nouveaux répertoires dans . et dans bar seront aussi surveillés.
+**Exemple: automd2h -w -r . va attendre les modifications des fichiers bar.md et baz/foo.bar.md. Les nouveaux fichiers .md dans . et dans bar seront aussi convertis. Les nouveaux répertoires dans . et dans bar seront aussi surveillés.**
 
 Option -f
 Par défaut, avec -w, les fichiers ne sont convertis que si une modification future est détectée.
 
 Combiné avec -w, l'option -f force la conversion immédiate des fichiers trouvés puis surveille les modifications futures.
 
-Exemple: automd2h -w -f foo.txt convertit et crée le fichier foo.txt.html directement puis bloque et attend les modifications de foo.txt avant de reconvertir.
+**Exemple: automd2h -w -f foo.txt convertit et crée le fichier foo.txt.html directement puis bloque et attend les modifications de foo.txt avant de reconvertir.**
 
 Note: l'option -f sans -w est en fait le comportement par défaut.
 
