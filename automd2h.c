@@ -9,7 +9,7 @@
 # define OPTION_MAX_LENGHT 3
 # define ONE_ARGUMENT 2
 # define TREE_ARGUMENT 4
-#define USAGE "\n\
+# define USAGE "\n\
 Usage: [-h|--help] [-r|--num-rows VALUE] [-c|--num-cols VALUE]\n\
     [-n|--num_steps VALUE] [-t|--type STRING] [-a|--allowed-cells STRING]\n\
     [-d|--distribution VALUES] [-i|--interactive] [-s|--stdin]\n\
@@ -50,6 +50,7 @@ struct File
 {
     /* data */
     enum Format format;
+    char filename[];        //The name of the file
 };
 
 
@@ -61,12 +62,13 @@ struct Arguments {
     bool Default;                   /**< Default Args  */
     int num_files;
     int num_directories;
-    char option1,option2;
-    
+    char option1,option2;            // options
+    struct File files[];             // Array of Files to convert
 };
 
+//  Note: les option -x sont entree en premier, ensuite les noms de fichiers
 struct Arguments *parse_arguments(int argc, char *argv[]) {
-    
+
     struct Arguments *arguments = malloc(sizeof(struct Arguments));
     char option1[OPTION_MAX_LENGHT];
     char option2[OPTION_MAX_LENGHT];
