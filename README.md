@@ -2,6 +2,12 @@
 ## Manuel
 automd2h convertit les fichiers markdown d'une sous-arborescence vers des fichiers HTML
 
+## By me
+Utiliser un max d'appel system : opendir, closedir (pour se promenet dans les repertoire de facon recurive)
+fork() wait() etc...
+
+Faudrais lister toutes les fonctions Appel System qu'on pense avoir besoin.
+
 ## Synopsis
 automd2h [options] fichier...
 

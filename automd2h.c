@@ -31,6 +31,8 @@ automd2h convertit les fichiers au format Markdown en fichiers au format HTML.\n
                               sources effectivement à convertir.\n\
 "
 
+// utiliser un max d'appel system : opendir, closedir (pour se promenet dans les rep de facon recurive)
+// fork() wait() etc...
 
 /**
  * The status of the program.
@@ -124,6 +126,7 @@ int main(int argc, char *argv[])
     //printf(USAGE);
     struct Arguments *arguments = parse_arguments(argc, argv); //takes the arguments in the structure
     if (arguments->status != OK) {  //if it fails
+        fprintf(stderr,"failed to read arguments");
         return arguments->status;
     }
     print_args(arguments);
