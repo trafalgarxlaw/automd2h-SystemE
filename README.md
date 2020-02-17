@@ -135,6 +135,9 @@ Un zéro vous sera automatiquement attribué si:
 - Le listing papier est illisible (lignes brisées, fonte non fixe, etc.)
 - Note : un jeu de tests vous sera fourni.
 
+## Jeu de tests
+Un jeu de test est disponible sur la machine java.labunix.uqam.ca. Exécutez la commande ~privat_j/inf3173/t à partir d'un répertoire contenant votre binaire automd2h pour lancer la suite de tests.
+
 ## Document à rendre et dates
 Date de remise électronique : dimanche 8 mars 23h55
 
