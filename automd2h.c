@@ -8,7 +8,7 @@
 
 # define OPTION_MAX_LENGHT 3
 # define ONE_ARGUMENT 2
-# define TREE_ARGUMENT 4
+# define TWO_ARGUMENT 3
 # define USAGE "\n\
 Usage: [-h|--help] [-r|--num-rows VALUE] [-c|--num-cols VALUE]\n\
     [-n|--num_steps VALUE] [-t|--type STRING] [-a|--allowed-cells STRING]\n\
@@ -68,14 +68,38 @@ struct Arguments {
     struct File files[];             // Array of Files to convert
 };
 
+
+
+bool is_HTML(char *filename){
+    return strstr(filename, ".html") != NULL;
+}
+bool is_Markdown(char *filename){
+    return strstr(filename, ".md") != NULL;
+}
+bool is_txt(char *filename){
+    return strstr(filename, ".txt") != NULL;
+}
+bool Filename_is_Valide(char *filename){
+    return is_txt(filename) || is_Markdown(filename) || is_HTML(filename);
+}
+
+
 //  Note: les option -x sont entree en premier, ensuite les noms de fichiers
+
+// ex automd2h foo.txt -> foo.txt.html
 struct Arguments *parse_arguments(int argc, char *argv[]) {
 
     struct Arguments *arguments = malloc(sizeof(struct Arguments));
     char option1[OPTION_MAX_LENGHT];
     char option2[OPTION_MAX_LENGHT];
 
-    if (argc>ONE_ARGUMENT && argc<TREE_ARGUMENT)
+    /**
+     * Option parsing
+     * if the lenght of argv is equal to 2, its an option, else its a filename.
+     * Im using only a max of 2 options as reference
+     */
+
+    if (argc == TWO_ARGUMENT && strlen(argv[1]) == 2 && strlen(argv[2]) == 2)
     {
         strcpy(option1, argv[1]);
         strcpy(option2, argv[2]);
@@ -83,16 +107,46 @@ struct Arguments *parse_arguments(int argc, char *argv[]) {
         arguments->option2 =option2[1];
 
         arguments->status = OK;
-    }else if (argc == ONE_ARGUMENT)
+    }else if (argc == ONE_ARGUMENT && strlen(argv[1]) == 2 )
     {
         strcpy(option1, argv[1]);
         arguments->option1 =option1[1];
         arguments->status = OK;
-    }
+    }else if (Filename_is_Valide(argv[1]))
+    {
+        /**
+        * File parsing
+        * if the lenght of argv >2 and contains a valide file format
+        */
+
+        if (is_Markdown(argv[1]))
+        {
+            printf("You want me to convert a md file \n");
+            
+        }
+
+        if (is_HTML(argv[1]))
+        {
+            printf("You want me to convert a html file \n");
+            
+        }
+
+        if (is_txt(argv[1]))
+        {
+            printf("You want me to convert a txt file \n");
+            
+        }
+        
+        
+    } 
     else
     {
         arguments->status = WRONG_VALUE;
     }
+
+
+
+   
     
     // Parse options
     switch (arguments->option1)
@@ -109,7 +163,7 @@ struct Arguments *parse_arguments(int argc, char *argv[]) {
 }
 
 void print_args(struct Arguments *arguments){
-    printf("Arguments : \n");
+    printf("Arguments  \n");
     printf("Arg1 : %c \n",arguments->option1);
     printf("Arg2 : %c \n",arguments->option2);
 
@@ -126,7 +180,7 @@ int main(int argc, char *argv[])
     //printf(USAGE);
     struct Arguments *arguments = parse_arguments(argc, argv); //takes the arguments in the structure
     if (arguments->status != OK) {  //if it fails
-        fprintf(stderr,"failed to read arguments");
+        fprintf(stderr,"failed to read arguments\n");
         return arguments->status;
     }
     print_args(arguments);
