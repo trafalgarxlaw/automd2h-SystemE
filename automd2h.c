@@ -69,6 +69,9 @@ struct Arguments {
 };
 
 
+/**
+ * File Validation functions.
+ */
 
 bool is_HTML(char *filename){
     return strstr(filename, ".html") != NULL;
