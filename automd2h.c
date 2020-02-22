@@ -94,8 +94,8 @@ bool Filename_is_Valide(char *filename){
 
 
 //  Note: les option -x sont entree en premier, ensuite les noms de fichiers
-
-// ex automd2h foo.txt -> foo.txt.html
+//  NomProgramme -options(4options Max) NomsFichiers(Unlimited)
+//  ex automd2h foo.txt -> foo.txt.html
 struct Arguments *parse_arguments(int argc, char *argv[]) {
 
     struct Arguments *arguments = malloc(sizeof(struct Arguments));
@@ -241,9 +241,6 @@ int main(int argc, char *argv[])
         else
             printf("Hello from Parent!\n"); 
     
-
-
-        
     }
     
     //print_args(arguments);
