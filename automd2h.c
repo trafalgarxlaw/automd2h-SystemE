@@ -71,7 +71,7 @@ struct Arguments {
     int num_files;
     int num_directories;
     char option1,option2;            // options
-    struct File files[];             // Array of Files to convert
+    struct File files[];             // Array of Files to convert. It can be unlimited
 };
 
 
@@ -187,34 +187,34 @@ void print_args(struct Arguments *arguments){
 }
 
 //Check if documents has a new version to convert
-bool files_needs_conversion(char *filePath){
-	struct stat attrib;
-	if (file_exist(filePath))
-	{
-		stat(filePath, &attrib);
-	}
+// bool files_needs_conversion(char *filePath){
+// 	struct stat attrib;
+// 	if (file_exist(filePath))
+// 	{
+// 		stat(filePath, &attrib);
+// 	}
 	
-	return ctime(&attr.st_mtime)
-}
+// 	return ctime(&attr.st_mtime);
+// };
 
 // Check if file exists in Current repository
-bool file_exist(char *filePath){
-	return access(filePath, F_OK) != -1
-}
+// bool file_exist(char *filePath){
+// 	return access(filePath, F_OK) != -1
+// };
 
 // Return the new file name after conversion
-char* new_file_name(char *filePath){
-	char *temp;
-	char *newFileName;
-	if (file_exist(filePath)){
-		if(is_txt(filePath)){
-			strcpy(temp,filePath);
-			strcpy(newFileName, temp + ".html")
-		}else if(is_Markdown(filePath)){
+// char* new_file_name(char *filePath){
+// 	char *temp;
+// 	char *newFileName;
+// 	if (file_exist(filePath)){
+// 		if(is_txt(filePath)){
+// 			strcpy(temp,filePath);
+// 			strcpy(newFileName, temp + ".html")
+// 		}else if(is_Markdown(filePath)){
 			
-		}
-	}
-}
+// 		}
+// 	}
+// }
 
 // To review
 void free_arguments(struct Arguments *arguments) {
@@ -233,18 +233,14 @@ int main(int argc, char *argv[])
     {
         // All good
 
-        // make two process which run same 
-        // program after this instruction 
-        fork(); 
-        { 
-            // child process because return value zero 
-            if (fork() == 0) 
-                printf("Hello from Child!\n"); 
-        
-            // parent process because return value non-zero. 
-            else
-                printf("Hello from Parent!\n"); 
-        } 
+        // child process because return value zero 
+        if (fork() == 0) 
+            printf("Hello from Child!\n"); 
+    
+        // parent process because return value non-zero. 
+        else
+            printf("Hello from Parent!\n"); 
+    
 
 
         
