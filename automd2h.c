@@ -6,6 +6,10 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#include <time.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
 # define OPTION_MAX_LENGHT 3
 # define ONE_ARGUMENT 2
 # define TWO_ARGUMENT 3
@@ -171,6 +175,36 @@ void print_args(struct Arguments *arguments){
     printf("Arg2 : %c \n",arguments->option2);
 
 
+}
+
+//Check if documents has a new version to convert
+bool files_needs_conversion(char *filePath){
+	struct stat attrib;
+	if (file_exist(filePath))
+	{
+		stat(filePath, &attrib);
+	}
+	
+	return ctime(&attr.st_mtime)
+}
+
+// Check if file exists in Current repository
+bool file_exist(char *filePath){
+	return access(filePath, F_OK) != -1
+}
+
+// Return the new file name after conversion
+char* new_file_name(char *filePath){
+	char *temp;
+	char *newFileName;
+	if (file_exist(filePath)){
+		if(is_txt(filePath)){
+			strcpy(temp,filePath);
+			strcpy(newFileName, temp + ".html")
+		}else if(is_Markdown(filePath)){
+			
+		}
+	}
 }
 
 // To review
