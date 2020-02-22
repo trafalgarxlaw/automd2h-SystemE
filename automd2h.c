@@ -5,12 +5,14 @@
 // sys calls
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <unistd.h> 
+
 
 # define OPTION_MAX_LENGHT 3
 # define ONE_ARGUMENT 2
 # define TWO_ARGUMENT 3
 # define USAGE "\n\
-Usage: [-h|--help] [-r|--num-rows VALUE] [-c|--num-cols VALUE]\n\
+Usage: [-h|--help] [-t|--???] [-n|--???]\n\
     [-n|--num_steps VALUE] [-t|--type STRING] [-a|--allowed-cells STRING]\n\
     [-d|--distribution VALUES] [-i|--interactive] [-s|--stdin]\n\
 \n\
@@ -52,7 +54,7 @@ struct File
 {
     /* data */
     enum Format format;
-    char filename[];        //The name of the file
+    char* filename;        //The name of the file
 };
 
 
@@ -93,6 +95,8 @@ bool Filename_is_Valide(char *filename){
 struct Arguments *parse_arguments(int argc, char *argv[]) {
 
     struct Arguments *arguments = malloc(sizeof(struct Arguments));
+    arguments->num_files=0;
+    arguments->num_directories=0;
     char option1[OPTION_MAX_LENGHT];
     char option2[OPTION_MAX_LENGHT];
 
@@ -125,18 +129,26 @@ struct Arguments *parse_arguments(int argc, char *argv[]) {
         if (is_Markdown(argv[1]))
         {
             printf("You want me to convert a md file \n");
-            
+            arguments->files[0].filename = argv[1];
+            arguments->files[0].format= markdown;
+            arguments->num_files++;
         }
 
         if (is_HTML(argv[1]))
         {
             printf("You want me to convert a html file \n");
+            arguments->files[0].filename = argv[1];
+            arguments->files[0].format= html;
+            arguments->num_files++;
             
         }
 
         if (is_txt(argv[1]))
         {
             printf("You want me to convert a txt file \n");
+            arguments->files[0].filename = argv[1];
+            arguments->files[0].format= txt;
+            arguments->num_files++;
             
         }
         
@@ -147,9 +159,6 @@ struct Arguments *parse_arguments(int argc, char *argv[]) {
         arguments->status = WRONG_VALUE;
     }
 
-
-
-   
     
     // Parse options
     switch (arguments->option1)
@@ -180,13 +189,34 @@ void free_arguments(struct Arguments *arguments) {
 
 int main(int argc, char *argv[])
 {
+    printf("Starting the program... \n");
     //printf(USAGE);
     struct Arguments *arguments = parse_arguments(argc, argv); //takes the arguments in the structure
-    if (arguments->status != OK) {  //if it fails
+    if (arguments->status != OK) {  
         fprintf(stderr,"failed to read arguments\n");
         return arguments->status;
+    }else
+    {
+        // All good
+
+        // make two process which run same 
+        // program after this instruction 
+        fork(); 
+        { 
+            // child process because return value zero 
+            if (fork() == 0) 
+                printf("Hello from Child!\n"); 
+        
+            // parent process because return value non-zero. 
+            else
+                printf("Hello from Parent!\n"); 
+        } 
+
+
+        
     }
-    print_args(arguments);
+    
+    //print_args(arguments);
 
     return 0;
 }
