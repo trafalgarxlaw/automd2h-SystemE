@@ -186,35 +186,49 @@ void print_args(struct Arguments *arguments){
 
 }
 
-//Check if documents has a new version to convert
-// bool files_needs_conversion(char *filePath){
-// 	struct stat attrib;
-// 	if (file_exist(filePath))
-// 	{
-// 		stat(filePath, &attrib);
-// 	}
-	
-// 	return ctime(&attr.st_mtime);
-// };
+//Check if converted document has a newer version
+bool is_new_doc_version(time_t sourceFile, time_t destFile){
+	return sourceFile > destFile;
+}
 
 // Check if file exists in Current repository
-// bool file_exist(char *filePath){
-// 	return access(filePath, F_OK) != -1
-// };
+bool file_exist(char *filePath){
+ 	return access(filePath, F_OK) != -1;
+};
 
 // Return the new file name after conversion
-// char* new_file_name(char *filePath){
-// 	char *temp;
-// 	char *newFileName;
-// 	if (file_exist(filePath)){
-// 		if(is_txt(filePath)){
-// 			strcpy(temp,filePath);
-// 			strcpy(newFileName, temp + ".html")
-// 		}else if(is_Markdown(filePath)){
-			
-// 		}
-// 	}
-// }
+ char* new_file_name(char *filePath){
+ 	char *newFileName;
+	char html[] = ".html"; 
+ 	if (file_exist(filePath)){
+ 		if(is_txt(filePath)){
+			strcpy(newFileName, filePath);
+			strncat(newFileName, html, 5);
+ 		}else if(is_Markdown(filePath)){
+			//copy all except .md
+			strncpy(newFileName, filePath, sizeof(filePath) -3);
+			strncat(newFileName, html, 5);
+ 		}
+ 	}
+	return newFileName;
+}
+
+//Check if documents has a new version to convert
+bool file_needs_conversion(char *filePath){
+ 	struct stat attrib;
+	struct stat newAttrib;
+	bool convert = true;
+ 	if (file_exist(filePath)){
+ 		stat(filePath, &attrib);
+		if (file_exist(new_file_name(filePath))){
+			stat(new_file_name(filePath), &newAttrib);
+			convert = is_new_doc_version(attrib.st_mtime, newAttrib.st_mtime);
+		}
+	}else{
+		convert = false;
+	}
+	return convert;
+};
 
 // To review
 void free_arguments(struct Arguments *arguments) {
