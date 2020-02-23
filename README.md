@@ -9,6 +9,9 @@ fork() wait() etc...
 **System calls**
 - fork()
 - wait()
+- state()
+- closedir()
+- closedir()
 
 Faudrais lister toutes les fonctions Appel System qu'on pense avoir besoin.
 
