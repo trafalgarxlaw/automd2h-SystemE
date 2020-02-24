@@ -247,14 +247,32 @@ int main(int argc, char *argv[])
     {
         // All good
 
+        int pid = fork();
+
+        if (pid == -1) {
+            perror("Fork Error");
+        }
         // child process because return value zero 
-        if (fork() == 0) 
+        else if (pid == 0){
+        
             printf("Hello from Child!\n"); 
-    
-        // parent process because return value non-zero. 
-        else
+            // Pandoc will run here.
+            
+            //calling pandoc
+
+            //argv array for: ls -l
+            char * ls_args[] = { "ls" , "-l", NULL};
+            //                    ^ 
+            //  use the name ls
+            //  rather than the
+            //  path to /bin/ls
+            execvp(   ls_args[0],     ls_args);   
+        }
+        // parent process because return value non-zero.   
+        else{
+
             printf("Hello from Parent!\n"); 
-    
+        }
     }
     
     //print_args(arguments);
