@@ -246,7 +246,7 @@ int main(int argc, char *argv[])
     }else
     {
         // All good
-        pid_t pid;
+        int pid;
 
 
         pid = fork();
@@ -264,7 +264,9 @@ int main(int argc, char *argv[])
 
             // argv array for: ls -l
             // Just like in main, the argv array must be NULL terminated.
-            char * ls_args[] = { "ls" , "-l", NULL};
+            // try to run ./a.out -x -y, it will work
+            char * ls_args[] = { "pandoc" , "README.md","-o","example1.html", NULL};
+
             //                    ^ 
             //  use the name ls
             //  rather than the
