@@ -246,8 +246,10 @@ int main(int argc, char *argv[])
     }else
     {
         // All good
+        pid_t pid;
 
-        int pid = fork();
+
+        pid = fork();
 
         if (pid == -1) {
             perror("Fork Error");
@@ -260,12 +262,17 @@ int main(int argc, char *argv[])
             
             //calling pandoc
 
-            //argv array for: ls -l
+            // argv array for: ls -l
+            // Just like in main, the argv array must be NULL terminated.
             char * ls_args[] = { "ls" , "-l", NULL};
             //                    ^ 
             //  use the name ls
             //  rather than the
             //  path to /bin/ls
+
+            // Little explaination
+            // The primary difference between execv and execvp is that with execv you have to provide the full path to the binary file (i.e., the program). 
+            // With execvp, you do not need to specify the full path because execvp will search the local environment variable PATH for the executable.
             execvp(   ls_args[0],     ls_args);   
         }
         // parent process because return value non-zero.   
