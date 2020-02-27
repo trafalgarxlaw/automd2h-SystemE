@@ -203,12 +203,11 @@ bool file_exist(char *filePath){
  	if (file_exist(filePath)){
  		if(is_txt(filePath)){
 			strcpy(newFileName, filePath);
-			strncat(newFileName, html, 5);
  		}else if(is_Markdown(filePath)){
 			//copy all except .md
-			strncpy(newFileName, filePath, sizeof(filePath) -3);
-			strncat(newFileName, html, 5);
+			strncpy(newFileName, filePath, sizeof(filePath) -4);
  		}
+		strncat(newFileName, html, 6);
  	}
 	return newFileName;
 }
@@ -218,7 +217,7 @@ bool file_needs_conversion(char *filePath){
  	struct stat attrib;
 	struct stat newAttrib;
 	bool convert = true;
- 	if (file_exist(filePath)){
+ 	if (file_exist(filePath) & !is_HTML(filePath)){
  		stat(filePath, &attrib);
 		if (file_exist(new_file_name(filePath))){
 			stat(new_file_name(filePath), &newAttrib);
@@ -238,6 +237,16 @@ void free_arguments(struct Arguments *arguments) {
 int main(int argc, char *argv[])
 {
     printf("Starting the program... \n");
+
+
+//printf("%s\n", new_file_name("test.txt"));
+//char *good = new_file_name("test.md");
+//char *test = new_file_name("test.md");
+//printf("%s\n", test);	
+printf("%d\n", file_needs_conversion("test.txt"));
+	//printf("%s\n", good);
+
+
     //printf(USAGE);
     struct Arguments *arguments = parse_arguments(argc, argv); //takes the arguments in the structure
     if (arguments->status != OK) {  
@@ -247,7 +256,6 @@ int main(int argc, char *argv[])
     {
         // All good
         int pid;
-
 
         pid = fork();
 
