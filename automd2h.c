@@ -227,9 +227,8 @@ bool file_exist(char *filePath){
 };
 
 // Return the new file name after conversion
- char* new_file_name(char *filePath){
- 	char *newFileName;
-	char html[] = ".html"; 
+char* new_file_name(char *filePath){
+ 	char *newFileName = (char *) malloc(255);
  	if (file_exist(filePath)){
  		if(is_txt(filePath)){
 			strcpy(newFileName, filePath);
@@ -237,7 +236,7 @@ bool file_exist(char *filePath){
 			//copy all except .md
 			strncpy(newFileName, filePath, sizeof(filePath) -4);
  		}
-		strncat(newFileName, html, 6);
+		strncat(newFileName, ".html", 5);
  	}
 	return newFileName;
 }
@@ -311,13 +310,12 @@ int main(int argc, char *argv[])
 {
     printf("\nStarting the program... \n");
 
-
-    //printf("%s\n", new_file_name("test.txt"));
-    //char *good = new_file_name("test.md");
-    //char *test = new_file_name("test.md");
-    //printf("%s\n", test);	
-    //printf("%d\n", file_needs_conversion("test.txt"));
-	//printf("%s\n", good);
+	printf("%d\n", file_exist("test.md"));
+	printf("%d\n", file_exist("test.txt"));
+	printf("%s\n", new_file_name("test.txt"));
+	printf("%s\n", new_file_name("test.md"));
+    	printf("%d\n", file_needs_conversion("test.txt"));
+	printf("%d\n", file_needs_conversion("test.md"));
 
 
     //printf(USAGE);
