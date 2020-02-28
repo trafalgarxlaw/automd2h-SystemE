@@ -118,12 +118,6 @@ struct Arguments *parse_arguments(int argc, char *argv[]) {
     char option1[OPTION_MAX_LENGHT];
     char option2[OPTION_MAX_LENGHT];
 
-    /**
-     * Option parsing
-     * if the lenght of argv is equal to 2, its an option, else its a filename.
-     * Im using only a max of 2 options as reference
-     */
-
     // ---Option detection Part ---
     if (is_Option(argv[1]))
     {
@@ -166,10 +160,6 @@ struct Arguments *parse_arguments(int argc, char *argv[]) {
     }
     if (Filename_is_Valide(argv[arguments->argv_index]))
     {
-        /**
-        * File parsing
-        * if the lenght of argv >2 and contains a valide file format
-        */
 
         if (is_Markdown(argv[arguments->argv_index]))
         {
@@ -195,8 +185,7 @@ struct Arguments *parse_arguments(int argc, char *argv[]) {
             arguments->files[0].format= txt;
             arguments->num_files++;
             
-        }
-        
+        }   
         
     } 
     else
