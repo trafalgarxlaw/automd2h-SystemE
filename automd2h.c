@@ -259,6 +259,50 @@ bool file_needs_conversion(char *filePath){
 	return convert;
 };
 
+// Function to replace a string with another 
+// string 
+char *replaceWord(const char *s, const char *oldW, 
+                                 const char *newW) 
+{ 
+    char *result; 
+    int i, cnt = 0; 
+    int newWlen = strlen(newW); 
+    int oldWlen = strlen(oldW); 
+  
+    // Counting the number of times old word 
+    // occur in the string 
+    for (i = 0; s[i] != '\0'; i++) 
+    { 
+        if (strstr(&s[i], oldW) == &s[i]) 
+        { 
+            cnt++; 
+  
+            // Jumping to index after the old word. 
+            i += oldWlen - 1; 
+        } 
+    } 
+  
+    // Making new string of enough length 
+    result = (char *)malloc(i + cnt * (newWlen - oldWlen) + 1); 
+  
+    i = 0; 
+    while (*s) 
+    { 
+        // compare the substring with the result 
+        if (strstr(s, oldW) == s) 
+        { 
+            strcpy(&result[i], newW); 
+            i += newWlen; 
+            s += oldWlen; 
+        } 
+        else
+            result[i++] = *s++; 
+    } 
+  
+    result[i] = '\0'; 
+    return result; 
+}
+
 // To review
 void free_arguments(struct Arguments *arguments) {
     free(arguments);
@@ -308,7 +352,8 @@ int main(int argc, char *argv[])
             // argv array for: ls -l
             // Just like in main, the argv array must be NULL terminated.
             // try to run ./a.out -x -y, it will work
-            char * ls_args[] = { "pandoc" , "README.md","-o","example1.html", NULL};
+            char* output =replaceWord(arguments->files[0].filename,".md",".html");
+            char * ls_args[] = { "pandoc" , arguments->files[0].filename, "-o", output, NULL};
             //                    ^ 
             //  use the name ls
             //  rather than the
