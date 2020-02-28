@@ -93,6 +93,11 @@ bool Filename_is_Valide(char *filename){
     return is_txt(filename) || is_Markdown(filename) || is_HTML(filename);
 }
 
+/**
+ * Option Validation functions.
+ */
+bool is_Option(char *option){}
+bool is_Option_t(char *option){}
 
 //  Note: les option -x sont entree en premier, ensuite les noms de fichiers
 //  NomProgramme -options(4options Max) NomsFichiers(Unlimited)
