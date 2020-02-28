@@ -13,6 +13,7 @@
 #include <unistd.h>
 
 # define OPTION_MAX_LENGHT 3
+# define NO_ARGUMENT 1
 # define ONE_ARGUMENT 2
 # define TWO_ARGUMENT 3
 # define USAGE "\n\
@@ -123,7 +124,7 @@ struct Arguments *parse_arguments(int argc, char *argv[]) {
         strcpy(option1, argv[1]);
         arguments->option1 =option1[1];
         arguments->status = OK;
-    }else if (Filename_is_Valide(argv[1]))
+    }else if (argc != NO_ARGUMENT && Filename_is_Valide(argv[1]))
     {
         /**
         * File parsing
@@ -239,11 +240,11 @@ int main(int argc, char *argv[])
     printf("Starting the program... \n");
 
 
-//printf("%s\n", new_file_name("test.txt"));
-//char *good = new_file_name("test.md");
-//char *test = new_file_name("test.md");
-//printf("%s\n", test);	
-printf("%d\n", file_needs_conversion("test.txt"));
+    //printf("%s\n", new_file_name("test.txt"));
+    //char *good = new_file_name("test.md");
+    //char *test = new_file_name("test.md");
+    //printf("%s\n", test);	
+    //printf("%d\n", file_needs_conversion("test.txt"));
 	//printf("%s\n", good);
 
 
@@ -255,8 +256,9 @@ printf("%d\n", file_needs_conversion("test.txt"));
     }else
     {
         // All good
-        int pid;
 
+
+        int pid;
         pid = fork();
 
         if (pid == -1) {
