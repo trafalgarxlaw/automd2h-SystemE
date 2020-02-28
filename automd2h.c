@@ -96,8 +96,12 @@ bool Filename_is_Valide(char *filename){
 /**
  * Option Validation functions.
  */
-bool is_Option(char *option){}
-bool is_Option_t(char *option){}
+bool is_Option(char *option){
+    return strstr(option, "-") != NULL;
+}
+bool is_Option_t(char *option){
+    return strstr(option, "-t") != NULL;
+}
 
 //  Note: les option -x sont entree en premier, ensuite les noms de fichiers
 //  NomProgramme -options(4options Max) NomsFichiers(Unlimited)
@@ -116,6 +120,7 @@ struct Arguments *parse_arguments(int argc, char *argv[]) {
      * Im using only a max of 2 options as reference
      */
 
+    // ---Option detection Part ---
     if (argc == TWO_ARGUMENT && strlen(argv[1]) == 2 && strlen(argv[2]) == 2)
     {
         strcpy(option1, argv[1]);
@@ -129,7 +134,9 @@ struct Arguments *parse_arguments(int argc, char *argv[]) {
         strcpy(option1, argv[1]);
         arguments->option1 =option1[1];
         arguments->status = OK;
-    }else if (argc != NO_ARGUMENT && Filename_is_Valide(argv[1]))
+    }
+    // ---File detection Part ---
+    else if (argc != NO_ARGUMENT && Filename_is_Valide(argv[1]))
     {
         /**
         * File parsing
@@ -281,7 +288,6 @@ int main(int argc, char *argv[])
             // Just like in main, the argv array must be NULL terminated.
             // try to run ./a.out -x -y, it will work
             char * ls_args[] = { "pandoc" , "README.md","-o","example1.html", NULL};
-
             //                    ^ 
             //  use the name ls
             //  rather than the
