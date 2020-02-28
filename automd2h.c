@@ -71,7 +71,8 @@ struct Arguments {
     bool Default;                   /**< Default Args  */
     int num_files;
     int num_directories;
-    char option1,option2;            // options
+    int num_options;
+    char option1,option2,option3,option4;            // options
     struct File files[];             // Array of Files to convert. It can be unlimited
 };
 
@@ -97,7 +98,7 @@ bool Filename_is_Valide(char *filename){
  * Option Validation functions.
  */
 bool is_Option(char *option){
-    return strstr(option, "-") != NULL;
+    return strstr(option, "-") != NULL  && strlen(option) == 2;
 }
 bool is_Option_t(char *option){
     return strstr(option, "-t") != NULL;
@@ -111,6 +112,7 @@ struct Arguments *parse_arguments(int argc, char *argv[]) {
     struct Arguments *arguments = malloc(sizeof(struct Arguments));
     arguments->num_files=0;
     arguments->num_directories=0;
+    arguments->num_options=0;
     char option1[OPTION_MAX_LENGHT];
     char option2[OPTION_MAX_LENGHT];
 
@@ -121,22 +123,41 @@ struct Arguments *parse_arguments(int argc, char *argv[]) {
      */
 
     // ---Option detection Part ---
-    if (argc == TWO_ARGUMENT && strlen(argv[1]) == 2 && strlen(argv[2]) == 2)
+    if (is_Option(argv[1]))
     {
-        strcpy(option1, argv[1]);
-        strcpy(option2, argv[2]);
-        arguments->option1 =option1[1];
-        arguments->option2 =option2[1];
+        for (int i = 0; i < argc; i++)
+        {
+            if (is_Option(argv[i]))
+            {
+                arguments->num_options++;
+            }
+            
+        }
 
-        arguments->status = OK;
-    }else if (argc == ONE_ARGUMENT && strlen(argv[1]) == 2 )
-    {
-        strcpy(option1, argv[1]);
-        arguments->option1 =option1[1];
-        arguments->status = OK;
-    }
+        if (arguments->num_options == 1)
+        {
+            strcpy(option1, argv[1]);
+            arguments->option1 =option1[1];
+            arguments->status = OK;
+        }else if (arguments->num_options == 2)
+        {
+            strcpy(option1, argv[1]);
+            strcpy(option2, argv[2]);
+            arguments->option1 =option1[1];
+            arguments->option2 =option2[1];
+            arguments->status = OK;
+
+        }else if (arguments->num_options == 3)
+        {
+            /* code */
+        }else if (arguments->num_options == 4)
+        {
+            /* code */
+        }
+        
+    
     // ---File detection Part ---
-    else if (argc != NO_ARGUMENT && Filename_is_Valide(argv[1]))
+    }else if (argc != NO_ARGUMENT && Filename_is_Valide(argv[1]))
     {
         /**
         * File parsing
@@ -249,7 +270,7 @@ void free_arguments(struct Arguments *arguments) {
 
 int main(int argc, char *argv[])
 {
-    printf("Starting the program... \n");
+    printf("\nStarting the program... \n");
 
 
     //printf("%s\n", new_file_name("test.txt"));
@@ -267,7 +288,11 @@ int main(int argc, char *argv[])
         return arguments->status;
     }else
     {
+        
         // All good
+        printf("\n");
+        print_args(arguments);
+        printf("\n");
 
 
         int pid;
@@ -305,7 +330,6 @@ int main(int argc, char *argv[])
         }
     }
     
-    //print_args(arguments);
 
     return 0;
 }
