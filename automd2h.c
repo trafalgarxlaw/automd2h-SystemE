@@ -69,6 +69,7 @@ struct File
 struct Arguments {
     enum Status status;             /**< The status of the parsing */
     bool Default;                   /**< Default Args  */
+    int argv_index;
     int num_files;
     int num_directories;
     int num_options;
@@ -110,6 +111,7 @@ bool is_Option_t(char *option){
 struct Arguments *parse_arguments(int argc, char *argv[]) {
 
     struct Arguments *arguments = malloc(sizeof(struct Arguments));
+    arguments->argv_index=0;
     arguments->num_files=0;
     arguments->num_directories=0;
     arguments->num_options=0;
@@ -130,6 +132,7 @@ struct Arguments *parse_arguments(int argc, char *argv[]) {
             if (is_Option(argv[i]))
             {
                 arguments->num_options++;
+                arguments->argv_index++;
             }
             
         }
@@ -154,37 +157,41 @@ struct Arguments *parse_arguments(int argc, char *argv[]) {
         {
             /* code */
         }
+
+        //next argv
+        arguments->argv_index++;
         
     
     // ---File detection Part ---
-    }else if (argc != NO_ARGUMENT && Filename_is_Valide(argv[1]))
+    }
+    if (Filename_is_Valide(argv[arguments->argv_index]))
     {
         /**
         * File parsing
         * if the lenght of argv >2 and contains a valide file format
         */
 
-        if (is_Markdown(argv[1]))
+        if (is_Markdown(argv[arguments->argv_index]))
         {
             printf("You want me to convert a md file \n");
-            arguments->files[0].filename = argv[1];
+            arguments->files[0].filename = argv[arguments->argv_index];
             arguments->files[0].format= markdown;
             arguments->num_files++;
         }
 
-        if (is_HTML(argv[1]))
+        if (is_HTML(argv[arguments->argv_index]))
         {
             printf("You want me to convert a html file \n");
-            arguments->files[0].filename = argv[1];
+            arguments->files[0].filename = argv[arguments->argv_index];
             arguments->files[0].format= html;
             arguments->num_files++;
             
         }
 
-        if (is_txt(argv[1]))
+        if (is_txt(argv[arguments->argv_index]))
         {
             printf("You want me to convert a txt file \n");
-            arguments->files[0].filename = argv[1];
+            arguments->files[0].filename = argv[arguments->argv_index];
             arguments->files[0].format= txt;
             arguments->num_files++;
             
