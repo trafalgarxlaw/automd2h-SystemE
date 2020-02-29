@@ -236,7 +236,7 @@ char* new_file_name(char *filePath){
 			//copy all except .md
 			strncpy(newFileName, filePath, sizeof(filePath) -4);
  		}
-		strncat(newFileName, ".html", 5);
+		//strncat(newFileName, ".html", 5);
  	}
 	return newFileName;
 }
@@ -246,7 +246,7 @@ bool file_needs_conversion(char *filePath){
  	struct stat attrib;
 	struct stat newAttrib;
 	bool convert = true;
- 	if (file_exist(filePath) & !is_HTML(filePath)){
+ 	if (file_exist(filePath) && !is_HTML(filePath)){
  		stat(filePath, &attrib);
 		if (file_exist(new_file_name(filePath))){
 			stat(new_file_name(filePath), &newAttrib);
@@ -313,10 +313,11 @@ int main(int argc, char *argv[])
 
 	printf("%d\n", file_exist("test.md"));
 	printf("%d\n", file_exist("test.txt"));
-	printf("%s\n", new_file_name("test.txt"));
-	printf("%s\n", new_file_name("test.md"));
-    	printf("%d\n", file_needs_conversion("test.txt"));
-	printf("%d\n", file_needs_conversion("test.md"));
+	printf("%s\n", new_file_name("test.txt\0"));
+	printf("%s\n", new_file_name("test.md\0"));
+    	printf("%d\n", file_needs_conversion("test.txt\0"));
+	printf("%d\n", file_needs_conversion("test.md\0"));
+	printf("%d\n", file_needs_conversion("new.md\0"));
 
 
     //printf(USAGE);
