@@ -427,6 +427,9 @@ int main(int argc, char *argv[])
                 printf("\nOption n Detected.\n");
                 //print_current_directory(,); 
                 break;
+            case Optionerror:
+                fprintf(stderr,"Option parsing failed\n");
+                break;
             
             default:
                 break;
