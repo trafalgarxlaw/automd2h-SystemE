@@ -344,6 +344,27 @@ void free_arguments(struct Arguments *arguments) {
     free(arguments);
 }
 
+void PandocCall(struct Arguments *arguments){
+
+    // argv array for: ls -l
+    // Just like in main, the argv array must be NULL terminated.
+    // try to run ./a.out -x -y, it will work
+    char* output =replaceWord(arguments->files[0].filename,".md",".html");
+    char * ls_args[] = { "pandoc" , arguments->files[0].filename, "-o", output, NULL};
+    //                    ^ 
+    //  use the name ls
+    //  rather than the
+    //  path to /bin/ls
+
+    // Little explaination
+    // The primary difference between execv and execvp is that with execv you have to provide the full path to the binary file (i.e., the program). 
+    // With execvp, you do not need to specify the full path because execvp will search the local environment variable PATH for the executable.
+    execvp(   ls_args[0],     ls_args); 
+    fprintf(stdout, "pandoc failed\n");
+    exit(EXIT_SUCCESS);
+        
+}
+
 int main(int argc, char *argv[])
 {
     printf("\nStarting the program... \n");
@@ -374,7 +395,7 @@ int main(int argc, char *argv[])
         print_args(arguments);
         printf("\n");
 
-
+        // Forking
         pid_t pid;
         pid = fork();
 
@@ -401,27 +422,11 @@ int main(int argc, char *argv[])
                 break;
             }
             
-
             
             
             //calling pandoc
+            PandocCall(arguments);
 
-            // argv array for: ls -l
-            // Just like in main, the argv array must be NULL terminated.
-            // try to run ./a.out -x -y, it will work
-            char* output =replaceWord(arguments->files[0].filename,".md",".html");
-            char * ls_args[] = { "pandoc" , arguments->files[0].filename, "-o", output, NULL};
-            //                    ^ 
-            //  use the name ls
-            //  rather than the
-            //  path to /bin/ls
-
-            // Little explaination
-            // The primary difference between execv and execvp is that with execv you have to provide the full path to the binary file (i.e., the program). 
-            // With execvp, you do not need to specify the full path because execvp will search the local environment variable PATH for the executable.
-            execvp(   ls_args[0],     ls_args); 
-            fprintf(stdout, "pandoc failed\n");
-            exit(EXIT_SUCCESS);
         }
         // parent process because return value non-zero.   
         else{
