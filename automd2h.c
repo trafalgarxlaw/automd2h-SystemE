@@ -260,8 +260,7 @@ bool file_needs_conversion(char *filePath){
 
 // Function to replace a string with another 
 // string 
-char *replaceWord(const char *s, const char *oldW, 
-                                 const char *newW) 
+char *replaceWord(const char *s, const char *oldW, const char *newW) 
 { 
     char *result; 
     int i, cnt = 0; 
@@ -334,7 +333,7 @@ int main(int argc, char *argv[])
         printf("\n");
 
 
-        int pid;
+        pid_t pid;
         pid = fork();
 
         if (pid == -1) {
