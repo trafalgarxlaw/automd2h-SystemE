@@ -11,6 +11,7 @@
 #include <time.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <dirent.h>
 
 # define OPTION_MAX_LENGHT 3
 # define NO_ARGUMENT 1
@@ -216,7 +217,7 @@ void print_args(struct Arguments *arguments){
 
 }
 
-//Check if converted document has a newer version
+//Check if converted document has a newer version (option t)
 bool is_new_doc_version(time_t sourceFile, time_t destFile){
 	return sourceFile > destFile;
 }
@@ -259,6 +260,25 @@ bool file_needs_conversion(char *filePath){
 	}
 	return convert;
 };
+
+//pritn all txt and md file in a directory (option n)
+void print_current_directory(char *currentDir, bool checkTime){
+	struct dirent *d;
+
+	DIR *dir = opendir(currentDir);
+	if(dir == NULL){
+		fprintf(stderr,"Can't access directory\n");
+	}
+	while ((d = readdir(dir)) != NULL){
+		if(is_Markdown(d -> d_name) || is_txt(d -> d_name)){
+			if(!checkTime || file_needs_conversion(d -> d_name)){
+				printf("%s\n", d -> d_name);
+			}
+		}
+	}
+	closedir(dir);
+	printf("\n");
+}
 
 // Function to replace a string with another 
 // string 
@@ -312,15 +332,17 @@ int main(int argc, char *argv[])
 {
     printf("\nStarting the program... \n");
 
-	printf("%d\n", file_exist("test.md"));
-	printf("%d\n", file_exist("test.txt"));
-	printf("%s\n", new_file_name("test.txt"));
-	printf("%s\n", new_file_name("test.md"));
-    	printf("%d\n", file_needs_conversion("test.txt"));
-	printf("%d\n", file_needs_conversion("test.md"));
-	printf("%s\n", new_file_name("new.md"));
-	printf("%d\n", file_needs_conversion("new.md"));
-	printf("%d\n", is_txt("test.txt.html"));
+	//printf("%d\n", file_exist("test.md"));
+	//printf("%d\n", file_exist("test.txt"));
+	//printf("%s\n", new_file_name("test.txt"));
+	//printf("%s\n", new_file_name("test.md"));
+    	//printf("%d\n", file_needs_conversion("test.txt"));
+	//printf("%d\n", file_needs_conversion("test.md"));
+	//printf("%s\n", new_file_name("new.md"));
+	//printf("%d\n", file_needs_conversion("new.md"));
+	print_current_directory(".", true);
+	print_current_directory(".", false);
+	
 
 
     //printf(USAGE);
