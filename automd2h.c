@@ -419,10 +419,13 @@ int main(int argc, char *argv[])
             switch (arguments->option1)
             {
             case t:
-                printf("\nOption t Detected.\n"); 
+                printf("\nOption t Detected.\n");
+                //file_needs_conversion(); 
+
                 break;
             case n:
-                printf("\nOption n Detected.\n"); 
+                printf("\nOption n Detected.\n");
+                //print_current_directory(,); 
                 break;
             
             default:
