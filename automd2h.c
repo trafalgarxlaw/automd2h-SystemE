@@ -13,7 +13,6 @@
 #include <unistd.h>
 #include <dirent.h>
 
-# define OPTION_MAX_LENGHT 3
 # define NO_ARGUMENT 1
 # define ONE_ARGUMENT 2
 # define TWO_ARGUMENT 3
@@ -56,6 +55,12 @@ enum Format{
     html
 };
 
+enum Options{
+    t,
+    n,
+    Optionerror
+};
+
 struct File
 {
     /* data */
@@ -75,7 +80,7 @@ struct Arguments {
     int num_files;
     int num_directories;
     int num_options;
-    char option1,option2,option3,option4;            // options
+    enum Options option1,option2,option3,option4;
     struct File files[];             // Array of Files to convert. It can be unlimited
 };
 
@@ -106,6 +111,28 @@ bool is_Option(char *option){
 bool is_Option_t(char *option){
     return strstr(option, "-t") != NULL;
 }
+bool is_Option_n(char *option){
+    return strstr(option, "-n") != NULL;
+}
+
+enum Options  option_detection(char *option){
+    enum Options Detected_option;
+    if (is_Option_t(option))
+    {
+        /* code */
+        Detected_option=t;
+    }else if (is_Option_n(option))
+    {
+        /* code */
+        Detected_option=n;
+    }
+    else
+    {
+         Detected_option=Optionerror;
+    }
+    
+    return Detected_option;
+}
 
 //  Note: les option -x sont entree en premier, ensuite les noms de fichiers
 //  NomProgramme -options(4options Max) NomsFichiers(Unlimited)
@@ -117,8 +144,7 @@ struct Arguments *parse_arguments(int argc, char *argv[]) {
     arguments->num_files=0;
     arguments->num_directories=0;
     arguments->num_options=0;
-    char option1[OPTION_MAX_LENGHT];
-    char option2[OPTION_MAX_LENGHT];
+
 
     // ---Option detection Part ---
     if (is_Option(argv[1]))
@@ -132,18 +158,17 @@ struct Arguments *parse_arguments(int argc, char *argv[]) {
             }
             
         }
-
+        //if we have one option as argument
         if (arguments->num_options == 1)
         {
-            strcpy(option1, argv[1]);
-            arguments->option1 =option1[1];
+            arguments->option1 = option_detection(argv[1]);
             arguments->status = OK;
-        }else if (arguments->num_options == 2)
+        }
+        //if we have two option as argument
+        else if (arguments->num_options == 2)
         {
-            strcpy(option1, argv[1]);
-            strcpy(option2, argv[2]);
-            arguments->option1 =option1[1];
-            arguments->option2 =option2[1];
+            arguments->option1 = option_detection(argv[1]);
+            arguments->option2 = option_detection(argv[2]);
             arguments->status = OK;
 
         }else if (arguments->num_options == 3)
@@ -195,18 +220,6 @@ struct Arguments *parse_arguments(int argc, char *argv[]) {
         arguments->status = WRONG_VALUE;
     }
 
-    
-    // Parse options
-    switch (arguments->option1)
-    {
-    case 'n':
-        /* code */
-        break;
-    
-    default:
-        break;
-    }
-
     return arguments;
 }
 
@@ -230,6 +243,7 @@ bool file_exist(char *filePath){
 };
 
 // Return the new file name after conversion
+////same as replaceWord
 char* new_file_name(char *filePath){
  	char *newFileName = (char *) malloc(255);
  	if (file_exist(filePath)){
@@ -246,7 +260,6 @@ char* new_file_name(char *filePath){
 }
 
 //Check if documents has a new version to convert
-//same as replaceWord
 bool file_needs_conversion(char *filePath){
 	bool convert = true;
  	struct stat attrib;
@@ -373,6 +386,23 @@ int main(int argc, char *argv[])
         
             printf("Hello from Child!\n"); 
             // Pandoc will run here.
+
+            // Parse options
+            switch (arguments->option1)
+            {
+            case t:
+                printf("\nOption t Detected.\n"); 
+                break;
+            case n:
+                printf("\nOption n Detected.\n"); 
+                break;
+            
+            default:
+                break;
+            }
+            
+
+            
             
             //calling pandoc
 
@@ -389,7 +419,9 @@ int main(int argc, char *argv[])
             // Little explaination
             // The primary difference between execv and execvp is that with execv you have to provide the full path to the binary file (i.e., the program). 
             // With execvp, you do not need to specify the full path because execvp will search the local environment variable PATH for the executable.
-            execvp(   ls_args[0],     ls_args);   
+            execvp(   ls_args[0],     ls_args); 
+            fprintf(stdout, "pandoc failed\n");
+            exit(EXIT_SUCCESS);
         }
         // parent process because return value non-zero.   
         else{
