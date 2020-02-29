@@ -344,6 +344,10 @@ void free_arguments(struct Arguments *arguments) {
     free(arguments);
 }
 
+void Print_num_Options(struct Arguments *arguments){
+    printf("Number of options entered :%d \n",arguments->num_options);
+}
+
 void PandocCall(struct Arguments *arguments){
 
     // argv array for: ls -l
@@ -360,6 +364,8 @@ void PandocCall(struct Arguments *arguments){
     // The primary difference between execv and execvp is that with execv you have to provide the full path to the binary file (i.e., the program). 
     // With execvp, you do not need to specify the full path because execvp will search the local environment variable PATH for the executable.
     execvp(   ls_args[0],     ls_args); 
+
+    //Error Handeler
     fprintf(stdout, "pandoc failed\n");
     exit(EXIT_SUCCESS);
         
@@ -409,6 +415,7 @@ int main(int argc, char *argv[])
             // Pandoc will run here.
 
             // Parse options
+            Print_num_Options(arguments);
             switch (arguments->option1)
             {
             case t:
@@ -421,8 +428,6 @@ int main(int argc, char *argv[])
             default:
                 break;
             }
-            
-            
             
             //calling pandoc
             PandocCall(arguments);
