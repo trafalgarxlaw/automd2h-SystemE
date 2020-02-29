@@ -32,7 +32,6 @@ automd2h convertit les fichiers au format Markdown en fichiers au format HTML.\n
                               est plus récent que le ficher .html cible associé, ou si le fichier. \n\
                               html cible n'existe pas, alors il y a conversion. Si la date est identique \n\
                               ou si le fichier .html cible est plus récent, alors il n'y a pas de conversion.\n\
-
                               \n\
   -n,                         L'option -n désactive l'utilisation de pandoc, à la place, la liste des chemins\n\
                               des fichiers sources à convertir sera affichée (un par ligne).\n\
