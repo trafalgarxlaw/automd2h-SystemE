@@ -61,6 +61,7 @@ struct File
     /* data */
     enum Format format;
     char* filename;        //The name of the file
+    time_t time;            //the last modification time
 };
 
 
@@ -223,6 +224,7 @@ bool is_new_doc_version(time_t sourceFile, time_t destFile){
 }
 
 // Check if file exists in Current repository
+// what file?
 bool file_exist(char *filePath){
  	return access(filePath, F_OK) != -1;
 };
@@ -244,6 +246,7 @@ char* new_file_name(char *filePath){
 }
 
 //Check if documents has a new version to convert
+//same as replaceWord
 bool file_needs_conversion(char *filePath){
 	bool convert = true;
  	struct stat attrib;
