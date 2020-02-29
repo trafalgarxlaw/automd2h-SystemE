@@ -32,6 +32,7 @@ automd2h convertit les fichiers au format Markdown en fichiers au format HTML.\n
                               est plus récent que le ficher .html cible associé, ou si le fichier. \n\
                               html cible n'existe pas, alors il y a conversion. Si la date est identique \n\
                               ou si le fichier .html cible est plus récent, alors il n'y a pas de conversion.\n\
+
                               \n\
   -n,                         L'option -n désactive l'utilisation de pandoc, à la place, la liste des chemins\n\
                               des fichiers sources à convertir sera affichée (un par ligne).\n\
@@ -231,13 +232,13 @@ bool file_exist(char *filePath){
 char* new_file_name(char *filePath){
  	char *newFileName = (char *) malloc(255);
  	if (file_exist(filePath)){
- 		if(is_txt(filePath)){
-			strcpy(newFileName, filePath);
- 		}else if(is_Markdown(filePath)){
+		if(is_Markdown(filePath)){
 			//copy all except .md
 			char *p = strstr(filePath, ".md");
 			strncpy(newFileName, filePath, p - filePath);
- 		}
+ 		}else{
+			strcpy(newFileName, filePath);
+		}
 		strncat(newFileName, ".html", 5);
  	}
 	return newFileName;
@@ -249,7 +250,7 @@ bool file_needs_conversion(char *filePath){
  	struct stat attrib;
 	struct stat newAttrib;
 	char *newFileName = new_file_name(filePath);
- 	if (file_exist(filePath) && !is_HTML(filePath)){
+ 	if (file_exist(filePath) && is_Markdown(filePath)){
  		stat(filePath, &attrib);
 		if (file_exist(newFileName)){
 			stat(newFileName, &newAttrib);
