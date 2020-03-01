@@ -372,6 +372,37 @@ void PandocCall(struct Arguments *arguments){
         
 }
 
+void ReadOptions(struct Arguments *arguments){
+            
+            switch (arguments->option1)
+            {
+            case t:
+                // Avec l'option -t. La date de dernière modification 
+                //des fichiers est utilisée pour savoir s'il faut reconvertir.
+                // Si le fichier source est plus récent que le ficher .html cible associé, 
+                //ou si le fichier .html cible n'existe pas, alors il y a conversion. 
+                //Si la date est identique ou si le fichier .html cible est plus récent, 
+                //alors il n'y a pas de conversion.
+                printf("\nOption t Detected.\n");
+                printf("%d\n",file_needs_conversion("README.md"));
+
+                break;
+            case n:
+                //L'option -n désactive l'utilisation de pandoc, 
+                //à la place, la liste des chemins des fichiers sources à convertir sera affichée (un par ligne).
+                //Combiné avec -n, l'option -t n'affiche que les fichiers sources effectivement à convertir.
+                printf("\nOption n Detected.\n");
+                print_current_directory(".", false);
+                break;
+            case Optionerror:
+                fprintf(stderr,"Option parsing failed\n");
+                break;
+            
+            default:
+                break;
+            }
+}
+
 int main(int argc, char *argv[])
 {
     printf("\nStarting the program... \n");
@@ -414,36 +445,9 @@ int main(int argc, char *argv[])
             printf("Hello from Child!\n"); 
             // Pandoc will run here.
 
-            // Parse options
             Print_num_Options(arguments);
-            switch (arguments->option1)
-            {
-            case t:
-                // Avec l'option -t. La date de dernière modification 
-                //des fichiers est utilisée pour savoir s'il faut reconvertir.
-                // Si le fichier source est plus récent que le ficher .html cible associé, 
-                //ou si le fichier .html cible n'existe pas, alors il y a conversion. 
-                //Si la date est identique ou si le fichier .html cible est plus récent, 
-                //alors il n'y a pas de conversion.
-                printf("\nOption t Detected.\n");
-                printf("%d\n",file_needs_conversion("README.md"));
 
-                break;
-            case n:
-                //L'option -n désactive l'utilisation de pandoc, 
-                //à la place, la liste des chemins des fichiers sources à convertir sera affichée (un par ligne).
-                //Combiné avec -n, l'option -t n'affiche que les fichiers sources effectivement à convertir.
-                printf("\nOption n Detected.\n");
-                print_current_directory(".", false);
-                break;
-            case Optionerror:
-                fprintf(stderr,"Option parsing failed\n");
-                break;
-            
-            default:
-                break;
-            }
-            
+            ReadOptions(arguments);
             //calling pandoc
             PandocCall(arguments);
 
