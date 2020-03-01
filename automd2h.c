@@ -302,23 +302,23 @@ bool file_exist(char *filePath){
 // }
 
 //Check if documents has a new version to convert
-bool file_needs_conversion(char *filePath){
+bool file_needs_conversion(char *filename){
 	bool convert = true;
  	struct stat attrib;
 	struct stat newAttrib;
-	char *newFileName = replaceWord(filePath,".md",".html");
+	char *newFileName = replaceWord(filename,".md",".html");
     printf("file:%s\n",newFileName);
 
- 	if (file_exist(filePath) && is_Markdown(filePath)){
+ 	if (file_exist(filename) && is_Markdown(filename)){
         
-        if (stat(filePath, &attrib) == 0)
+        if (stat(filename, &attrib) == 0)
         {
             //ok
         }
         else
         {
             printf("Unable to get file properties.\n");
-            printf("Please check whether '%s' file exists.\n", filePath);
+            printf("Please check whether '%s' file exists.\n", filename);
         }
 
 
@@ -330,7 +330,7 @@ bool file_needs_conversion(char *filePath){
 		convert = false;
 	}
 
-    printf("fileinitial:%s\n",filePath);
+    printf("fileinitial:%s\n",filename);
 	return convert;
 };
 
@@ -403,12 +403,13 @@ void ReadOptions(struct Arguments *arguments){
                 printf("file name : %s \n",arguments->files[0].filename);
                 if (file_needs_conversion(arguments->files[0].filename))
                 {
+                    printf("hello2\n");
+
                     printf("%s needs to be converted again.\n",arguments->files[0].filename);
                 }else
                 {
                     printf("no convertion needed for %s \n",arguments->files[0].filename);
                 }
-                    printf("hello2\n");
 
                 
                 
@@ -464,29 +465,29 @@ int main(int argc, char *argv[])
 
         printf("Forking...\n");
 
-        // Forking
-        pid_t pid;
-        pid = fork();
+        // // Forking
+        // pid_t pid;
+        // pid = fork();
 
-        if (pid == -1) {
-            perror("Fork Error");
-        }
-        // child process because return value zero 
-        else if (pid == 0){
+        // if (pid == -1) {
+        //     perror("Fork Error");
+        // }
+        // // child process because return value zero 
+        // else if (pid == 0){
         
-            printf("Hello from Child!\n"); 
-            // Pandoc will run here.
+        //     printf("Hello from Child!\n"); 
+        //     // Pandoc will run here.
 
 
-            //calling pandoc
-            //PandocCall(arguments);
+        //     //calling pandoc
+        //     //PandocCall(arguments);
 
-        }
-        // parent process because return value non-zero.   
-        else{
+        // }
+        // // parent process because return value non-zero.   
+        // else{
 
-            printf("Hello from Parent!\n"); 
-        }
+        //     printf("Hello from Parent!\n"); 
+        // }
     }
     
     free_arguments(arguments);
