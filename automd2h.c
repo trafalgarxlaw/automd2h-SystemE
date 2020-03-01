@@ -384,7 +384,16 @@ void ReadOptions(struct Arguments *arguments){
                 //Si la date est identique ou si le fichier .html cible est plus récent, 
                 //alors il n'y a pas de conversion.
                 printf("\nOption t Detected.\n");
-                printf("%d\n",file_needs_conversion("README.md"));
+                printf("file name : %s \n",arguments->files[0].filename);
+                if (file_needs_conversion(arguments->files[0].filename))
+                {
+                    printf("%s needs to be converted again.\n",arguments->files[0].filename);
+                }else
+                {
+                    printf("no convertion needed for %s \n",arguments->files[0].filename);
+                }
+                
+                
 
                 break;
             case n:
@@ -411,7 +420,7 @@ int main(int argc, char *argv[])
 	//printf("%d\n", file_exist("test.txt"));
 	//printf("%s\n", new_file_name("test.txt"));
 	//printf("%s\n", new_file_name("test.md"));
-    	//printf("%d\n", file_needs_conversion("test.txt"));
+    //printf("%d\n", file_needs_conversion("test.txt"));
 	//printf("%d\n", file_needs_conversion("test.md"));
 	//printf("%s\n", new_file_name("new.md"));
 	//printf("%d\n", file_needs_conversion("new.md"));
@@ -449,7 +458,7 @@ int main(int argc, char *argv[])
 
             ReadOptions(arguments);
             //calling pandoc
-            PandocCall(arguments);
+            //PandocCall(arguments);
 
         }
         // parent process because return value non-zero.   
@@ -459,7 +468,7 @@ int main(int argc, char *argv[])
         }
     }
     
-
+    free_arguments(arguments);
     return 0;
 }
 
