@@ -65,8 +65,8 @@ struct File
 {
     /* data */
     enum Format format;
-    char* filename;        //The name of the file
     time_t time;            //the last modification time
+    char* filename;        //The name of the file
 };
 
 
@@ -75,13 +75,13 @@ struct File
  */
 struct Arguments {
     enum Status status;             /**< The status of the parsing */
+    enum Options option1,option2,option3,option4;
     bool Default;                   /**< Default Args  */
     int argv_index;
     int num_files;
     int num_directories;
     int num_options;
-    enum Options option1,option2,option3,option4;
-    struct File files[];             // Array of Files to convert. It can be unlimited
+    struct File files[10];             // Array of Files to convert. It can be unlimited
 };
 
 // Function to replace a string with another 
@@ -307,7 +307,6 @@ bool file_needs_conversion(char *filename){
  	struct stat attrib;
 	struct stat newAttrib;
 	char *newFileName = replaceWord(filename,".md",".html");
-    printf("file:%s\n",newFileName);
 
  	if (file_exist(filename) && is_Markdown(filename)){
         
@@ -330,7 +329,6 @@ bool file_needs_conversion(char *filename){
 		convert = false;
 	}
 
-    printf("fileinitial:%s\n",filename);
 	return convert;
 };
 
@@ -403,7 +401,6 @@ void ReadOptions(struct Arguments *arguments){
                 printf("file name : %s \n",arguments->files[0].filename);
                 if (file_needs_conversion(arguments->files[0].filename))
                 {
-                    printf("hello2\n");
 
                     printf("%s needs to be converted again.\n",arguments->files[0].filename);
                 }else
