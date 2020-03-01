@@ -58,6 +58,7 @@ enum Format{
 enum Options{
     t,
     n,
+    no_option,
     Optionerror
 };
 
@@ -81,7 +82,7 @@ struct Arguments {
     int num_files;
     int num_directories;
     int num_options;
-    struct File files[10];             // Array of Files to convert. It can be unlimited
+    struct File files[20];             // Array of Files to convert. It can be unlimited
 };
 
 // Function to replace a string with another 
@@ -158,7 +159,7 @@ bool is_Option_n(char *option){
 }
 
 enum Options  option_detection(char *option){
-    enum Options Detected_option;
+    enum Options Detected_option = no_option;
     if (is_Option_t(option))
     {
         /* code */
@@ -171,6 +172,8 @@ enum Options  option_detection(char *option){
     else
     {
          Detected_option=Optionerror;
+         fprintf(stderr,"Option detection error");
+         exit(1);
     }
     
     return Detected_option;
@@ -178,10 +181,14 @@ enum Options  option_detection(char *option){
 
 //  Note: les option -x sont entree en premier, ensuite les noms de fichiers
 //  NomProgramme -options(4options Max) NomsFichiers(Unlimited)
-//  ex automd2h foo.txt -> foo.txt.html
+//  ex automd2h foo.txt -˛> foo.txt.html
 struct Arguments *parse_arguments(int argc, char *argv[]) {
 
     struct Arguments *arguments = malloc(sizeof(struct Arguments));
+    arguments->option1=no_option;
+    arguments->option2=no_option;
+    arguments->option3=no_option;
+    arguments->option4=no_option;
     arguments->argv_index=0;
     arguments->num_files=0;
     arguments->num_directories=0;
@@ -267,9 +274,37 @@ struct Arguments *parse_arguments(int argc, char *argv[]) {
 
 void print_args(struct Arguments *arguments){
     printf("Arguments  \n");
-    printf("Arg1 : %c \n",arguments->option1);
-    printf("Arg2 : %c \n",arguments->option2);
+    switch (arguments->option1)
+    {
+    case n:
+        printf("Arg1 : n \n");
+        break;
+    case t:
+        printf("Arg1 : t \n");
+        break;
+    case no_option:
+        printf("Arg1 : no_option \n");
+        break;
+    
+    default:
+        break;
+    }
 
+    switch (arguments->option2)
+    {
+    case n:
+        printf("Arg2 : n \n");
+        break;
+    case t:
+        printf("Arg2 : t \n");
+        break;
+    case no_option:
+        printf("Arg2 : no_option \n");
+        break;
+    
+    default:
+        break;
+    }
 
 }
 
@@ -462,29 +497,29 @@ int main(int argc, char *argv[])
 
         printf("Forking...\n");
 
-        // // Forking
-        // pid_t pid;
-        // pid = fork();
+        // Forking
+        pid_t pid;
+        pid = fork();
 
-        // if (pid == -1) {
-        //     perror("Fork Error");
-        // }
-        // // child process because return value zero 
-        // else if (pid == 0){
+        if (pid == -1) {
+            perror("Fork Error");
+        }
+        // child process because return value zero 
+        else if (pid == 0){
         
-        //     printf("Hello from Child!\n"); 
-        //     // Pandoc will run here.
+            printf("Hello from Child!\n"); 
+            // Pandoc will run here.
 
 
-        //     //calling pandoc
-        //     //PandocCall(arguments);
+            //calling pandoc
+            //PandocCall(arguments);
 
-        // }
-        // // parent process because return value non-zero.   
-        // else{
+        }
+        // parent process because return value non-zero.   
+        else{
 
-        //     printf("Hello from Parent!\n"); 
-        // }
+            printf("Hello from Parent!\n"); 
+        }
     }
     
     free_arguments(arguments);
