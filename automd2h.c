@@ -84,6 +84,48 @@ struct Arguments {
     struct File files[];             // Array of Files to convert. It can be unlimited
 };
 
+// Function to replace a string with another 
+// string 
+char *replaceWord(const char *s, const char *oldW, const char *newW) 
+{ 
+    char *result; 
+    int i, cnt = 0; 
+    int newWlen = strlen(newW); 
+    int oldWlen = strlen(oldW); 
+  
+    // Counting the number of times old word 
+    // occur in the string 
+    for (i = 0; s[i] != '\0'; i++) 
+    { 
+        if (strstr(&s[i], oldW) == &s[i]) 
+        { 
+            cnt++; 
+  
+            // Jumping to index after the old word. 
+            i += oldWlen - 1; 
+        } 
+    } 
+  
+    // Making new string of enough length 
+    result = (char *)malloc(i + cnt * (newWlen - oldWlen) + 1); 
+  
+    i = 0; 
+    while (*s) 
+    { 
+        // compare the substring with the result 
+        if (strstr(s, oldW) == s) 
+        { 
+            strcpy(&result[i], newW); 
+            i += newWlen; 
+            s += oldWlen; 
+        } 
+        else
+            result[i++] = *s++; 
+    } 
+  
+    result[i] = '\0'; 
+    return result; 
+}
 
 /**
  * File Validation functions.
@@ -244,29 +286,41 @@ bool file_exist(char *filePath){
 
 // Return the new file name after conversion
 ////same as replaceWord
-char* new_file_name(char *filePath){
- 	char *newFileName = (char *) malloc(255);
- 	if (file_exist(filePath)){
-		if(is_Markdown(filePath)){
-			//copy all except .md
-			char *p = strstr(filePath, ".md");
-			strncpy(newFileName, filePath, p - filePath);
- 		}else{
-			strcpy(newFileName, filePath);
-		}
-		strncat(newFileName, ".html", 5);
- 	}
-	return newFileName;
-}
+// char* new_file_name(char *filePath){
+//  	char *newFileName = (char *) malloc(255);
+//  	if (file_exist(filePath)){
+// 		if(is_Markdown(filePath)){
+// 			//copy all except .md
+// 			char *p = strstr(filePath, ".md");
+// 			strncpy(newFileName, filePath, p - filePath);
+//  		}else{
+// 			strcpy(newFileName, filePath);
+// 		}
+// 		strncat(newFileName, ".html", 5);
+//  	}
+// 	return newFileName;
+// }
 
 //Check if documents has a new version to convert
 bool file_needs_conversion(char *filePath){
 	bool convert = true;
  	struct stat attrib;
 	struct stat newAttrib;
-	char *newFileName = new_file_name(filePath);
+	char *newFileName = replaceWord(filePath,".md",".html");
+
  	if (file_exist(filePath) && is_Markdown(filePath)){
- 		stat(filePath, &attrib);
+        
+        if (stat(filePath, &attrib) == 0)
+        {
+            //ok
+        }
+        else
+        {
+            printf("Unable to get file properties.\n");
+            printf("Please check whether '%s' file exists.\n", filePath);
+        }
+
+
 		if (file_exist(newFileName)){
 			stat(newFileName, &newAttrib);
 			convert = is_new_doc_version(attrib.st_mtime, newAttrib.st_mtime);
@@ -297,48 +351,7 @@ void print_current_directory(char *currentDir, bool checkTime){
 	printf("\n");
 }
 
-// Function to replace a string with another 
-// string 
-char *replaceWord(const char *s, const char *oldW, const char *newW) 
-{ 
-    char *result; 
-    int i, cnt = 0; 
-    int newWlen = strlen(newW); 
-    int oldWlen = strlen(oldW); 
-  
-    // Counting the number of times old word 
-    // occur in the string 
-    for (i = 0; s[i] != '\0'; i++) 
-    { 
-        if (strstr(&s[i], oldW) == &s[i]) 
-        { 
-            cnt++; 
-  
-            // Jumping to index after the old word. 
-            i += oldWlen - 1; 
-        } 
-    } 
-  
-    // Making new string of enough length 
-    result = (char *)malloc(i + cnt * (newWlen - oldWlen) + 1); 
-  
-    i = 0; 
-    while (*s) 
-    { 
-        // compare the substring with the result 
-        if (strstr(s, oldW) == s) 
-        { 
-            strcpy(&result[i], newW); 
-            i += newWlen; 
-            s += oldWlen; 
-        } 
-        else
-            result[i++] = *s++; 
-    } 
-  
-    result[i] = '\0'; 
-    return result; 
-}
+
 
 // To review
 void free_arguments(struct Arguments *arguments) {
@@ -394,7 +407,6 @@ void ReadOptions(struct Arguments *arguments){
                 }
                 
                 
-
                 break;
             case n:
                 //L'option -n désactive l'utilisation de pandoc, 
