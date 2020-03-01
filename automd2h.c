@@ -307,6 +307,7 @@ bool file_needs_conversion(char *filePath){
  	struct stat attrib;
 	struct stat newAttrib;
 	char *newFileName = replaceWord(filePath,".md",".html");
+    printf("file:%s\n",newFileName);
 
  	if (file_exist(filePath) && is_Markdown(filePath)){
         
@@ -328,6 +329,8 @@ bool file_needs_conversion(char *filePath){
 	}else{
 		convert = false;
 	}
+
+    printf("fileinitial:%s\n",filePath);
 	return convert;
 };
 
@@ -405,6 +408,8 @@ void ReadOptions(struct Arguments *arguments){
                 {
                     printf("no convertion needed for %s \n",arguments->files[0].filename);
                 }
+                    printf("hello2\n");
+
                 
                 
                 break;
@@ -453,6 +458,12 @@ int main(int argc, char *argv[])
         print_args(arguments);
         printf("\n");
 
+
+        Print_num_Options(arguments);
+        ReadOptions(arguments);
+
+        printf("Forking...\n");
+
         // Forking
         pid_t pid;
         pid = fork();
@@ -466,9 +477,7 @@ int main(int argc, char *argv[])
             printf("Hello from Child!\n"); 
             // Pandoc will run here.
 
-            Print_num_Options(arguments);
 
-            ReadOptions(arguments);
             //calling pandoc
             //PandocCall(arguments);
 
