@@ -182,9 +182,7 @@ enum Options  option_detection(char *option){
 //  Note: les option -x sont entree en premier, ensuite les noms de fichiers
 //  NomProgramme -options(4options Max) NomsFichiers(Unlimited)
 //  ex automd2h foo.txt -˛> foo.txt.html
-struct Arguments *parse_arguments(int argc, char *argv[]) {
-
-    struct Arguments *arguments = malloc(sizeof(struct Arguments));
+void initialise_Arguments(struct Arguments *arguments) {
     arguments->option1=no_option;
     arguments->option2=no_option;
     arguments->option3=no_option;
@@ -193,6 +191,11 @@ struct Arguments *parse_arguments(int argc, char *argv[]) {
     arguments->num_files=0;
     arguments->num_directories=0;
     arguments->num_options=0;
+}
+struct Arguments *parse_arguments(int argc, char *argv[]) {
+
+    struct Arguments *arguments = malloc(sizeof(struct Arguments));
+    initialise_Arguments(arguments);
 
 
     // ---Option detection Part ---
@@ -348,6 +351,17 @@ bool file_needs_conversion(char *filename){
         if (stat(filename, &attrib) == 0)
         {
             //ok
+            if (file_exist(newFileName)){
+			if (stat(newFileName, &newAttrib)==0)
+            {
+                convert = is_new_doc_version(attrib.st_mtime, newAttrib.st_mtime);
+            } else
+            {
+            printf("Unable to get file properties.\n");
+            printf("Please check whether '%s' file exists.\n", newFileName);
+            }
+            
+		}
         }
         else
         {
@@ -356,10 +370,7 @@ bool file_needs_conversion(char *filename){
         }
 
 
-		if (file_exist(newFileName)){
-			stat(newFileName, &newAttrib);
-			convert = is_new_doc_version(attrib.st_mtime, newAttrib.st_mtime);
-		}
+
 	}else{
 		convert = false;
 	}
