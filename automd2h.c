@@ -33,6 +33,14 @@ automd2h convertit les fichiers au format Markdown en fichiers au format HTML.\n
                               des fichiers sources à convertir sera affichée (un par ligne).\n\
                               Combiné avec -n, l'option -t n'affiche que les fichiers \n\
                               sources effectivement à convertir.\n\
+                              \n\
+  -w,                         Avec l'option -w, automd2h bloque et surveille les modifications des fichiers \n\
+                              et des répertoires passés en argument. Lors de la modification d'un fichier source,\n\
+                              celui-ci est automatiquement reconverti. Si dans un répertoire surveillé un fichier .md \n\
+                              apparait, est modifié, est déplacé ou est renommé, celui-ci aussi est automatiquement converti.\n\
+                              \n\
+  -f,                         Par défaut, avec -w, les fichiers ne sont convertis que si une modification future est détectée.\n\
+                              Combiné avec -w, l'option -f force la conversion immédiate des fichiers trouvés puis surveille les modifications futures.\n\
 "
 
 // utiliser un max d'appel system : opendir, closedir (pour se promenet dans les rep de facon recurive)
