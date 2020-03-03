@@ -13,9 +13,6 @@
 #include <unistd.h>
 #include <dirent.h>
 
-# define NO_ARGUMENT 1
-# define ONE_ARGUMENT 2
-# define TWO_ARGUMENT 3
 # define USAGE "\n\
 Usage: [-h|--help] [-t|--???] [-n|--???]\n\
     [-n|--num_steps VALUE] [-t|--type STRING] [-a|--allowed-cells STRING]\n\
@@ -287,6 +284,12 @@ void print_args(struct Arguments *arguments){
     case t:
         printf("Arg1 : t \n");
         break;
+    case w:
+        printf("Arg1 : t \n");
+        break;
+    case f:
+        printf("Arg1 : t \n");
+        break;
     case no_option:
         printf("Arg1 : no_option \n");
         break;
@@ -303,8 +306,58 @@ void print_args(struct Arguments *arguments){
     case t:
         printf("Arg2 : t \n");
         break;
+    case w:
+        printf("Arg2 : t \n");
+        break;
+    case f:
+        printf("Arg2 : t \n");
+        break;
     case no_option:
         printf("Arg2 : no_option \n");
+        break;
+    
+    default:
+        break;
+    }
+
+    switch (arguments->option3)
+    {
+    case n:
+        printf("Arg3 : n \n");
+        break;
+    case t:
+        printf("Arg3 : t \n");
+        break;
+    case w:
+        printf("Arg3 : t \n");
+        break;
+    case f:
+        printf("Arg3 : t \n");
+        break;
+    case no_option:
+        printf("Arg3 : no_option \n");
+        break;
+    
+    default:
+        break;
+    }
+
+    switch (arguments->option4)
+    {
+    case n:
+        printf("Arg4 : n \n");
+        break;
+    case t:
+        printf("Arg4 : t \n");
+        break;
+    case w:
+        printf("v : t \n");
+        break;
+    case f:
+        printf("Arg4 : t \n");
+        break;
+    case no_option:
+        printf("Arg4 : no_option \n");
         break;
     
     default:
