@@ -324,23 +324,6 @@ bool file_exist(char *filePath){
  	return access(filePath, F_OK) != -1;
 };
 
-// Return the new file name after conversion
-////same as replaceWord
-// char* new_file_name(char *filePath){
-//  	char *newFileName = (char *) malloc(255);
-//  	if (file_exist(filePath)){
-// 		if(is_Markdown(filePath)){
-// 			//copy all except .md
-// 			char *p = strstr(filePath, ".md");
-// 			strncpy(newFileName, filePath, p - filePath);
-//  		}else{
-// 			strcpy(newFileName, filePath);
-// 		}
-// 		strncat(newFileName, ".html", 5);
-//  	}
-// 	return newFileName;
-// }
-
 //Check if documents has a new version to convert
 bool file_needs_conversion(char *filename){
 	bool convert = true;
