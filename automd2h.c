@@ -473,6 +473,34 @@ void ReadOptions(struct Arguments *arguments){
             }
 }
 
+void Forking(struct Arguments *arguments){
+
+        // Forking
+        pid_t pid;
+        pid = fork();
+
+        if (pid == -1) {
+            perror("Fork Error");
+        }
+        // child process because return value zero 
+        else if (pid == 0){
+        
+            printf("Hello from Child!\n"); 
+            // Pandoc will run here.
+
+
+            //calling pandoc
+            PandocCall(arguments);
+
+        }
+        // parent process because return value non-zero.   
+        else{
+
+            printf("Hello from Parent!\n"); 
+        }
+
+}
+
 int main(int argc, char *argv[])
 {
     printf("\nStarting the program... \n");
@@ -507,35 +535,11 @@ int main(int argc, char *argv[])
         ReadOptions(arguments);
 
         printf("Forking...\n");
-
-        // Forking
-        pid_t pid;
-        pid = fork();
-
-        if (pid == -1) {
-            perror("Fork Error");
-        }
-        // child process because return value zero 
-        else if (pid == 0){
-        
-            printf("Hello from Child!\n"); 
-            // Pandoc will run here.
+        Forking(arguments);
 
 
-            //calling pandoc
-            //PandocCall(arguments);
-
-        }
-        // parent process because return value non-zero.   
-        else{
-
-            printf("Hello from Parent!\n"); 
-        }
     }
     
     free_arguments(arguments);
     return 0;
 }
-
-
-
