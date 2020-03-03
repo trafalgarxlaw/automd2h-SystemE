@@ -477,6 +477,7 @@ void ReadOptions(struct Arguments *arguments){
 
 
 // The following functions checks if a specific option is in the arguments structure
+
 bool Option_n(struct Arguments *arguments){
     return arguments->option1 == n || arguments->option2 == n || arguments->option3 == n ||arguments->option4 == n;
 }
@@ -496,7 +497,6 @@ bool Option_f(struct Arguments *arguments){
 
 void Forking(struct Arguments *arguments){
 
-if (Option_n(arguments)!= true){ // option n desactivate pandoc
         // Forking
         pid_t pid;
         pid = fork();
@@ -519,7 +519,7 @@ if (Option_n(arguments)!= true){ // option n desactivate pandoc
         else{
 
             printf("Hello from Parent!\n"); 
-        }}
+        }
 
 
 }
@@ -527,18 +527,6 @@ if (Option_n(arguments)!= true){ // option n desactivate pandoc
 int main(int argc, char *argv[])
 {
     printf("\nStarting the program... \n");
-
-	//printf("%d\n", file_exist("test.md"));
-	//printf("%d\n", file_exist("test.txt"));
-	//printf("%s\n", new_file_name("test.txt"));
-	//printf("%s\n", new_file_name("test.md"));
-    //printf("%d\n", file_needs_conversion("test.txt"));
-	//printf("%d\n", file_needs_conversion("test.md"));
-	//printf("%s\n", new_file_name("new.md"));
-	//printf("%d\n", file_needs_conversion("new.md"));
-
-	
-
 
     //printf(USAGE);
     struct Arguments *arguments = parse_arguments(argc, argv); //takes the arguments in the structure
@@ -557,10 +545,12 @@ int main(int argc, char *argv[])
         Print_num_Options(arguments);
         ReadOptions(arguments);
 
-        printf("Forking...\n");
-        Forking(arguments);
+        if (Option_n(arguments)!= true){ // option n desactivate pandoc
 
+            printf("Forking...\n");
+            Forking(arguments);
 
+        }
     }
     
     free_arguments(arguments);
