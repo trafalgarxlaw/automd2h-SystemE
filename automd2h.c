@@ -58,6 +58,8 @@ enum Format{
 enum Options{
     t,
     n,
+    w,
+    f,
     no_option,
     Optionerror
 };
@@ -473,8 +475,28 @@ void ReadOptions(struct Arguments *arguments){
             }
 }
 
+
+// The following functions checks if a specific option is in the arguments structure
+bool Option_n(struct Arguments *arguments){
+    return arguments->option1 == n || arguments->option2 == n || arguments->option3 == n ||arguments->option4 == n;
+}
+
+bool Option_t(struct Arguments *arguments){
+    return arguments->option1 == t || arguments->option2 == t || arguments->option3 == t ||arguments->option4 == t;
+}
+
+bool Option_w(struct Arguments *arguments){
+    return arguments->option1 == w || arguments->option2 == w || arguments->option3 == w ||arguments->option4 == w;
+}
+
+bool Option_f(struct Arguments *arguments){
+    return arguments->option1 == f || arguments->option2 == f || arguments->option3 == f ||arguments->option4 == f;
+}
+
+
 void Forking(struct Arguments *arguments){
 
+if (Option_n(arguments)!= true){ // option n desactivate pandoc
         // Forking
         pid_t pid;
         pid = fork();
@@ -497,7 +519,8 @@ void Forking(struct Arguments *arguments){
         else{
 
             printf("Hello from Parent!\n"); 
-        }
+        }}
+
 
 }
 
