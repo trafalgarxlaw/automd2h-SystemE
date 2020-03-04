@@ -481,11 +481,12 @@ void PandocCall(struct Arguments *arguments){
 void ReadOptions(struct Arguments *arguments){
 
     //Array of options
-    enum Options OptionArray[4]; 
+    enum Options OptionArray[5]; 
     OptionArray[0]=arguments->option1;
     OptionArray[1]=arguments->option2;
     OptionArray[2]=arguments->option3;
     OptionArray[3]=arguments->option4;
+    OptionArray[4]=no_option;
 
 
     for (int i = 0; i < 4; i++)
@@ -520,7 +521,20 @@ void ReadOptions(struct Arguments *arguments){
                 //à la place, la liste des chemins des fichiers sources à convertir sera affichée (un par ligne).
                 //Combiné avec -n, l'option -t n'affiche que les fichiers sources effectivement à convertir.
                 printf("\nOption n Detected.\n");
-                print_current_directory(".", false);
+                //if combined with t
+                if (OptionArray[i+1] == t)
+                {
+                    printf("\nOption n combined with t Detected.\n");
+                    print_current_directory(".", true);
+                    i++; // because we already considered the next option (which is t)
+
+
+                }else
+                {
+                    print_current_directory(".", false);
+                }
+                
+                
                 break;
 
             case Optionerror:
