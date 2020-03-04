@@ -634,8 +634,8 @@ int RecursiveSearch(char *Dir){
     Directory = opendir(Dir);
     if(Directory == NULL)
     {
-        perror("Unable to read directory\n");
-        return(1);
+        perror("Unable to read directory.. i'm leaving\n");
+        return(1); // leave
     }
 
     /* Read directory entries */
@@ -644,7 +644,7 @@ int RecursiveSearch(char *Dir){
         stat(entry->d_name,&filestat);
         if( S_ISDIR(filestat.st_mode) ){
             printf("%4s: %s\n","Dir",entry->d_name);
-            if (strstr(entry->d_name, ".") == NULL && strstr(entry->d_name, "..") == NULL )
+            if (strstr(entry->d_name, ".") == NULL && strstr(entry->d_name, "..") == NULL ) // to not infinit loop
             {
                 // Recursion
                 printf("\n*Entering a subDirectory*\n");
