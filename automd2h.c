@@ -686,7 +686,7 @@ int main(int argc, char *argv[])
     }
     //test
     printf("\nStarting Recursive Research..\n");
-    int code = RecursiveSearch(".");
+    int code = RecursiveSearch("./Directories");
     printf("code %d\n", code);
 
     
