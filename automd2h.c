@@ -542,7 +542,6 @@ void ReadOptions(struct Arguments *arguments){
                 //L'option -n désactive l'utilisation de pandoc, 
                 //à la place, la liste des chemins des fichiers sources à convertir sera affichée (un par ligne).
                 //Combiné avec -n, l'option -t n'affiche que les fichiers sources effectivement à convertir.
-                printf("\nOption n Detected.\n");
                 //if combined with t
                 if (OptionArray[i+1] == t)
                 {
@@ -553,6 +552,7 @@ void ReadOptions(struct Arguments *arguments){
 
                 }else
                 {
+                    printf("\nOption n Detected.\n");
                     print_current_directory(".", false);
                 }
                 
@@ -621,28 +621,39 @@ void Forking(struct Arguments *arguments){
 
 // The sys/stat.h header file also defines macros to test for file type, which work similarly to the ctype.h macros that examine characters. For a directory entry, the S_ISDIR macro is used
 // The stat() function requires two arguments. The first is the name (or pathname) to a filename. The second argument is the address of a stat structure. This structure is filled with oodles of good info about a directory entry and it’s consistent across all file systems.
-int RecursiveSearch(){
-    DIR *folder;
+int RecursiveSearch(char *Dir){
+    DIR *Directory;
+    //DIR *SubDirectory;
     struct dirent *entry;
     struct stat filestat;
 
-    folder = opendir(".");
-    if(folder == NULL)
+    Directory = opendir(Dir);
+    if(Directory == NULL)
     {
-        perror("Unable to read directory");
-        //  return(1);
+        printf("\nError directory ->%s : ",Dir);
+        perror("Unable to read directory\n");
+        return(1);
     }
 
     /* Read directory entries */
-    while( (entry=readdir(folder)) )
+    while( (entry=readdir(Directory)) )
     {
         stat(entry->d_name,&filestat);
-        if( S_ISDIR(filestat.st_mode) )
+        if( S_ISDIR(filestat.st_mode) ){
             printf("%4s: %s\n","Dir",entry->d_name);
+            if (strstr(entry->d_name, ".") == NULL && strstr(entry->d_name, "..") == NULL )
+            {
+                printf("*Entering a subDirectory*\n");
+                RecursiveSearch(entry->d_name);
+                printf("*Leaving a subDirectory*\n");
+            }
+            
+            
+        }
         else
             printf("%4s: %s\n","File",entry->d_name);
     }
-    closedir(folder);
+    closedir(Directory);
 
     return(0);
 }
@@ -669,9 +680,9 @@ int main(int argc, char *argv[])
         ReadOptions(arguments);
 
     }
-
+    //test
     printf("\nStarting Recursive Research..\n");
-    int code = RecursiveSearch();
+    int code = RecursiveSearch(".");
     printf("code %d\n", code);
 
     
