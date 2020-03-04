@@ -478,6 +478,21 @@ void PandocCall(struct Arguments *arguments){
         
 }
 
+// Check if the user entered the same option twice.
+bool Check_Duplicates(enum Options OptionArray[]){
+
+bool DuplicateOption = false;
+
+for (int i = 0; i < 4 - 1; i++) {
+    for (int j = i + 1; j < 4; j++) {
+        if (OptionArray[i] !=no_option && OptionArray[i] == OptionArray[j]) {
+            DuplicateOption=true;
+        }
+    }
+}
+return DuplicateOption;
+}
+
 void ReadOptions(struct Arguments *arguments){
 
     //Array of options
@@ -487,6 +502,13 @@ void ReadOptions(struct Arguments *arguments){
     OptionArray[2]=arguments->option3;
     OptionArray[3]=arguments->option4;
     OptionArray[4]=no_option;
+
+    if (Check_Duplicates(OptionArray))
+    {
+       fprintf(stderr,"Error duplicates options.\n");
+       exit(1);
+    }
+    
 
     //looping through the options
     for (int i = 0; i < 4; i++)
@@ -608,7 +630,7 @@ int RecursiveSearch(){
     if(folder == NULL)
     {
         perror("Unable to read directory");
-        return(1);
+        //  return(1);
     }
 
     /* Read directory entries */
