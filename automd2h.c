@@ -621,6 +621,8 @@ void Forking(struct Arguments *arguments){
 
 // The sys/stat.h header file also defines macros to test for file type, which work similarly to the ctype.h macros that examine characters. For a directory entry, the S_ISDIR macro is used
 // The stat() function requires two arguments. The first is the name (or pathname) to a filename. The second argument is the address of a stat structure. This structure is filled with oodles of good info about a directory entry and it’s consistent across all file systems.
+
+// i cant detected properly if an element is a file or a dir 
 int RecursiveSearch(char *Dir){
     DIR *Directory;
     //DIR *SubDirectory;
