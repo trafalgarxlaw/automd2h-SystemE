@@ -488,7 +488,7 @@ void ReadOptions(struct Arguments *arguments){
     OptionArray[3]=arguments->option4;
     OptionArray[4]=no_option;
 
-
+    //looping through the options
     for (int i = 0; i < 4; i++)
     {
             
