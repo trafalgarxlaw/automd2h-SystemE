@@ -625,7 +625,6 @@ void Forking(struct Arguments *arguments){
 // i cant detected properly if an element is a file or a dir 
 int RecursiveSearch(char *Dir){
     DIR *Directory;
-    //DIR *SubDirectory;
     struct dirent *entry;
     struct stat filestat;
 
@@ -641,21 +640,21 @@ int RecursiveSearch(char *Dir){
     /* Read directory entries */
     while( (entry=readdir(Directory)) )
     {
-        stat(entry->d_name,&filestat);
+        char fullname[100];
+        sprintf(fullname, "%s/%s",Dir,entry->d_name);
+        stat(fullname,&filestat);
         if( S_ISDIR(filestat.st_mode) ){
-            printf("%4s: %s\n","Dir",entry->d_name);
-            if (strstr(entry->d_name, ".") == NULL && strstr(entry->d_name, "..") == NULL ) // to not infinit loop
+            printf("%4s: %s\n","Dir",fullname);
+            if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0 ) // to not infinite loop
             {
                 // Recursion
                 printf("\n*Entering a subDirectory*\n");
-                RecursiveSearch(entry->d_name);
+                RecursiveSearch(fullname);
                 printf("\n*Leaving a subDirectory*\n");
             }
-            
-            
         }
         else
-            printf("%4s: %s\n","File",entry->d_name);
+            printf("%4s: %s\n","File",fullname);
     }
     closedir(Directory);
 
