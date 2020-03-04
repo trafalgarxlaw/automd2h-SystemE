@@ -597,6 +597,34 @@ void Forking(struct Arguments *arguments){
 
 }
 
+// The sys/stat.h header file also defines macros to test for file type, which work similarly to the ctype.h macros that examine characters. For a directory entry, the S_ISDIR macro is used
+// The stat() function requires two arguments. The first is the name (or pathname) to a filename. The second argument is the address of a stat structure. This structure is filled with oodles of good info about a directory entry and it’s consistent across all file systems.
+int rec(){
+    DIR *folder;
+    struct dirent *entry;
+    struct stat filestat;
+
+    folder = opendir(".");
+    if(folder == NULL)
+    {
+        perror("Unable to read directory");
+        return(1);
+    }
+
+    /* Read directory entries */
+    while( (entry=readdir(folder)) )
+    {
+        stat(entry->d_name,&filestat);
+        if( S_ISDIR(filestat.st_mode) )
+            printf("%4s: %s\n","Dir",entry->d_name);
+        else
+            printf("%4s: %s\n","File",entry->d_name);
+    }
+    closedir(folder);
+
+    return(0);
+}
+
 int main(int argc, char *argv[])
 {
     printf("\nStarting the program... \n");
@@ -618,13 +646,12 @@ int main(int argc, char *argv[])
         Print_num_Options(arguments);
         ReadOptions(arguments);
 
-        if (Option_n(arguments)!= true){ // option n desactivate pandoc
-
-            printf("Forking...\n");
-            Forking(arguments);
-
-        }
     }
+
+    printf("\nStarting Recursive Research..\n");
+    int code = rec();
+    printf("code %d\n", code);
+
     
     free_arguments(arguments);
     return 0;
