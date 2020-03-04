@@ -627,10 +627,11 @@ int RecursiveSearch(char *Dir){
     struct dirent *entry;
     struct stat filestat;
 
+    printf("I am Reading %s Directory\n", Dir);
+
     Directory = opendir(Dir);
     if(Directory == NULL)
     {
-        printf("\nError directory ->%s : ",Dir);
         perror("Unable to read directory\n");
         return(1);
     }
@@ -643,9 +644,10 @@ int RecursiveSearch(char *Dir){
             printf("%4s: %s\n","Dir",entry->d_name);
             if (strstr(entry->d_name, ".") == NULL && strstr(entry->d_name, "..") == NULL )
             {
-                printf("*Entering a subDirectory*\n");
+                // Recursion
+                printf("\n*Entering a subDirectory*\n");
                 RecursiveSearch(entry->d_name);
-                printf("*Leaving a subDirectory*\n");
+                printf("\n*Leaving a subDirectory*\n");
             }
             
             
