@@ -479,8 +479,19 @@ void PandocCall(struct Arguments *arguments){
 }
 
 void ReadOptions(struct Arguments *arguments){
+
+    //Array of options
+    enum Options OptionArray[4]; 
+    OptionArray[0]=arguments->option1;
+    OptionArray[1]=arguments->option2;
+    OptionArray[2]=arguments->option3;
+    OptionArray[3]=arguments->option4;
+
+
+    for (int i = 0; i < 4; i++)
+    {
             
-            switch (arguments->option1)
+            switch (OptionArray[i])
             {
             case t:
                 // Avec l'option -t. La date de dernière modification 
@@ -503,6 +514,7 @@ void ReadOptions(struct Arguments *arguments){
                 
                 
                 break;
+
             case n:
                 //L'option -n désactive l'utilisation de pandoc, 
                 //à la place, la liste des chemins des fichiers sources à convertir sera affichée (un par ligne).
@@ -510,6 +522,7 @@ void ReadOptions(struct Arguments *arguments){
                 printf("\nOption n Detected.\n");
                 print_current_directory(".", false);
                 break;
+
             case Optionerror:
                 fprintf(stderr,"Option parsing failed\n");
                 break;
@@ -517,6 +530,8 @@ void ReadOptions(struct Arguments *arguments){
             default:
                 break;
             }
+    }
+
 }
 
 
