@@ -387,7 +387,7 @@ bool file_exist(char *filePath){
 
 //Check if documents has a new version to convert
 bool file_needs_conversion(char *filename){
-	bool convert = true;
+	bool convert = false;
  	struct stat attrib;
 	struct stat newAttrib;
 	char *newFileName = replaceWord(filename,".md",".html");
@@ -398,16 +398,24 @@ bool file_needs_conversion(char *filename){
         if (stat(filename, &attrib) == 0)
         {
             //ok
-            if (file_exist(newFileName)){
-			if (stat(newFileName, &newAttrib)==0)
-            {
-                convert = is_new_doc_version(attrib.st_mtime, newAttrib.st_mtime);
-            } else
-            {
-            printf("Unable to get file properties.\n");
-            printf("Please check whether '%s' file exists.\n", newFileName);
-            }
-            
+            if (file_exist(newFileName)){ //if the converted file alredy exists
+                if (stat(newFileName, &newAttrib)==0)
+                {
+                    if (is_new_doc_version(attrib.st_mtime, newAttrib.st_mtime))
+                    {
+                        convert=true;
+                        printf("..Convertion needed\n");
+                    }else 
+                    {
+                       printf("..no convertion needed\n"); 
+                    }     
+                    
+                } else
+                {
+                printf("Unable to get file properties.\n");
+                printf("Please check whether '%s' file exists.\n", newFileName);
+                }
+                
 		}
         }
         else
@@ -455,31 +463,6 @@ void free_arguments(struct Arguments *arguments) {
 
 void Print_num_Options(struct Arguments *arguments){
     printf("Number of options entered :%d \n",arguments->num_options);
-}
-
-void PandocCall(struct Arguments *arguments){
-
-    printf("Pandoc is trying to convert the files...\n");
-
-    // argv array for: ls -l
-    // Just like in main, the argv array must be NULL terminated.
-    // try to run ./a.out -x -y, it will work
-    char* output =replaceWord(arguments->files[0].filename,".md",".html");
-    char * ls_args[] = { "pandoc" , arguments->files[0].filename, "-o", output, NULL};
-    //                    ^ 
-    //  use the name ls
-    //  rather than the
-    //  path to /bin/ls
-
-    // Little explaination
-    // The primary difference between execv and execvp is that with execv you have to provide the full path to the binary file (i.e., the program). 
-    // With execvp, you do not need to specify the full path because execvp will search the local environment variable PATH for the executable.
-    execvp(   ls_args[0],     ls_args); 
-
-    //Error Handeler
-    fprintf(stdout, "pandoc failed\n");
-    exit(EXIT_SUCCESS);
-        
 }
 
 void Pandoc(char * file){
@@ -640,36 +623,6 @@ bool Option_f(struct Arguments *arguments){
     return arguments->option1 == f || arguments->option2 == f || arguments->option3 == f ||arguments->option4 == f;
 }
 
-
-void Forking(struct Arguments *arguments){
-
-        // Forking
-        pid_t pid;
-        pid = fork();
-
-        if (pid == -1) {
-            perror("Fork Error");
-        }
-        // child process because return value zero 
-        else if (pid == 0){
-        
-            printf("Hello from Child!\n"); 
-            // Pandoc will run here.
-
-
-            //calling pandoc
-            PandocCall(arguments);
-
-        }
-        // parent process because return value non-zero.   
-        else{
-
-            printf("Hello from Parent!\n"); 
-        }
-
-
-}
-
 // The sys/stat.h header file also defines macros to test for file type, which work similarly to the ctype.h macros that examine characters. For a directory entry, the S_ISDIR macro is used
 // The stat() function requires two arguments. The first is the name (or pathname) to a filename. The second argument is the address of a stat structure. This structure is filled with oodles of good info about a directory entry and it’s consistent across all file systems.
 
@@ -691,7 +644,7 @@ int RecursiveSearch(char *Dir){
     /* Read directory entries */
     while( (entry=readdir(Directory)) )
     {
-        char fullname[100];
+        char fullname[200];
         sprintf(fullname, "%s/%s",Dir,entry->d_name);
         stat(fullname,&filestat);
         if( S_ISDIR(filestat.st_mode) ){
