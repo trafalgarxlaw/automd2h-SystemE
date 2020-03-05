@@ -231,6 +231,8 @@ void initialise_Arguments(struct Arguments *arguments) {
 }
 struct Arguments *parse_arguments(int argc, char *argv[]) {
 
+    printf("Parsing Arguments..\n");
+
     struct Arguments *arguments = malloc(sizeof(struct Arguments));
     initialise_Arguments(arguments);
 
@@ -238,7 +240,7 @@ struct Arguments *parse_arguments(int argc, char *argv[]) {
     // ---Option detection Part ---
     if (is_Option(argv[1]))
     {
-        for (int i = 0; i < argc; i++)
+        for (int i = 1; i < argc; i++)
         {
             if (is_Option(argv[i]))
             {
@@ -269,14 +271,14 @@ struct Arguments *parse_arguments(int argc, char *argv[]) {
         }
 
         //next argv
-        arguments->argv_index++;
+       //xs arguments->argv_index++;
         
     
     // ---File detection Part ---
     }
-    
     if (Filename_is_Valide(argv[arguments->argv_index]))
     {
+        printf("here\n");
 
         if (is_Markdown(argv[arguments->argv_index]))
         {
@@ -567,13 +569,10 @@ bool if_html_version_exists(const char *file){
 // The stat() function requires two arguments. The first is the name (or pathname) to a filename. The second argument is the address of a stat structure. This structure is filled with oodles of good info about a directory entry and it’s consistent across all file systems.
 
 // i cant detected properly if an element is a file or a dir 
-int RecursiveSearch(char *Dir,bool CheckModification){
+bool RecursiveSearch(char *Dir,bool CheckModification){
     DIR *Directory;
     struct dirent *entry;
-    struct stat filestat;
-
-    bool SomethingChanged=false;
-    
+    struct stat filestat;    
 
     printf("I am Reading %s Directory\n", Dir);
 
@@ -592,11 +591,11 @@ int RecursiveSearch(char *Dir,bool CheckModification){
         stat(fullname,&filestat);
 
 
-        if( S_ISDIR(filestat.st_mode) ){
+        if( S_ISDIR(filestat.st_mode)){
 
             printf("%4s: %s\n","Dir",fullname);
 
-            if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0 ) // to not infinite loop
+            if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0  ) // to not infinite loop
             {
                 // Recursion
                 printf("\n*Entering a subDirectory*\n");
@@ -604,35 +603,94 @@ int RecursiveSearch(char *Dir,bool CheckModification){
                 printf("\n*Leaving a subDirectory*\n");
             }
         }
-        else{//its a file
+        else{
+            //its a file
             printf("%4s: %s\n","File",fullname);
 
-            if (is_Markdown(fullname))
+            if (CheckModification == false && is_Markdown(fullname) && if_html_version_exists(fullname)==false)
             {
                 Pandoc(fullname);
             }
-            if (CheckModification && file_needs_conversion(fullname))
-            {
-                // converting all md files here.
-                Pandoc(fullname);
-                SomethingChanged = true;
-            }else
-            {
-                continue;
-            }
-            
-            
 
+            if (CheckModification == true && file_needs_conversion(fullname))
+            {
+                Pandoc(fullname);
+                printf("A modification has been detected and Updated.\n");
+                exit(0);
+            }
+            
         }
     }
     closedir(Directory);
 
-    return SomethingChanged;
+    return true;
 }
 
 bool no_options_entered(enum Options OptionArray[]){
     return OptionArray[0]==no_option && OptionArray[1]==no_option && OptionArray[2]==no_option && OptionArray[3]==no_option;
 }
+
+// The following functions checks if a specific option is in the arguments structure
+
+bool Option_n(struct Arguments *arguments){
+    return arguments->option1 == n || arguments->option2 == n || arguments->option3 == n ||arguments->option4 == n;
+}
+
+bool Option_t(struct Arguments *arguments){
+    return arguments->option1 == t || arguments->option2 == t || arguments->option3 == t ||arguments->option4 == t;
+}
+
+bool Option_w(struct Arguments *arguments){
+    return arguments->option1 == w || arguments->option2 == w || arguments->option3 == w ||arguments->option4 == w;
+}
+
+bool Option_f(struct Arguments *arguments){
+    return arguments->option1 == f || arguments->option2 == f || arguments->option3 == f ||arguments->option4 == f;
+}
+
+//option w
+
+// Avec l'option -w, automd2h bloque et surveille les modifications des fichiers 
+//et des répertoires passés en argument. Lors de la modification d'un fichier source, 
+//celui-ci est automatiquement reconverti. Si dans un répertoire surveillé un 
+//fichier .md apparait, est modifié, est déplacé ou est renommé, celui-ci aussi
+// est automatiquement converti.
+void Observe(){
+    printf("\nStarting to observe Sub Directories ...\n");
+
+  pid_t c_pid, pid;
+  int status;
+
+  c_pid = fork(); //duplicate
+
+  if( c_pid == 0 ){
+
+ 
+        while (RecursiveSearch(".",true))
+        {
+            printf("\nsleeping...\n");
+            sleep(5);
+        }
+
+    }else if (c_pid > 0){
+        //parent
+
+        //waiting for child to terminate
+        pid = wait(&status);
+
+        if ( WIFEXITED(status) ){
+        printf("Parent: Child exited with status: %d\n", WEXITSTATUS(status));
+        }
+
+    }else{
+        //error: The return of fork() is negative
+        perror("fork failed");
+        _exit(2); //exit failure, hard
+  }
+}
+
+
+
 
 
 int ReadOptions(struct Arguments *arguments){
@@ -677,19 +735,20 @@ int ReadOptions(struct Arguments *arguments){
                 //ou si le fichier .html cible n'existe pas, alors il y a conversion. 
                 //Si la date est identique ou si le fichier .html cible est plus récent, 
                 //alors il n'y a pas de conversion.
-                printf("\nOption t Detected.\n");
-                printf("file name : %s \n",arguments->files[0].filename);
-                if (file_needs_conversion(arguments->files[0].filename))
+                for (int file = 0; i < arguments->num_files; i++)
                 {
+                    printf("\nOption t Detected.\n");
+                    printf("file name : %s \n",arguments->files[file].filename);
+                    if (file_needs_conversion(arguments->files[file].filename))
+                    {
 
-                    printf("%s needs to be converted again.\n",arguments->files[0].filename);
-                }else
-                {
-                    printf("no convertion needed for %s \n",arguments->files[0].filename);
+                        printf("%s needs to be converted again.\n",arguments->files[file].filename);
+                        Pandoc(arguments->files[file].filename);
+                    }else
+                    {
+                        printf("no convertion needed for %s \n",arguments->files[file].filename);
+                    }
                 }
-
-                
-                
                 break;
 
             case n:
@@ -709,23 +768,16 @@ int ReadOptions(struct Arguments *arguments){
                     printf("\nOption n Detected.\n");
                     print_current_directory(".", false);
                 }
-                
-                
                 break;
 
             
             case r:
                 printf("\nStarting Recursive Research..\n");
-                if(RecursiveSearch(".",false)==0)
-                {
-                    //ok
-                }else
-                {
-                    //error
-                    fprintf(stderr,"Something went wrong in the recursive function");
-                }
-                
-                
+                RecursiveSearch(".",false);
+                break;
+
+            case w:
+                Observe();
                 break;
 
             case Optionerror:
@@ -739,69 +791,6 @@ int ReadOptions(struct Arguments *arguments){
     return 0;
 }
 
-
-// The following functions checks if a specific option is in the arguments structure
-
-bool Option_n(struct Arguments *arguments){
-    return arguments->option1 == n || arguments->option2 == n || arguments->option3 == n ||arguments->option4 == n;
-}
-
-bool Option_t(struct Arguments *arguments){
-    return arguments->option1 == t || arguments->option2 == t || arguments->option3 == t ||arguments->option4 == t;
-}
-
-bool Option_w(struct Arguments *arguments){
-    return arguments->option1 == w || arguments->option2 == w || arguments->option3 == w ||arguments->option4 == w;
-}
-
-bool Option_f(struct Arguments *arguments){
-    return arguments->option1 == f || arguments->option2 == f || arguments->option3 == f ||arguments->option4 == f;
-}
-
-//option w
-
-// Avec l'option -w, automd2h bloque et surveille les modifications des fichiers 
-//et des répertoires passés en argument. Lors de la modification d'un fichier source, 
-//celui-ci est automatiquement reconverti. Si dans un répertoire surveillé un 
-//fichier .md apparait, est modifié, est déplacé ou est renommé, celui-ci aussi
-// est automatiquement converti.
-void Observe(){
-    printf("\nStarting to observe Sub Directories ...\n");
-
-  pid_t c_pid, pid;
-  int status;
-
-  c_pid = fork(); //duplicate
-
-  if( c_pid == 0 ){
-
-        //child
-        pid = getpid();
-
-
-
-        //sleep for 2 seconds
-        sleep(2);
-
-        //exit with statys 12
-        exit(12);
-
-    }else if (c_pid > 0){
-        //parent
-
-        //waiting for child to terminate
-        pid = wait(&status);
-
-        if ( WIFEXITED(status) ){
-        printf("Parent: Child exited with status: %d\n", WEXITSTATUS(status));
-        }
-
-    }else{
-        //error: The return of fork() is negative
-        perror("fork failed");
-        _exit(2); //exit failure, hard
-  }
-}
 
 int main(int argc, char *argv[])
 {

@@ -18,7 +18,7 @@ Note : Ne pas oublier de handle les erreurs des system calls, ca vaut des points
 Faudrais lister toutes les fonctions Appel System qu'on pense avoir besoin.
 
 ## Synopsis
-automd2h [options] fichier...
+automd2h [options] fichier...x
 
 ## Description
 automd2h convertit les fichiers au format Markdown en fichiers au format HTML.
