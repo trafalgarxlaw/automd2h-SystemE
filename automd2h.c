@@ -392,6 +392,7 @@ bool file_needs_conversion(char *filename){
 	struct stat newAttrib;
 	char *newFileName = replaceWord(filename,".md",".html");
 
+    printf("\nChecking if %s needs to be converted\n",filename);
  	if (file_exist(filename) && is_Markdown(filename)){
         
         if (stat(filename, &attrib) == 0)
@@ -419,6 +420,7 @@ bool file_needs_conversion(char *filename){
 
 	}else{
 		convert = false;
+        printf("The file %s does not exists or is not .md\n\n",filename);
 	}
 
 	return convert;
@@ -457,6 +459,8 @@ void Print_num_Options(struct Arguments *arguments){
 
 void PandocCall(struct Arguments *arguments){
 
+    printf("Pandoc is trying to convert the files...\n");
+
     // argv array for: ls -l
     // Just like in main, the argv array must be NULL terminated.
     // try to run ./a.out -x -y, it will work
@@ -478,19 +482,66 @@ void PandocCall(struct Arguments *arguments){
         
 }
 
-// Check if the user entered the same option twice.
+void Pandoc(char * file){
+
+    printf("Pandoc is trying to convert the file...\n");
+
+            // Forking
+        pid_t pid;
+        pid = fork();
+
+        if (pid == -1) {
+            perror("Fork Error");
+        }
+        // child process because return value zero 
+        else if (pid == 0){
+        
+            printf("Hello from Child!\n"); 
+            // Pandoc will run here.
+
+            //calling pandoc
+            // argv array for: ls -l
+            // Just like in main, the argv array must be NULL terminated.
+            // try to run ./a.out -x -y, it will work
+            char* output =replaceWord(file,".md",".html");
+            char * ls_args[] = { "pandoc" , file, "-o", output, NULL};
+            //                    ^ 
+            //  use the name ls
+            //  rather than the
+            //  path to /bin/ls
+
+            // Little explaination
+            // The primary difference between execv and execvp is that with execv you have to provide the full path to the binary file (i.e., the program). 
+            // With execvp, you do not need to specify the full path because execvp will search the local environment variable PATH for the executable.
+            execvp(   ls_args[0],     ls_args); 
+
+            //Error Handeler
+            fprintf(stdout, "pandoc failed\n");
+            exit(EXIT_SUCCESS);
+
+        }
+        // parent process because return value non-zero.   
+        else{
+
+            printf("Hello from Parent!\n"); 
+        }
+
+        
+}
+
+    // Check if the user entered the same option twice.
 bool Check_Duplicates(enum Options OptionArray[]){
 
-bool DuplicateOption = false;
+    bool DuplicateOption = false;
 
-for (int i = 0; i < 4 - 1; i++) {
-    for (int j = i + 1; j < 4; j++) {
-        if (OptionArray[i] !=no_option && OptionArray[i] == OptionArray[j]) {
-            DuplicateOption=true;
+    for (int i = 0; i < 4 - 1; i++) {
+        for (int j = i + 1; j < 4; j++) {
+            if (OptionArray[i] !=no_option && OptionArray[i] == OptionArray[j]) {
+                DuplicateOption=true;
+            }
         }
     }
-}
-return DuplicateOption;
+    return DuplicateOption;
 }
 
 void ReadOptions(struct Arguments *arguments){
@@ -653,8 +704,17 @@ int RecursiveSearch(char *Dir){
                 printf("\n*Leaving a subDirectory*\n");
             }
         }
-        else
+        else{
             printf("%4s: %s\n","File",fullname);
+            
+            if (file_needs_conversion(fullname))
+            {
+                // converting all md files here.
+                Pandoc(fullname);
+            }
+            
+
+        }
     }
     closedir(Directory);
 
