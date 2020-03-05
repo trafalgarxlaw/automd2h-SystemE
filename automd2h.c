@@ -63,6 +63,7 @@ enum Format{
 enum Options{
     t,
     n,
+    r,
     w,
     f,
     no_option,
@@ -164,7 +165,15 @@ bool is_Option_t(char *option){
 bool is_Option_n(char *option){
     return strstr(option, "-n") != NULL;
 }
-
+bool is_Option_r(char *option){
+    return strstr(option, "-r") != NULL;
+}
+bool is_Option_w(char *option){
+    return strstr(option, "-w") != NULL;
+}
+bool is_Option_f(char *option){
+    return strstr(option, "-f") != NULL;
+}
 enum Options  option_detection(char *option){
     enum Options Detected_option = no_option;
     if (is_Option_t(option))
@@ -175,6 +184,21 @@ enum Options  option_detection(char *option){
     {
         /* code */
         Detected_option=n;
+    }
+    else if (is_Option_r(option))
+    {
+        /* code */
+        Detected_option=r;
+    }
+    else if (is_Option_w(option))
+    {
+        /* code */
+        Detected_option=w;
+    }
+    else if (is_Option_f(option))
+    {
+        /* code */
+        Detected_option=f;
     }
     else
     {
@@ -527,6 +551,56 @@ bool Check_Duplicates(enum Options OptionArray[]){
     return DuplicateOption;
 }
 
+// The sys/stat.h header file also defines macros to test for file type, which work similarly to the ctype.h macros that examine characters. For a directory entry, the S_ISDIR macro is used
+// The stat() function requires two arguments. The first is the name (or pathname) to a filename. The second argument is the address of a stat structure. This structure is filled with oodles of good info about a directory entry and it’s consistent across all file systems.
+
+// i cant detected properly if an element is a file or a dir 
+int RecursiveSearch(char *Dir){
+    DIR *Directory;
+    struct dirent *entry;
+    struct stat filestat;
+
+    printf("I am Reading %s Directory\n", Dir);
+
+    Directory = opendir(Dir);
+    if(Directory == NULL)
+    {
+        perror("Unable to read directory.. i'm leaving\n");
+        return(1); // leave
+    }
+
+    /* Read directory entries */
+    while( (entry=readdir(Directory)) )
+    {
+        char fullname[200];
+        sprintf(fullname, "%s/%s",Dir,entry->d_name);
+        stat(fullname,&filestat);
+        if( S_ISDIR(filestat.st_mode) ){
+            printf("%4s: %s\n","Dir",fullname);
+            if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0 ) // to not infinite loop
+            {
+                // Recursion
+                printf("\n*Entering a subDirectory*\n");
+                RecursiveSearch(fullname);
+                printf("\n*Leaving a subDirectory*\n");
+            }
+        }
+        else{
+            printf("%4s: %s\n","File",fullname);
+            
+            if (file_needs_conversion(fullname))
+            {
+                // converting all md files here.
+                Pandoc(fullname);
+            }
+            
+
+        }
+    }
+    closedir(Directory);
+
+    return(0);
+}
 void ReadOptions(struct Arguments *arguments){
 
     //Array of options
@@ -593,6 +667,20 @@ void ReadOptions(struct Arguments *arguments){
                 
                 break;
 
+            
+            case r:
+                printf("\nStarting Recursive Research..\n");
+                if(RecursiveSearch(".")==0)
+                {
+                    //ok
+                }else
+                {
+                    //error
+                }
+                
+                
+                break;
+
             case Optionerror:
                 fprintf(stderr,"Option parsing failed\n");
                 break;
@@ -623,56 +711,6 @@ bool Option_f(struct Arguments *arguments){
     return arguments->option1 == f || arguments->option2 == f || arguments->option3 == f ||arguments->option4 == f;
 }
 
-// The sys/stat.h header file also defines macros to test for file type, which work similarly to the ctype.h macros that examine characters. For a directory entry, the S_ISDIR macro is used
-// The stat() function requires two arguments. The first is the name (or pathname) to a filename. The second argument is the address of a stat structure. This structure is filled with oodles of good info about a directory entry and it’s consistent across all file systems.
-
-// i cant detected properly if an element is a file or a dir 
-int RecursiveSearch(char *Dir){
-    DIR *Directory;
-    struct dirent *entry;
-    struct stat filestat;
-
-    printf("I am Reading %s Directory\n", Dir);
-
-    Directory = opendir(Dir);
-    if(Directory == NULL)
-    {
-        perror("Unable to read directory.. i'm leaving\n");
-        return(1); // leave
-    }
-
-    /* Read directory entries */
-    while( (entry=readdir(Directory)) )
-    {
-        char fullname[200];
-        sprintf(fullname, "%s/%s",Dir,entry->d_name);
-        stat(fullname,&filestat);
-        if( S_ISDIR(filestat.st_mode) ){
-            printf("%4s: %s\n","Dir",fullname);
-            if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0 ) // to not infinite loop
-            {
-                // Recursion
-                printf("\n*Entering a subDirectory*\n");
-                RecursiveSearch(fullname);
-                printf("\n*Leaving a subDirectory*\n");
-            }
-        }
-        else{
-            printf("%4s: %s\n","File",fullname);
-            
-            if (file_needs_conversion(fullname))
-            {
-                // converting all md files here.
-                Pandoc(fullname);
-            }
-            
-
-        }
-    }
-    closedir(Directory);
-
-    return(0);
-}
 
 int main(int argc, char *argv[])
 {
@@ -696,11 +734,6 @@ int main(int argc, char *argv[])
         ReadOptions(arguments);
 
     }
-    //test
-    printf("\nStarting Recursive Research..\n");
-    int code = RecursiveSearch("./Directories");
-    printf("code %d\n", code);
-
     
     free_arguments(arguments);
     return 0;
