@@ -93,6 +93,11 @@ struct Arguments {
     struct File files[20];             // Array of Files to convert. It can be unlimited
 };
 
+// Check if file exists in Current repository
+bool file_exist(char *filePath){
+ 	return access(filePath, F_OK) != -1;
+};
+
 // Function to replace a string with another 
 // string 
 char *replaceWord(const char *s, const char *oldW, const char *newW) 
@@ -135,6 +140,7 @@ char *replaceWord(const char *s, const char *oldW, const char *newW)
     result[i] = '\0'; 
     return result; 
 }
+
 
 /**
  * File Validation functions.
@@ -218,7 +224,7 @@ void initialise_Arguments(struct Arguments *arguments) {
     arguments->option2=no_option;
     arguments->option3=no_option;
     arguments->option4=no_option;
-    arguments->argv_index=0;
+    arguments->argv_index=1;
     arguments->num_files=0;
     arguments->num_directories=0;
     arguments->num_options=0;
@@ -268,6 +274,7 @@ struct Arguments *parse_arguments(int argc, char *argv[]) {
     
     // ---File detection Part ---
     }
+    
     if (Filename_is_Valide(argv[arguments->argv_index]))
     {
 
@@ -399,15 +406,11 @@ void print_args(struct Arguments *arguments){
 }
 
 //Check if converted document has a newer version (option t)
-bool is_new_doc_version(time_t sourceFile, time_t destFile){
+bool has_new_doc_version(time_t sourceFile, time_t destFile){
 	return sourceFile > destFile;
 }
 
-// Check if file exists in Current repository
-// what file?
-bool file_exist(char *filePath){
- 	return access(filePath, F_OK) != -1;
-};
+
 
 //Check if documents has a new version to convert
 bool file_needs_conversion(char *filename){
@@ -423,9 +426,10 @@ bool file_needs_conversion(char *filename){
         {
             //ok
             if (file_exist(newFileName)){ //if the converted file alredy exists
+            printf("here\n");
                 if (stat(newFileName, &newAttrib)==0)
                 {
-                    if (is_new_doc_version(attrib.st_mtime, newAttrib.st_mtime))
+                    if (has_new_doc_version(attrib.st_mtime, newAttrib.st_mtime))
                     {
                         convert=true;
                         printf("..Convertion needed\n");
@@ -437,10 +441,13 @@ bool file_needs_conversion(char *filename){
                 } else
                 {
                 printf("Unable to get file properties.\n");
-                printf("Please check whether '%s' file exists.\n", newFileName);
                 }
                 
-		}
+		    }else
+            {
+                printf("'%s' file do not exists, i can't compare them.\n", newFileName);
+            }
+            
         }
         else
         {
@@ -493,7 +500,7 @@ void Pandoc(char * file){
 
     printf("Pandoc is trying to convert the file...\n");
 
-            // Forking
+        // Forking
         pid_t pid;
         pid = fork();
 
@@ -524,7 +531,7 @@ void Pandoc(char * file){
 
             //Error Handeler
             fprintf(stdout, "pandoc failed\n");
-            exit(EXIT_SUCCESS);
+            exit(1);
 
         }
         // parent process because return value non-zero.   
@@ -551,14 +558,22 @@ bool Check_Duplicates(enum Options OptionArray[]){
     return DuplicateOption;
 }
 
+bool if_html_version_exists(const char *file){
+    char *MardownVersion = replaceWord(file,".md",".html");
+    return file_exist(MardownVersion);
+}
+
 // The sys/stat.h header file also defines macros to test for file type, which work similarly to the ctype.h macros that examine characters. For a directory entry, the S_ISDIR macro is used
 // The stat() function requires two arguments. The first is the name (or pathname) to a filename. The second argument is the address of a stat structure. This structure is filled with oodles of good info about a directory entry and it’s consistent across all file systems.
 
 // i cant detected properly if an element is a file or a dir 
-int RecursiveSearch(char *Dir){
+int RecursiveSearch(char *Dir,bool CheckModification){
     DIR *Directory;
     struct dirent *entry;
     struct stat filestat;
+
+    bool SomethingChanged=false;
+    
 
     printf("I am Reading %s Directory\n", Dir);
 
@@ -575,33 +590,52 @@ int RecursiveSearch(char *Dir){
         char fullname[200];
         sprintf(fullname, "%s/%s",Dir,entry->d_name);
         stat(fullname,&filestat);
+
+
         if( S_ISDIR(filestat.st_mode) ){
+
             printf("%4s: %s\n","Dir",fullname);
+
             if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0 ) // to not infinite loop
             {
                 // Recursion
                 printf("\n*Entering a subDirectory*\n");
-                RecursiveSearch(fullname);
+                RecursiveSearch(fullname,CheckModification);
                 printf("\n*Leaving a subDirectory*\n");
             }
         }
-        else{
+        else{//its a file
             printf("%4s: %s\n","File",fullname);
-            
-            if (file_needs_conversion(fullname))
+
+            if (is_Markdown(fullname))
+            {
+                Pandoc(fullname);
+            }
+            if (CheckModification && file_needs_conversion(fullname))
             {
                 // converting all md files here.
                 Pandoc(fullname);
+                SomethingChanged = true;
+            }else
+            {
+                continue;
             }
+            
             
 
         }
     }
     closedir(Directory);
 
-    return(0);
+    return SomethingChanged;
 }
-void ReadOptions(struct Arguments *arguments){
+
+bool no_options_entered(enum Options OptionArray[]){
+    return OptionArray[0]==no_option && OptionArray[1]==no_option && OptionArray[2]==no_option && OptionArray[3]==no_option;
+}
+
+
+int ReadOptions(struct Arguments *arguments){
 
     //Array of options
     enum Options OptionArray[5]; 
@@ -616,8 +650,20 @@ void ReadOptions(struct Arguments *arguments){
        fprintf(stderr,"Error duplicates options.\n");
        exit(1);
     }
-    
 
+    if (no_options_entered(OptionArray))
+    {
+        for (int i = 0; i < arguments->num_files; i++)
+        {
+            if (if_html_version_exists(arguments->files[i].filename) == false)
+            {
+                Pandoc(arguments->files[i].filename);     
+            }
+        }
+
+        return 0;
+    }
+    
     //looping through the options
     for (int i = 0; i < 4; i++)
     {
@@ -670,12 +716,13 @@ void ReadOptions(struct Arguments *arguments){
             
             case r:
                 printf("\nStarting Recursive Research..\n");
-                if(RecursiveSearch(".")==0)
+                if(RecursiveSearch(".",false)==0)
                 {
                     //ok
                 }else
                 {
                     //error
+                    fprintf(stderr,"Something went wrong in the recursive function");
                 }
                 
                 
@@ -689,7 +736,7 @@ void ReadOptions(struct Arguments *arguments){
                 break;
             }
     }
-
+    return 0;
 }
 
 
@@ -711,6 +758,50 @@ bool Option_f(struct Arguments *arguments){
     return arguments->option1 == f || arguments->option2 == f || arguments->option3 == f ||arguments->option4 == f;
 }
 
+//option w
+
+// Avec l'option -w, automd2h bloque et surveille les modifications des fichiers 
+//et des répertoires passés en argument. Lors de la modification d'un fichier source, 
+//celui-ci est automatiquement reconverti. Si dans un répertoire surveillé un 
+//fichier .md apparait, est modifié, est déplacé ou est renommé, celui-ci aussi
+// est automatiquement converti.
+void Observe(){
+    printf("\nStarting to observe Sub Directories ...\n");
+
+  pid_t c_pid, pid;
+  int status;
+
+  c_pid = fork(); //duplicate
+
+  if( c_pid == 0 ){
+
+        //child
+        pid = getpid();
+
+
+
+        //sleep for 2 seconds
+        sleep(2);
+
+        //exit with statys 12
+        exit(12);
+
+    }else if (c_pid > 0){
+        //parent
+
+        //waiting for child to terminate
+        pid = wait(&status);
+
+        if ( WIFEXITED(status) ){
+        printf("Parent: Child exited with status: %d\n", WEXITSTATUS(status));
+        }
+
+    }else{
+        //error: The return of fork() is negative
+        perror("fork failed");
+        _exit(2); //exit failure, hard
+  }
+}
 
 int main(int argc, char *argv[])
 {
