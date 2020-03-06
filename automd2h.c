@@ -11,7 +11,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <dirent.h>
-//#include <sys/inotify.h>
+//#include <linux/inotify.h>
 
 #define USAGE "\n\
 Usage: [-h|--help] [-t|--???] [-n|--???]\n\
@@ -650,6 +650,33 @@ int Convert_Directory( char *Dir){
     return (0);
 }
 
+bool no_options_entered(enum Options OptionArray[])
+{
+    return OptionArray[0] == no_option && OptionArray[1] == no_option && OptionArray[2] == no_option && OptionArray[3] == no_option;
+}
+
+// The following functions checks if a specific option is in the arguments structure
+
+bool Option_n(struct Arguments *arguments)
+{
+    return arguments->option1 == n || arguments->option2 == n || arguments->option3 == n || arguments->option4 == n;
+}
+
+bool Option_t(struct Arguments *arguments)
+{
+    return arguments->option1 == t || arguments->option2 == t || arguments->option3 == t || arguments->option4 == t;
+}
+
+bool Option_w(struct Arguments *arguments)
+{
+    return arguments->option1 == w || arguments->option2 == w || arguments->option3 == w || arguments->option4 == w;
+}
+
+bool Option_f(struct Arguments *arguments)
+{
+    return arguments->option1 == f || arguments->option2 == f || arguments->option3 == f || arguments->option4 == f;
+}
+
 // The sys/stat.h header file also defines macros to test for file type, which work similarly to the ctype.h macros that examine characters. For a directory entry, the S_ISDIR macro is used
 // The stat() function requires two arguments. The first is the name (or pathname) to a filename. The second argument is the address of a stat structure. This structure is filled with oodles of good info about a directory entry and it’s consistent across all file systems.
 
@@ -711,34 +738,6 @@ bool RecursiveSearch(char *Dir, bool CheckModification)
 
     return true;
 }
-
-bool no_options_entered(enum Options OptionArray[])
-{
-    return OptionArray[0] == no_option && OptionArray[1] == no_option && OptionArray[2] == no_option && OptionArray[3] == no_option;
-}
-
-// The following functions checks if a specific option is in the arguments structure
-
-bool Option_n(struct Arguments *arguments)
-{
-    return arguments->option1 == n || arguments->option2 == n || arguments->option3 == n || arguments->option4 == n;
-}
-
-bool Option_t(struct Arguments *arguments)
-{
-    return arguments->option1 == t || arguments->option2 == t || arguments->option3 == t || arguments->option4 == t;
-}
-
-bool Option_w(struct Arguments *arguments)
-{
-    return arguments->option1 == w || arguments->option2 == w || arguments->option3 == w || arguments->option4 == w;
-}
-
-bool Option_f(struct Arguments *arguments)
-{
-    return arguments->option1 == f || arguments->option2 == f || arguments->option3 == f || arguments->option4 == f;
-}
-
 //option w
 
 // Avec l'option -w, automd2h bloque et surveille les modifications des fichiers
