@@ -359,10 +359,10 @@ void print_args(struct Arguments *arguments)
         printf("Arg1 : t \n");
         break;
     case w:
-        printf("Arg1 : t \n");
+        printf("Arg1 : w \n");
         break;
     case f:
-        printf("Arg1 : t \n");
+        printf("Arg1 : f \n");
         break;
     case no_option:
         printf("Arg1 : no_option \n");
@@ -381,10 +381,10 @@ void print_args(struct Arguments *arguments)
         printf("Arg2 : t \n");
         break;
     case w:
-        printf("Arg2 : t \n");
+        printf("Arg2 : w \n");
         break;
     case f:
-        printf("Arg2 : t \n");
+        printf("Arg2 : f \n");
         break;
     case no_option:
         printf("Arg2 : no_option \n");
@@ -403,10 +403,10 @@ void print_args(struct Arguments *arguments)
         printf("Arg3 : t \n");
         break;
     case w:
-        printf("Arg3 : t \n");
+        printf("Arg3 : w \n");
         break;
     case f:
-        printf("Arg3 : t \n");
+        printf("Arg3 : f \n");
         break;
     case no_option:
         printf("Arg3 : no_option \n");
@@ -425,10 +425,10 @@ void print_args(struct Arguments *arguments)
         printf("Arg4 : t \n");
         break;
     case w:
-        printf("v : t \n");
+        printf("Arg4 : t \n");
         break;
     case f:
-        printf("Arg4 : t \n");
+        printf("Arg4 : f \n");
         break;
     case no_option:
         printf("Arg4 : no_option \n");
@@ -746,7 +746,7 @@ bool Option_f(struct Arguments *arguments)
 //celui-ci est automatiquement reconverti. Si dans un répertoire surveillé un
 //fichier .md apparait, est modifié, est déplacé ou est renommé, celui-ci aussi
 // est automatiquement converti.
-void Observe()
+void Observe(bool Immediate_Convertion)
 {
     printf("\nStarting to observe Sub Directories ...\n");
 
@@ -757,6 +757,13 @@ void Observe()
 
     if (c_pid == 0)
     {
+        //This will converte immediatly any files
+        if (Immediate_Convertion)
+        {
+            RecursiveSearch(".", false);
+        }
+        
+
 
         while (RecursiveSearch(".", true))
         {
@@ -1004,7 +1011,18 @@ int ReadOptions(struct Arguments *arguments)
 
         case w:
             //Watch(false, arguments, false);
-            Observe();
+            
+            if (OptionArray[i + 1] == f)
+            {
+                printf("\nOption w combined with f Detected.\n");
+                Observe(true);
+            }else
+            {
+                printf("\nOption w Detected.\n");
+                Observe(false);
+            }
+            
+            
             break;
 
         case Optionerror:
