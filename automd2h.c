@@ -1014,7 +1014,7 @@ int ReadOptions(struct Arguments *arguments)
             
             if (OptionArray[i + 1] == f)
             {
-                printf("\nOption w combined with f Detected.\n");
+                printf("\nOption w combined with f Detected...Immediate convertion\n");
                 Observe(true);
             }else
             {
