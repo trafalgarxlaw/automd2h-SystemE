@@ -695,7 +695,8 @@ void Watch(bool recursive, struct Arguments *arguments, bool timeCheck){
     printf("\nStarting to observe Sub Directories ...\n");
 
   pid_t c_pid, pid;
-  int status, inotify, directory;
+  int status, inotify, directory, length;
+	int i = 0;
 	char buffer[1024 * (sizeof(struct inotify_event) + 16)];
 
 	inotify = inotify_init();
@@ -715,9 +716,20 @@ void Watch(bool recursive, struct Arguments *arguments, bool timeCheck){
         }
 			}
 			else{
-printf("Add watcher to file %s\n", arguments->files[i].filename);
-				directory = inotify_add_watch(inotify, arguments->files[i].filename, IN_CREATE | IN_DELETE | IN_MODIFY);
+				printf("Add watcher to file %s\n", arguments->files[i].filename);
+				directory = inotify_add_watch(inotify, arguments->files[i].filename, IN_CREATE | IN_DELETE | IN_MODIFY | IN_OPEN);
 				
+			}
+			length = read(inotify, buffer, 1024 * (sizeof(struct inotify_event) + 16));
+			i = 0;
+			while(i < length){
+				struct inotify_event *event = (struct inotify_event *) &buffer[i];
+				if(event->len){
+					if(event->mask & IN_OPEN){
+						printf("%s OPENED!", event->name);
+					}
+				}
+				i += sizeof(struct inotify_event) + event->len;
 			}
 		}
 
