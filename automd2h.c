@@ -11,8 +11,10 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <dirent.h>
-//#include <linux/inotify.h>
+#include <linux/inotify.h>
 
+#define EVENT_SIZE  ( sizeof (struct inotify_event) )
+#define BUF_LEN     ( 1024 * ( EVENT_SIZE + 16 ) )
 #define USAGE "\n\
 Usage: [-h|--help] [-t|--???] [-n|--???]\n\
     [-n|--num_steps VALUE] [-t|--type STRING] [-a|--allowed-cells STRING]\n\
@@ -705,6 +707,7 @@ bool RecursiveSearch(char *Dir, bool CheckModification)
 
         if (S_ISDIR(filestat.st_mode))
         {
+            //its a dir
 
             printf("%4s: %s\n", "Dir", fullname);
 
@@ -736,6 +739,101 @@ bool RecursiveSearch(char *Dir, bool CheckModification)
     }
     closedir(Directory);
 
+    return true;
+}
+
+void watch(char *Dir,int *wd[]){
+            int length, i = 0;
+            int fd;
+            //int wd[2];
+            char buffer[BUF_LEN];
+
+            fd = inotify_init();
+
+            if ( fd < 0 ) {
+                perror( "inotify_init" );
+            }
+            wd[0] = inotify_add_watch( fd, Dir, IN_CREATE);
+            //wd[1] = inotify_add_watch (fd, "/tmp/inotify2", IN_CREATE);
+            bool SomethingChanged=false;
+
+            while (SomethingChanged==false){
+                struct inotify_event *event;
+
+                length = read( fd, buffer, BUF_LEN );  
+
+                if ( length < 0 ) {
+                    perror( "read" );
+                } 
+
+                event = ( struct inotify_event * ) &buffer[ i ];
+
+                if ( event->len ) {
+                    if (event->wd == wd[0]) printf("%s\n", "In /tmp/inotify1: ");
+                    else printf("%s\n", "In /tmp/inotify2: ");
+                    if ( event->mask & IN_CREATE ) {
+                        if ( event->mask & IN_ISDIR ) {
+                            printf( "The directory %s was created.\n", event->name ); 
+                            SomethingChanged = true;      
+                        }
+                        else {
+                            SomethingChanged=true;
+                            printf( "The file %s was created.\n", event->name );
+                        }
+                    }
+                }
+            }
+            ( void ) inotify_rm_watch( fd, wd[0] );
+            //( void ) inotify_rm_watch( fd, wd[1]);
+            ( void ) close( fd );
+}
+bool RecursiveSearch2(char *Dir, bool CheckModification)
+{
+    //Directory stuff
+    DIR *Directory;
+    struct dirent *entry;
+    struct stat filestat;
+
+
+    //inotify
+    int wd[10];
+
+
+    printf("I am Reading %s Directory\n", Dir);
+
+    Directory = opendir(Dir);
+    if (Directory == NULL)
+    {
+        perror("Unable to read directory.. i'm leaving\n");
+        return (1); // leave
+    }
+
+    /* Read directory entries */
+    while ((entry = readdir(Directory))){
+        char fullname[257];
+        sprintf(fullname, "%s/%s", Dir, entry->d_name);
+        stat(fullname, &filestat);
+        if (S_ISDIR(filestat.st_mode)){
+            //its a dir
+            if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) // to not infinite loop
+            {
+                // Recursion
+                printf("\n*Entering a subDirectory*\n");
+                RecursiveSearch2(fullname, CheckModification);
+                watch(Dir,&wd);
+                printf("\n*Leaving a subDirectory*\n");
+            }
+
+        }else
+        {
+            //its a file
+        }
+    
+    }
+
+
+
+    exit( 0 );
     return true;
 }
 //option w
@@ -790,132 +888,7 @@ void Observe(bool Immediate_Convertion)
     }
 }
 
-// //Option w
-// void Watch(bool recursive, struct Arguments *arguments, bool timeCheck){
-//     printf("\nStarting to observe Sub Directories ...\n");
 
-//   pid_t c_pid, pid;
-//   int status, inotify, directory, length;
-// 	int i = 0;
-// 	char buffer[1024 * (sizeof(struct inotify_event) + 16)];
-
-// 	inotify = inotify_init();
-
-//   if(inotify < 0){
-// 		perror("inotify_init");
-// 	}
-//   c_pid = fork(); //duplicate
-
-//   if( c_pid == 0 ){
-
-//  		for(int i = 0; (i < arguments->num_files); ++i){
-// 			if(recursive){
-//         while (RecursiveSearch(arguments->files[i].filename, timeCheck))
-//         {
-// 						//need to enter directory to add watcher
-//             printf("\nsleeping...\n");
-//             sleep(5);
-//         }
-// 			}
-// 			else{
-// 				printf("Add watcher to file %s\n", arguments->files[i].filename);
-// 				directory = inotify_add_watch(inotify, arguments->files[i].filename, IN_CREATE | IN_DELETE | IN_MODIFY | IN_OPEN);
-
-// 			}
-// 			length = read(inotify, buffer, 1024 * (sizeof(struct inotify_event) + 16));
-// 			i = 0;
-// 			if(length < 0){
-// 				perror("cant read");
-// 			}
-// 			while(i < length){
-// 				struct inotify_event *event = (struct inotify_event *) &buffer[i];
-// 				if(event->len){
-// 					printf("%s il se passe qqch!\n", event->name);
-// 					if(event->mask & IN_OPEN){
-// 						printf("%s OPENED!", event->name);
-// 					}
-// 				}
-// 				i += sizeof(struct inotify_event) + event->len;
-// 			}
-// 		}
-
-//     }else if (c_pid > 0){
-//         //parent
-
-//         //waiting for child to terminate
-//         pid = wait(&status);
-
-//         if ( WIFEXITED(status) ){
-//         printf("Parent: Child exited with status: %d\n", WEXITSTATUS(status));
-//         }
-
-//     }else{
-//         //error: The return of fork() is negative
-//         perror("fork failed");
-//         _exit(2); //exit failure, hard
-//   }
-// }
-
-// // i cant detected properly if an element is a file or a dir
-// bool RecursiveSearchWithWatcher(char *Dir,bool CheckModification, bool addWatcher){
-//     DIR *Directory;
-//     struct dirent *entry;
-//     struct stat filestat;
-
-//     printf("I am Reading %s Directory\n", Dir);
-
-//     Directory = opendir(Dir);
-//     if(Directory == NULL)
-//     {
-//         perror("Unable to read directory.. i'm leaving\n");
-//         return(1); // leave
-//     }
-
-//     /* Read directory entries */
-//     while( (entry=readdir(Directory)) )
-//     {
-//         char fullname[257];
-//         sprintf(fullname, "%s/%s",Dir,entry->d_name);
-//         stat(fullname,&filestat);
-
-//         if( S_ISDIR(filestat.st_mode)){
-
-//             printf("%4s: %s\n","Dir",fullname);
-
-//             if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0  ) // to not infinite loop
-//             {
-//                 // Recursion
-//                 printf("\n*Entering a subDirectory*\n");
-//                 RecursiveSearch(fullname,CheckModification);
-//                 printf("\n*Leaving a subDirectory*\n");
-//             }
-//         }
-//         else{
-//             //its a file
-//             printf("%4s: %s\n","File",fullname);
-// 						//Add Watcher to file
-// 						if(addWatcher){
-// 							printf("adding watcher here");
-// 						}
-
-//             if (CheckModification == false && is_Markdown(fullname) && if_html_version_exists(fullname)==false)
-//             {
-//                 Pandoc(fullname);
-//             }
-
-//             if (CheckModification == true && file_needs_conversion(fullname))
-//             {
-//                 Pandoc(fullname);
-//                 printf("A modification has been detected and Updated.\n");
-//                 exit(0);
-//             }
-
-//         }
-//     }
-//     closedir(Directory);
-
-//     return true;
-// }
 
 int ReadOptions(struct Arguments *arguments)
 {
@@ -1014,11 +987,12 @@ int ReadOptions(struct Arguments *arguments)
             if (OptionArray[i + 1] == f)
             {
                 printf("\nOption w combined with f Detected...Immediate convertion\n");
-                Observe(true);
+                //Observe(true);
             }else
             {
                 printf("\nOption w Detected.\n");
-                Observe(false);
+                //Observe(false);
+                RecursiveSearch2(".",true);
             }
             
             
