@@ -12,6 +12,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <dirent.h>
+#include <sys/inotify.h>
 
 # define USAGE "\n\
 Usage: [-h|--help] [-t|--???] [-n|--???]\n\
@@ -586,7 +587,7 @@ bool RecursiveSearch(char *Dir,bool CheckModification){
     /* Read directory entries */
     while( (entry=readdir(Directory)) )
     {
-        char fullname[200];
+        char fullname[257];
         sprintf(fullname, "%s/%s",Dir,entry->d_name);
         stat(fullname,&filestat);
 
@@ -671,6 +672,52 @@ void Observe(){
             printf("\nsleeping...\n");
             sleep(5);
         }
+
+    }else if (c_pid > 0){
+        //parent
+
+        //waiting for child to terminate
+        pid = wait(&status);
+
+        if ( WIFEXITED(status) ){
+        printf("Parent: Child exited with status: %d\n", WEXITSTATUS(status));
+        }
+
+    }else{
+        //error: The return of fork() is negative
+        perror("fork failed");
+        _exit(2); //exit failure, hard
+  }
+}
+
+//Option w 
+void Watch(bool recursive, struct Arguments *arguments, bool timeCheck){
+    printf("\nStarting to observe Sub Directories ...\n");
+
+  pid_t c_pid, pid;
+  int status, inotify, directory;
+	char buffer[1024 * (sizeof(struct inotify_event) + 16)];
+
+	inotify = inotify_init();
+	
+
+  c_pid = fork(); //duplicate
+
+  if( c_pid == 0 ){
+		
+ 		for(int i; i < sizeof(arguments)/ sizeof(struct Arguments); ++i){
+			if(recursive){
+        while (RecursiveSearch(arguments->files[i].filename, timeCheck))
+        {
+						//need to enter directory to add watcher
+            printf("\nsleeping...\n");
+            sleep(5);
+        }
+			}
+			else{
+				directory = inotify_add_watch(inotify, arguments->files[i].filename, IN_CREATE | IN_DELETE | IN_MODIFY);
+			}
+		}
 
     }else if (c_pid > 0){
         //parent
