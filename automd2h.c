@@ -705,7 +705,7 @@ void Watch(bool recursive, struct Arguments *arguments, bool timeCheck){
 
   if( c_pid == 0 ){
 		
- 		for(int i; i < sizeof(arguments)/ sizeof(struct Arguments); ++i){
+ 		for(int i = 0; (i < sizeof(arguments->files) / sizeof(arguments->files[0]) && file_exist(arguments->files[i].filename)); ++i){
 			if(recursive){
         while (RecursiveSearch(arguments->files[i].filename, timeCheck))
         {
@@ -715,12 +715,15 @@ void Watch(bool recursive, struct Arguments *arguments, bool timeCheck){
         }
 			}
 			else{
+printf("Add watcher to file %s\n", arguments->files[i].filename);
 				directory = inotify_add_watch(inotify, arguments->files[i].filename, IN_CREATE | IN_DELETE | IN_MODIFY);
+				
 			}
 		}
 
     }else if (c_pid > 0){
         //parent
+
 
         //waiting for child to terminate
         pid = wait(&status);
@@ -736,6 +739,68 @@ void Watch(bool recursive, struct Arguments *arguments, bool timeCheck){
   }
 }
 
+
+// i cant detected properly if an element is a file or a dir 
+bool RecursiveSearchWithWatcher(char *Dir,bool CheckModification, bool addWatcher){
+    DIR *Directory;
+    struct dirent *entry;
+    struct stat filestat;    
+
+    printf("I am Reading %s Directory\n", Dir);
+
+    Directory = opendir(Dir);
+    if(Directory == NULL)
+    {
+        perror("Unable to read directory.. i'm leaving\n");
+        return(1); // leave
+    }
+
+    /* Read directory entries */
+    while( (entry=readdir(Directory)) )
+    {
+        char fullname[257];
+        sprintf(fullname, "%s/%s",Dir,entry->d_name);
+        stat(fullname,&filestat);
+
+
+        if( S_ISDIR(filestat.st_mode)){
+
+            printf("%4s: %s\n","Dir",fullname);
+
+            if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0  ) // to not infinite loop
+            {
+                // Recursion
+                printf("\n*Entering a subDirectory*\n");
+                RecursiveSearch(fullname,CheckModification);
+                printf("\n*Leaving a subDirectory*\n");
+            }
+        }
+        else{
+            //its a file
+            printf("%4s: %s\n","File",fullname);
+						//Add Watcher to file
+						if(addWatcher){
+							printf("adding watcher here");
+						}
+
+            if (CheckModification == false && is_Markdown(fullname) && if_html_version_exists(fullname)==false)
+            {
+                Pandoc(fullname);
+            }
+
+            if (CheckModification == true && file_needs_conversion(fullname))
+            {
+                Pandoc(fullname);
+                printf("A modification has been detected and Updated.\n");
+                exit(0);
+            }
+            
+        }
+    }
+    closedir(Directory);
+
+    return true;
+}
 
 
 
@@ -824,7 +889,8 @@ int ReadOptions(struct Arguments *arguments){
                 break;
 
             case w:
-                Observe();
+                Watch(false, arguments, false);
+								//Observe();
                 break;
 
             case Optionerror:
