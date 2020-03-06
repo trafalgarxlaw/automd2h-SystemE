@@ -160,6 +160,12 @@ bool Filename_is_Valide(char *filename){
     return is_txt(filename) || is_Markdown(filename) || is_HTML(filename);
 }
 
+bool is_directory(char *filename){
+	DIR *d;
+	d = opendir(filename);
+	return d;
+}
+
 /**
  * Option Validation functions.
  */
@@ -701,12 +707,14 @@ void Watch(bool recursive, struct Arguments *arguments, bool timeCheck){
 
 	inotify = inotify_init();
 	
-
+  if(inotify < 0){
+		perror("inotify_init");
+	}
   c_pid = fork(); //duplicate
 
   if( c_pid == 0 ){
 		
- 		for(int i = 0; (i < sizeof(arguments->files) / sizeof(arguments->files[0]) && file_exist(arguments->files[i].filename)); ++i){
+ 		for(int i = 0; (i < arguments->num_files); ++i){
 			if(recursive){
         while (RecursiveSearch(arguments->files[i].filename, timeCheck))
         {
@@ -722,9 +730,13 @@ void Watch(bool recursive, struct Arguments *arguments, bool timeCheck){
 			}
 			length = read(inotify, buffer, 1024 * (sizeof(struct inotify_event) + 16));
 			i = 0;
+			if(length < 0){
+				perror("cant read");
+			}
 			while(i < length){
 				struct inotify_event *event = (struct inotify_event *) &buffer[i];
 				if(event->len){
+					printf("%s il se passe qqch!\n", event->name);
 					if(event->mask & IN_OPEN){
 						printf("%s OPENED!", event->name);
 					}
@@ -920,6 +932,9 @@ int ReadOptions(struct Arguments *arguments){
 int main(int argc, char *argv[])
 {
     printf("\nStarting the program... \n");
+
+	//printf ("%d", is_directory("README.md"));
+	//printf ("%d", is_directory("Directories"));
 
     //printf(USAGE);
     struct Arguments *arguments = parse_arguments(argc, argv); //takes the arguments in the structure
