@@ -770,8 +770,8 @@ void watch(char *Dir,int *wdd[]){
                 event = ( struct inotify_event * ) &buffer[ i ];
 
                 if ( event->len ) {
-                    if (event->wd == wd[0]) printf("%s\n", "In /tmp/inotify1: ");
-                    else printf("%s\n", "In /tmp/inotify2: ");
+                    if (event->wd == wd[0]) printf("In %s\n", Dir);
+                    else continue;
                     if ( event->mask & IN_CREATE ) {
                         if ( event->mask & IN_ISDIR ) {
                             printf( "The directory %s was created.\n", event->name ); 
@@ -831,10 +831,6 @@ bool RecursiveSearch2(char *Dir, bool CheckModification)
         }
     
     }
-
-
-
-    exit( 0 );
     return true;
 }
 //option w
