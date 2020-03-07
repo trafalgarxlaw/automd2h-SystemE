@@ -538,6 +538,19 @@ void print_current_directory(char *currentDir, bool checkTime)
     printf("\n");
 }
 
+void print_arguments_files(struct Arguments *arguments, bool checkTime)
+{
+	for (int i = 0; i < arguments->num_files; i++)
+    {
+		if(is_directory(arguments->files[i].filename)){
+			print_current_directory(arguments->files[i].filename, checkTime);
+		}
+		else{
+			printf("%s\n", arguments->files[i].filename);
+		}
+	}
+}
+
 // To review
 void free_arguments(struct Arguments *arguments)
 {
@@ -928,13 +941,15 @@ int lauchProgram(struct Arguments *arguments)
             if (OptionArray[i + 1] == t)
             {
                 //printf("\nOption n combined with t Detected.\n");
-                print_current_directory(".", true);
+                //print_current_directory(".", true);
+				print_arguments_files(arguments, true);
                 i++; // because we already considered the next option (which is t)
             }
             else
             {
                 //printf("\nOption n Detected.\n");
-                print_current_directory(".", false);
+				print_arguments_files(arguments, false);
+                //print_current_directory(".", false);
             }
             break;
 
