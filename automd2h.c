@@ -742,10 +742,11 @@ bool RecursiveSearch(char *Dir, bool CheckModification)
     return true;
 }
 
-void watch(char *Dir,int *wd[]){
+void watch(char *Dir,int *wdd[]){
+    printf("starting watching..\n");
             int length, i = 0;
             int fd;
-            //int wd[2];
+            int wd[2];
             char buffer[BUF_LEN];
 
             fd = inotify_init();
@@ -819,8 +820,8 @@ bool RecursiveSearch2(char *Dir, bool CheckModification)
             {
                 // Recursion
                 printf("\n*Entering a subDirectory*\n");
-                RecursiveSearch2(fullname, CheckModification);
                 watch(Dir,&wd);
+                RecursiveSearch2(fullname, CheckModification);
                 printf("\n*Leaving a subDirectory*\n");
             }
 
