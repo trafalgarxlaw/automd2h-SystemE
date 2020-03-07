@@ -297,15 +297,18 @@ struct Arguments *parse_arguments(int argc, char *argv[])
         }
         else if (arguments->num_options == 3)
         {
-            /* code */
-        }
+            arguments->option1 = option_detection(argv[1]);
+            arguments->option2 = option_detection(argv[2]);
+            arguments->option3 = option_detection(argv[3]);
+            arguments->status = OK;        }
         else if (arguments->num_options == 4)
         {
-            /* code */
+            arguments->option1 = option_detection(argv[1]);
+            arguments->option2 = option_detection(argv[2]);
+            arguments->option3 = option_detection(argv[3]);
+            arguments->option4 = option_detection(argv[4]);
+            arguments->status = OK;            
         }
-
-        //next argv
-        //xs arguments->argv_index++;
 
         // ---File detection Part ---
     }
@@ -468,24 +471,27 @@ bool file_needs_conversion(char *filename)
     char *newFileName = replaceWord(filename, ".md", ".html");
 
     printf("\nChecking if %s needs to be converted\n", filename);
+    //Checking if the given file exists and if its a .md
     if (file_exist(filename) && is_Markdown(filename))
     {
-
+        //getting the file stats
         if (stat(filename, &attrib) == 0)
         {
-            //ok
-            if (file_exist(newFileName))
-            { //if the converted file alredy exists
-                printf("here\n");
+            //if there is no errors, check if his htmk version exists
+            if (file_exist(newFileName)){ 
+                //if the html file alredy exists, we proceed 
                 if (stat(newFileName, &newAttrib) == 0)
                 {
+                    // Verify if there is a newer version of the source file
                     if (has_new_doc_version(attrib.st_mtime, newAttrib.st_mtime))
                     {
+                        //If there is, a convertion is needed
                         convert = true;
                         printf("..Convertion needed\n");
                     }
                     else
                     {
+                        //if not, no convertion needed.
                         printf("..no convertion needed\n");
                     }
                 }
