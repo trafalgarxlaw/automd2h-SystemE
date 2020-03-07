@@ -635,7 +635,7 @@ int Convert_Directory( char *Dir){
     struct dirent *entry;
     struct stat filestat;
 
-    printf("I am converting (%s) Directory\n", Dir);
+    //printf("I am converting (%s) Directory\n", Dir);
 
     Directory = opendir(Dir);
     if (Directory == NULL)
@@ -654,12 +654,12 @@ int Convert_Directory( char *Dir){
         if (S_ISDIR(filestat.st_mode))
         {
 
-            printf("%4s: %s\n", "Dir", fullname);
+            //printf("%4s: %s\n", "Dir", fullname);
         }
         else
         {
             //its a file
-            printf("%4s: %s\n", "File", fullname);
+            //printf("%4s: %s\n", "File", fullname);
             if (is_Markdown(fullname) && if_html_version_exists(fullname) == false)
             {
                 Pandoc(fullname);
@@ -702,7 +702,7 @@ bool Dir_is_Visited(char *Dir,struct VisitedDirectories *Directories){
     bool isVisited = false;
     for (int i = 0; i < Directories->num_dir_visited; i++)
     {
-        printf("comparing %s and %s\n",Dir,Directories->DirectoriesTable[i].name);
+        //printf("comparing %s and %s\n",Dir,Directories->DirectoriesTable[i].name);
         if (strcmp(Dir,Directories->DirectoriesTable[i].name))
         {
             isVisited = true;
@@ -775,7 +775,7 @@ void Watch_fork(char *Dir,struct VisitedDirectories *Directories){
         return 1;
     }else
     {
-        printf("adding %s Dir to the list\n",Dir);
+        //printf("adding %s Dir to the list\n",Dir);
         // printf("Visited dir : %d\n",Directories->num_dir_visited);
         struct Directory directory;
         directory.name = Dir;
