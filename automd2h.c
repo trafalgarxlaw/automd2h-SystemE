@@ -11,7 +11,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <dirent.h>
-#include <linux/inotify.h>
+#include <sys/inotify.h>
 
 #define EVENT_SIZE  ( sizeof (struct inotify_event) )
 #define BUF_LEN     ( 1024 * ( EVENT_SIZE + 16 ) )
@@ -701,13 +701,13 @@ bool Dir_is_Visited(char *Dir,struct VisitedDirectories *Directories){
 
 int watch(char *Dir,struct VisitedDirectories *Directories){
 
-    if (Dir_is_Visited(Dir,Directories))
+    if (Dir_is_Visited(Dir,Directories)==true)
     {
         return 1;
     }else
     {
         printf("adding %s Dir to the list\n",Dir);
-        printf("Visited dir : %d\n",Directories->num_dir_visited);
+        // printf("Visited dir : %d\n",Directories->num_dir_visited);
         struct Directory directory;
         directory.name = Dir;
         Directories->DirectoriesTable[Directories->num_dir_visited]=directory;
@@ -758,9 +758,7 @@ int watch(char *Dir,struct VisitedDirectories *Directories){
 
 void Watch_fork(char *Dir,struct VisitedDirectories *Directories){
 
-    pid_t c_pid, pid;
-    int status;
-
+    pid_t c_pid;
     c_pid = fork(); //duplicate
 
     if (c_pid == 0)
@@ -782,6 +780,7 @@ void Watch_fork(char *Dir,struct VisitedDirectories *Directories){
 }
 bool RecursiveSearch(char *Dir, bool AddWatcher,struct VisitedDirectories *Directories)
 {
+    printf("Visited dir : %d\n",Directories->num_dir_visited);
     //Directory stuff
     DIR *Directory;
     struct dirent *entry;
@@ -824,46 +823,20 @@ void Observe(bool Immediate_Convertion)
 {
     printf("\nStarting to observe Sub Directories ...\n");
 
-    pid_t c_pid, pid;
-    int status;
-
-    struct VisitedDirectories Directories;
-    Directories.num_dir_visited=0;
-
-    c_pid = fork(); //duplicate
-
-    if (c_pid == 0)
-    {
+        struct VisitedDirectories *Directories = malloc(sizeof(struct VisitedDirectories));
+        Directories->num_dir_visited=0;
         //This will converte immediatly any files
         if (Immediate_Convertion)
         {
-            RecursiveSearch(".", false,&Directories);
+            RecursiveSearch(".", false,Directories);
         }
         
-        while (RecursiveSearch(".", true,&Directories))
+        while (RecursiveSearch(".", true,Directories))
         {
+            
             printf("\nsleeping...\n");
             sleep(5);
         }
-    }
-    else if (c_pid > 0)
-    {
-        //parent
-
-        //waiting for child to terminate
-        pid = wait(&status);
-
-        if (WIFEXITED(status))
-        {
-            printf("Parent: Child exited with status: %d\n", WEXITSTATUS(status));
-        }
-    }
-    else
-    {
-        //error: The return of fork() is negative
-        perror("fork failed");
-        _exit(2); //exit failure, hard
-    }
 }
 
 
