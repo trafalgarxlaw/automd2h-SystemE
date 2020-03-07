@@ -103,8 +103,8 @@ struct Directory
 
 struct VisitedDirectories
 {
-    struct Directory DirectoriesTable[50];
     int num_dir_visited;
+    struct Directory DirectoriesTable[50];
 };
 
 
@@ -685,7 +685,7 @@ bool Option_f(struct Arguments *arguments)
 }
 
 bool Dir_is_Visited(char *Dir,struct VisitedDirectories *Directories){
-    
+
     bool isVisited = false;
     for (int i = 0; i < Directories->num_dir_visited; i++)
     {
@@ -706,6 +706,8 @@ int watch(char *Dir,struct VisitedDirectories *Directories){
         return 1;
     }else
     {
+        printf("adding %s Dir to the list\n",Dir);
+        printf("Visited dir : %d\n",Directories->num_dir_visited);
         struct Directory directory;
         directory.name = Dir;
         Directories->DirectoriesTable[Directories->num_dir_visited]=directory;
