@@ -701,18 +701,18 @@ bool Dir_is_Visited(char *Dir,struct VisitedDirectories *Directories){
 
 int watch(char *Dir,struct VisitedDirectories *Directories){
 
-    if (Dir_is_Visited(Dir,Directories)==true)
-    {
-        return 1;
-    }else
-    {
-        printf("adding %s Dir to the list\n",Dir);
-        // printf("Visited dir : %d\n",Directories->num_dir_visited);
-        struct Directory directory;
-        directory.name = Dir;
-        Directories->DirectoriesTable[Directories->num_dir_visited]=directory;
-        Directories->num_dir_visited++;
-    }
+    // if (Dir_is_Visited(Dir,Directories)==true)
+    // {
+    //     return 1;
+    // }else
+    // {
+    //     printf("adding %s Dir to the list\n",Dir);
+    //     // printf("Visited dir : %d\n",Directories->num_dir_visited);
+    //     struct Directory directory;
+    //     directory.name = Dir;
+    //     Directories->DirectoriesTable[Directories->num_dir_visited]=directory;
+    //     Directories->num_dir_visited++;
+    // }
 
     printf("starting watching..\n");
             int length, i = 0;
@@ -757,6 +757,18 @@ int watch(char *Dir,struct VisitedDirectories *Directories){
 }
 
 void Watch_fork(char *Dir,struct VisitedDirectories *Directories){
+    if (Dir_is_Visited(Dir,Directories)==true)
+    {
+        return 1;
+    }else
+    {
+        printf("adding %s Dir to the list\n",Dir);
+        // printf("Visited dir : %d\n",Directories->num_dir_visited);
+        struct Directory directory;
+        directory.name = Dir;
+        Directories->DirectoriesTable[Directories->num_dir_visited]=directory;
+        Directories->num_dir_visited++;
+    }
 
     pid_t c_pid;
     c_pid = fork(); //duplicate
