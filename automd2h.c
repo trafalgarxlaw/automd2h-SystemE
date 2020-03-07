@@ -690,7 +690,7 @@ bool Dir_is_Visited(char *Dir,struct VisitedDirectories *Directories){
     for (int i = 0; i < Directories->num_dir_visited; i++)
     {
         printf("comparing %s and %s\n",Dir,Directories->DirectoriesTable[i].name);
-        if (strcmp(Dir,Directories->DirectoriesTable[i].name))
+        if (strcmp(Dir,Directories->DirectoriesTable[i].name)==0)
         {
             isVisited = true;
         }
@@ -759,6 +759,7 @@ int watch(char *Dir,struct VisitedDirectories *Directories){
 void Watch_fork(char *Dir,struct VisitedDirectories *Directories){
     if (Dir_is_Visited(Dir,Directories)==true)
     {
+        printf("%s is already visited\n",Dir);
         return 1;
     }else
     {
@@ -835,15 +836,15 @@ void Observe(bool Immediate_Convertion)
 {
     printf("\nStarting to observe Sub Directories ...\n");
 
-        struct VisitedDirectories *Directories = malloc(sizeof(struct VisitedDirectories));
-        Directories->num_dir_visited=0;
+        struct VisitedDirectories Directories;
+        Directories.num_dir_visited=0;
         //This will converte immediatly any files
         if (Immediate_Convertion)
         {
-            RecursiveSearch(".", false,Directories);
+            RecursiveSearch(".", false,&Directories);
         }
         
-        while (RecursiveSearch(".", true,Directories))
+        while (RecursiveSearch(".", true,&Directories))
         {
             
             printf("\nsleeping...\n");
