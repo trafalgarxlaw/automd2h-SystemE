@@ -518,7 +518,7 @@ void print_current_directory(char *currentDir, bool checkTime)
 {
     struct dirent *d;
 
-    printf("printing current directory...\n");
+    //printf("printing current directory...\n");
     DIR *dir = opendir(currentDir);
     if (dir == NULL)
     {
@@ -927,13 +927,13 @@ int lauchProgram(struct Arguments *arguments)
             //if combined with t
             if (OptionArray[i + 1] == t)
             {
-                printf("\nOption n combined with t Detected.\n");
+                //printf("\nOption n combined with t Detected.\n");
                 print_current_directory(".", true);
                 i++; // because we already considered the next option (which is t)
             }
             else
             {
-                printf("\nOption n Detected.\n");
+                //printf("\nOption n Detected.\n");
                 print_current_directory(".", false);
             }
             break;
