@@ -742,7 +742,8 @@ bool RecursiveSearch(char *Dir, bool CheckModification)
     return true;
 }
 
-void watch(char *Dir,int *wdd[]){
+
+void watch(char *Dir){
     printf("starting watching..\n");
             int length, i = 0;
             int fd;
@@ -756,9 +757,9 @@ void watch(char *Dir,int *wdd[]){
             }
             wd[0] = inotify_add_watch( fd, Dir, IN_CREATE);
             //wd[1] = inotify_add_watch (fd, "/tmp/inotify2", IN_CREATE);
-            bool SomethingChanged=false;
+            //bool SomethingChanged=false;
 
-            while (SomethingChanged==false){
+            while (true){
                 struct inotify_event *event;
 
                 length = read( fd, buffer, BUF_LEN );  
@@ -775,10 +776,10 @@ void watch(char *Dir,int *wdd[]){
                     if ( event->mask & IN_CREATE ) {
                         if ( event->mask & IN_ISDIR ) {
                             printf( "The directory %s was created.\n", event->name ); 
-                            SomethingChanged = true;      
+                            //SomethingChanged = true;      
                         }
                         else {
-                            SomethingChanged=true;
+                            //SomethingChanged=true;
                             printf( "The file %s was created.\n", event->name );
                         }
                     }
@@ -788,7 +789,37 @@ void watch(char *Dir,int *wdd[]){
             //( void ) inotify_rm_watch( fd, wd[1]);
             ( void ) close( fd );
 }
-bool RecursiveSearch2(char *Dir, bool CheckModification)
+
+void Watch_fork(char *Dir){
+
+    pid_t c_pid, pid;
+    int status;
+
+    c_pid = fork(); //duplicate
+
+    if (c_pid == 0)
+    {
+        watch(Dir);
+    }
+    else if (c_pid > 0)
+    {
+        //parent
+        //waiting for child to terminate
+        // pid = wait(&status);
+        // if (WIFEXITED(status))
+        // {
+        //     printf("Parent: Child exited with status: %d\n", WEXITSTATUS(status));
+        // }
+    }
+    else
+    {
+        //error: The return of fork() is negative
+        perror("fork failed");
+        _exit(2); //exit failure, hard
+    }
+
+}
+bool RecursiveSearch2(char *Dir, bool AddWatcher)
 {
     //Directory stuff
     DIR *Directory;
@@ -808,8 +839,7 @@ bool RecursiveSearch2(char *Dir, bool CheckModification)
         perror("Unable to read directory.. i'm leaving\n");
         return (1); // leave
     }
-    watch(Dir,&wd);
-
+    Watch_fork(Dir);
     /* Read directory entries */
     while ((entry = readdir(Directory))){
         char fullname[257];
@@ -821,7 +851,7 @@ bool RecursiveSearch2(char *Dir, bool CheckModification)
             {
                 // Recursion
                 printf("\n*Entering a subDirectory* : %s \n",entry->d_name);
-                RecursiveSearch2(fullname, CheckModification);
+                RecursiveSearch2(fullname, AddWatcher);
                 printf("\n*Leaving a subDirectory*\n");
             }
 
@@ -854,12 +884,12 @@ void Observe(bool Immediate_Convertion)
         //This will converte immediatly any files
         if (Immediate_Convertion)
         {
-            RecursiveSearch(".", false);
+            RecursiveSearch2(".", false);
         }
         
 
 
-        while (RecursiveSearch(".", true))
+        while (RecursiveSearch2(".", true))
         {
             printf("\nsleeping...\n");
             sleep(5);
@@ -988,8 +1018,7 @@ int ReadOptions(struct Arguments *arguments)
             }else
             {
                 printf("\nOption w Detected.\n");
-                //Observe(false);
-                RecursiveSearch2(".",true);
+                Observe(false);
             }
             
             
