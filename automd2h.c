@@ -336,7 +336,10 @@ struct Arguments *parse_arguments(int argc, char *argv[])
         }
         else
         {
-            arguments->status = WRONG_VALUE;
+		perror("ENOENT");
+		exit(0);
+            //arguments->status = WRONG_VALUE;
+
         }
         //next argument
         arguments->argv_index++;
@@ -551,7 +554,7 @@ void Pandoc(char *file)
     else if (pid == 0)
     {
 
-        printf("Hello from Child!\n");
+        //printf("Hello from Child!\n");
         // Pandoc will run here.
 
         //calling pandoc
@@ -573,12 +576,6 @@ void Pandoc(char *file)
         //Error Handeler
         fprintf(stdout, "pandoc failed\n");
         exit(1);
-    }
-    // parent process because return value non-zero.
-    else
-    {
-
-        printf("Hello from Parent!\n");
     }
 }
 
