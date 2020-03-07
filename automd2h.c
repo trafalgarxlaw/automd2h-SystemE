@@ -317,8 +317,9 @@ struct Arguments *parse_arguments(int argc, char *argv[])
 
             if (is_Markdown(argv[arguments->argv_index]))
             {
+                strncpy(arguments->files[arguments->num_files].filename, argv[arguments->argv_index], sizeof(arguments->files[arguments->num_files].filename));
+                arguments->files[arguments->num_files].filename[sizeof(arguments->files[arguments->num_files].filename) - 1] = '\0';
                 //printf("You want me to convert a md file (%s) \n",argv[arguments->argv_index]);
-                arguments->files[arguments->num_files].filename = argv[arguments->argv_index];
                 arguments->files[arguments->num_files].format = markdown;
                 arguments->num_files++;
             }
@@ -326,24 +327,24 @@ struct Arguments *parse_arguments(int argc, char *argv[])
             if (is_HTML(argv[arguments->argv_index]))
             {
                 //printf("You want me to convert a html file \n");
-                arguments->files[arguments->num_files].filename = argv[arguments->argv_index];
-                arguments->files[arguments->num_files].format = html;
+                strncpy(arguments->files[arguments->num_files].filename, argv[arguments->argv_index], sizeof(arguments->files[arguments->num_files].filename));
+                arguments->files[arguments->num_files].filename[sizeof(arguments->files[arguments->num_files].filename) - 1] = '\0';                arguments->files[arguments->num_files].format = html;
                 arguments->num_files++;
             }
 
             if (is_txt(argv[arguments->argv_index]))
             {
                 //printf("You want me to convert a txt file \n");
-                arguments->files[arguments->num_files].filename = argv[arguments->argv_index];
-                arguments->files[arguments->num_files].format = txt;
+                strncpy(arguments->files[arguments->num_files].filename, argv[arguments->argv_index], sizeof(arguments->files[arguments->num_files].filename));
+                arguments->files[arguments->num_files].filename[sizeof(arguments->files[arguments->num_files].filename) - 1] = '\0';                arguments->files[arguments->num_files].format = txt;
                 arguments->num_files++;
             }
         }
         else if (is_directory(argv[arguments->argv_index]))
         {
             //printf("You want me to convert files inside (%s) directory \n", argv[arguments->argv_index]);
-            arguments->files[arguments->num_files].filename = argv[arguments->argv_index];
-            arguments->files[arguments->num_files].format = Directory;
+                strncpy(arguments->files[arguments->num_files].filename, argv[arguments->argv_index], sizeof(arguments->files[arguments->num_files].filename));
+                arguments->files[arguments->num_files].filename[sizeof(arguments->files[arguments->num_files].filename) - 1] = '\0';            arguments->files[arguments->num_files].format = Directory;
             arguments->num_files++;
         }
         else
@@ -795,7 +796,9 @@ bool RecursiveSearch(char *Dir, bool AddWatcher,struct VisitedDirectories *Direc
         perror("Unable to read directory.. i'm leaving\n");
         return (1); // leave
     }
-    Watch_fork(Dir,Directories);
+
+    if (AddWatcher){Watch_fork(Dir,Directories);}
+
     /* Read directory entries */
     while ((entry = readdir(Directory))){
         char fullname[257];
@@ -929,7 +932,7 @@ int lauchProgram(struct Arguments *arguments)
 
         case r:
             printf("\nStarting Recursive Research..\n");
-            //RecursiveSearch(".", 0,false,0);
+            RecursiveSearch(".", false,NULL);
             break;
 
         case w:
