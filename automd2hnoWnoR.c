@@ -160,17 +160,22 @@ char *replaceWord(const char *s, const char *oldW, const char *newW)
  * File Validation functions.
  */
 
+char *get_filename_ext(char *filename){
+	char *dot = strrchr(filename, '.');
+	return dot + 1;
+}
+
 bool is_HTML(char *filename)
 {
-    return strstr(filename, ".html") != NULL;
+    return strstr(get_filename_ext(filename), "html") != NULL;
 }
 bool is_Markdown(char *filename)
 {
-    return strstr(filename, ".md") != NULL;
+    return strstr(get_filename_ext(filename), "md") != NULL;
 }
 bool is_txt(char *filename)
 {
-    return strstr(filename, ".txt") != NULL;
+    return strstr(get_filename_ext(filename), "txt") != NULL;
 }
 bool Filename_is_Valide(char *filename)
 {
@@ -183,6 +188,7 @@ bool is_directory(char *filename)
     d = opendir(filename);
     return d;
 }
+
 
 /**
  * Option Validation functions.
