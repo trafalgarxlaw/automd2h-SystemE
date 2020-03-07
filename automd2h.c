@@ -709,7 +709,9 @@ bool Dir_is_Visited(char *Dir,struct VisitedDirectories *Directories){
     }
     return isVisited;
 }
-void Delete_Child(pid_t c_pid,int sec){
+
+//Need to fork this function
+void Delete_Child(pid_t c_pid_To_Delete,int sec){
     
         // It will be watching for an event in the current Directory for a certain amount of time
         time_t endwait;
@@ -724,7 +726,7 @@ void Delete_Child(pid_t c_pid,int sec){
         }
         printf("*****************Deleted..*************\n");
         //killing the child after a certain delay.
-        kill(c_pid, SIGKILL);
+        kill(c_pid_To_Delete, SIGKILL);
 }
 // Listen in the current directories
 int watch(char *Dir){
@@ -801,8 +803,7 @@ int Watch_fork(char *Dir,struct VisitedDirectories *Directories){
     else if (c_pid > 0)//parent
     {
         //Deleting the child after 3 seconds
-        Delete_Child(c_pid,3);
-
+        Delete_Child(c_pid,10);
     }
     else
     {
@@ -878,7 +879,7 @@ void Observe(bool Immediate_Convertion)
         while (RecursiveSearch(".", true,&Directories))
         {
             printf("\nsleeping...\n");
-            sleep(5);
+            sleep(2);
         }
 }
 
@@ -984,7 +985,7 @@ int lauchProgram(struct Arguments *arguments)
             }else
             {
                 printf("\nOption w Detected.\n");
-                Observe(false);
+                //Observe(false);
             }
             
             
