@@ -98,7 +98,7 @@ struct Arguments
 
 struct Directory
 {
-    char *name[100];
+    char name[100];
 };
 
 struct VisitedDirectories
@@ -689,8 +689,8 @@ bool Dir_is_Visited(char *Dir,struct VisitedDirectories *Directories){
     bool isVisited = false;
     for (int i = 0; i < Directories->num_dir_visited; i++)
     {
-        printf("comparing %s and %s, i = %d\n",Dir,*Directories->DirectoriesTable[i].name,i);
-        if (strcmp(Dir,*Directories->DirectoriesTable[i].name)==0)
+        printf("comparing %s and %s, i = %d\n",Dir,Directories->DirectoriesTable[i].name,i);
+        if (strcmp(Dir,Directories->DirectoriesTable[i].name)==0)
         {
             isVisited = true;
         }
@@ -751,9 +751,8 @@ int Watch_fork(char *Dir,struct VisitedDirectories *Directories){
     }else
     {
         printf("adding %s Dir to the list at the positon : %d\n",Dir,Directories->num_dir_visited);
-        // printf("Visited dir : %d\n",Directories->num_dir_visited);
         struct Directory directory;
-        strncpy(*directory.name, Dir, sizeof(directory.name));
+        strncpy(directory.name, Dir, sizeof(directory.name));
         directory.name[sizeof(directory.name) - 1] = '\0';
         Directories->DirectoriesTable[Directories->num_dir_visited]=directory;
         Directories->num_dir_visited++;
