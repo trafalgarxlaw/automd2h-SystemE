@@ -685,9 +685,11 @@ bool Option_f(struct Arguments *arguments)
 }
 
 bool Dir_is_Visited(char *Dir,struct VisitedDirectories *Directories){
+    
     bool isVisited = false;
     for (int i = 0; i < Directories->num_dir_visited; i++)
     {
+        printf("comparing %s and %s\n",Dir,Directories->DirectoriesTable[i].name);
         if (strcmp(Dir,Directories->DirectoriesTable[i].name))
         {
             isVisited = true;
