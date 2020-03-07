@@ -726,7 +726,7 @@ int watch(char *Dir){
 
             time_t endwait;
             time_t start = time(NULL);
-            time_t seconds = 3; // end loop after this time has elapsed
+            time_t seconds = 5; // end loop after this time has elapsed
             endwait = start + seconds;
 
             //Adding to the watch list
@@ -736,10 +736,10 @@ int watch(char *Dir){
             while (start < endwait){
                 struct inotify_event *event;
 
-                // length = read( fd, buffer, BUF_LEN );  
-                // if ( length < 0 ) {
-                //     perror( "read" );
-                // } 
+                length = read( fd, buffer, BUF_LEN );  
+                if ( length < 0 ) {
+                    perror( "read" );
+                } 
                 event = ( struct inotify_event * ) &buffer[ i ];
 
                 if ( event->len ) {
@@ -789,7 +789,6 @@ int Watch_fork(char *Dir,struct VisitedDirectories *Directories){
     {
         //the child will be watching this unvisited directory...
         watch(Dir);
-        printf("*****************Deleted..*************\n");
         //killing the child after a certain delay.
         kill(c_pid, SIGKILL);
     }
@@ -870,7 +869,7 @@ void Observe(bool Immediate_Convertion)
         while (RecursiveSearch(".", true,&Directories))
         {
             printf("\nsleeping...\n");
-            sleep(5);
+            sleep(1);
         }
 }
 
