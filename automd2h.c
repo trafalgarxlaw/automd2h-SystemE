@@ -675,69 +675,6 @@ bool Option_f(struct Arguments *arguments)
     return arguments->option1 == f || arguments->option2 == f || arguments->option3 == f || arguments->option4 == f;
 }
 
-// The sys/stat.h header file also defines macros to test for file type, which work similarly to the ctype.h macros that examine characters. For a directory entry, the S_ISDIR macro is used
-// The stat() function requires two arguments. The first is the name (or pathname) to a filename. The second argument is the address of a stat structure. This structure is filled with oodles of good info about a directory entry and it’s consistent across all file systems.
-
-bool RecursiveSearch(char *Dir, bool CheckModification)
-{
-    DIR *Directory;
-    struct dirent *entry;
-    struct stat filestat;
-
-    printf("I am Reading %s Directory\n", Dir);
-
-    Directory = opendir(Dir);
-    if (Directory == NULL)
-    {
-        perror("Unable to read directory.. i'm leaving\n");
-        return (1); // leave
-    }
-
-    /* Read directory entries */
-    while ((entry = readdir(Directory)))
-    {
-        char fullname[257];
-        sprintf(fullname, "%s/%s", Dir, entry->d_name);
-        stat(fullname, &filestat);
-
-        if (S_ISDIR(filestat.st_mode))
-        {
-            //its a dir
-
-            printf("%4s: %s\n", "Dir", fullname);
-
-            if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) // to not infinite loop
-            {
-                // Recursion
-                printf("\n*Entering a subDirectory*\n");
-                RecursiveSearch(fullname, CheckModification);
-                printf("\n*Leaving a subDirectory*\n");
-            }
-        }
-        else
-        {
-            //its a file
-            printf("%4s: %s\n", "File", fullname);
-
-            if (CheckModification == false && is_Markdown(fullname) && if_html_version_exists(fullname) == false)
-            {
-                Pandoc(fullname);
-            }
-
-            if (CheckModification == true && file_needs_conversion(fullname))
-            {
-                Pandoc(fullname);
-                printf("A modification has been detected and Updated.\n");
-                exit(0);
-            }
-        }
-    }
-    closedir(Directory);
-
-    return true;
-}
-
-
 void watch(char *Dir){
     printf("starting watching..\n");
             int length, i = 0;
@@ -804,7 +741,7 @@ void Watch_fork(char *Dir){
     }
 
 }
-bool RecursiveSearch2(char *Dir, bool AddWatcher)
+bool RecursiveSearch(char *Dir, bool AddWatcher)
 {
     //Directory stuff
     DIR *Directory;
@@ -834,7 +771,7 @@ bool RecursiveSearch2(char *Dir, bool AddWatcher)
             {
                 // Recursion
                 printf("\n*Entering a subDirectory* : %s \n",entry->d_name);
-                RecursiveSearch2(fullname, AddWatcher);
+                RecursiveSearch(fullname, AddWatcher);
                 printf("\n*Leaving a subDirectory*\n");
             }
 
@@ -861,10 +798,10 @@ void Observe(bool Immediate_Convertion)
         //This will converte immediatly any files
         if (Immediate_Convertion)
         {
-            RecursiveSearch2(".", false);
+            RecursiveSearch(".", false);
         }
         
-        while (RecursiveSearch2(".", true))
+        while (RecursiveSearch(".", true))
         {
             printf("\nsleeping...\n");
             sleep(5);
