@@ -266,7 +266,7 @@ void initialise_Arguments(struct Arguments *arguments)
 struct Arguments *parse_arguments(int argc, char *argv[])
 {
 
-    printf("Parsing Arguments..\n");
+    //printf("Parsing Arguments..\n");
 
     struct Arguments *arguments = malloc(sizeof(struct Arguments));
     initialise_Arguments(arguments);
@@ -317,7 +317,7 @@ struct Arguments *parse_arguments(int argc, char *argv[])
 
             if (is_Markdown(argv[arguments->argv_index]))
             {
-                printf("You want me to convert a md file (%s) \n",argv[arguments->argv_index]);
+                //printf("You want me to convert a md file (%s) \n",argv[arguments->argv_index]);
                 arguments->files[arguments->num_files].filename = argv[arguments->argv_index];
                 arguments->files[arguments->num_files].format = markdown;
                 arguments->num_files++;
@@ -325,7 +325,7 @@ struct Arguments *parse_arguments(int argc, char *argv[])
 
             if (is_HTML(argv[arguments->argv_index]))
             {
-                printf("You want me to convert a html file \n");
+                //printf("You want me to convert a html file \n");
                 arguments->files[arguments->num_files].filename = argv[arguments->argv_index];
                 arguments->files[arguments->num_files].format = html;
                 arguments->num_files++;
@@ -333,7 +333,7 @@ struct Arguments *parse_arguments(int argc, char *argv[])
 
             if (is_txt(argv[arguments->argv_index]))
             {
-                printf("You want me to convert a txt file \n");
+                //printf("You want me to convert a txt file \n");
                 arguments->files[arguments->num_files].filename = argv[arguments->argv_index];
                 arguments->files[arguments->num_files].format = txt;
                 arguments->num_files++;
@@ -341,7 +341,7 @@ struct Arguments *parse_arguments(int argc, char *argv[])
         }
         else if (is_directory(argv[arguments->argv_index]))
         {
-            printf("You want me to convert files inside (%s) directory \n", argv[arguments->argv_index]);
+            //printf("You want me to convert files inside (%s) directory \n", argv[arguments->argv_index]);
             arguments->files[arguments->num_files].filename = argv[arguments->argv_index];
             arguments->files[arguments->num_files].format = Directory;
             arguments->num_files++;
@@ -552,7 +552,7 @@ void Print_num_Options(struct Arguments *arguments)
 void Pandoc(char *file)
 {
 
-    printf("Pandoc is trying to convert the file...\n");
+    //printf("Pandoc is trying to convert the file...\n");
 
     // Forking
     pid_t pid;
@@ -999,11 +999,11 @@ int main(int argc, char *argv[])
     {
 
         // All good
-        printf("\n");
-        print_args(arguments);
-        printf("\n");
+        //printf("\n");
+        //print_args(arguments);
+        //printf("\n");
 
-        Print_num_Options(arguments);
+        //Print_num_Options(arguments);
         lauchProgram(arguments);
     }
 
