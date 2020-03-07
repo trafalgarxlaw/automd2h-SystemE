@@ -959,7 +959,7 @@ int lauchProgram(struct Arguments *arguments)
 
 int main(int argc, char *argv[])
 {
-    printf("\nStarting the program... \n");
+    //printf("\nStarting the program... \n");
 
     //printf(USAGE);
     struct Arguments *arguments = parse_arguments(argc, argv); //takes the arguments in the structure
