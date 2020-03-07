@@ -709,6 +709,23 @@ bool Dir_is_Visited(char *Dir,struct VisitedDirectories *Directories){
     }
     return isVisited;
 }
+void Delete_Child(pid_t c_pid,int sec){
+    
+        // It will be watching for an event in the current Directory for a certain amount of time
+        time_t endwait;
+        time_t start = time(NULL);
+        time_t seconds = sec; // end loop after this time has elapsed
+        endwait = start + seconds;
+
+        while (start < endwait){
+
+            sleep(1);   // sleep 1s.
+            start = time(NULL);
+        }
+        printf("*****************Deleted..*************\n");
+        //killing the child after a certain delay.
+        kill(c_pid, SIGKILL);
+}
 // Listen in the current directories
 int watch(char *Dir){
 
@@ -724,16 +741,9 @@ int watch(char *Dir){
                 perror( "inotify_init" );
             }
 
-            time_t endwait;
-            time_t start = time(NULL);
-            time_t seconds = 5; // end loop after this time has elapsed
-            endwait = start + seconds;
-
             //Adding to the watch list
             wd[0] = inotify_add_watch( fd, Dir, IN_CREATE);
-
-            // It will be watching for an event in the current Directory for a certain amount of time
-            while (start < endwait){
+            while (true){
                 struct inotify_event *event;
 
                 length = read( fd, buffer, BUF_LEN );  
@@ -754,8 +764,6 @@ int watch(char *Dir){
                         }
                     }
                 }
-                sleep(1);   // sleep 1s.
-                start = time(NULL);
             }
             ( void ) inotify_rm_watch( fd, wd[0] );
             ( void ) close( fd );
@@ -789,13 +797,12 @@ int Watch_fork(char *Dir,struct VisitedDirectories *Directories){
     {
         //the child will be watching this unvisited directory...
         watch(Dir);
-        //killing the child after a certain delay.
-        kill(c_pid, SIGKILL);
     }
-    else if (c_pid > 0)
+    else if (c_pid > 0)//parent
     {
-        //parent
-        //sleep(1);
+        //Deleting the child after 3 seconds
+        Delete_Child(c_pid,3);
+
     }
     else
     {
@@ -803,6 +810,8 @@ int Watch_fork(char *Dir,struct VisitedDirectories *Directories){
         perror("fork failed");
         _exit(2); //exit failure, hard
     }
+
+
     return 0;
 
 }
@@ -869,7 +878,7 @@ void Observe(bool Immediate_Convertion)
         while (RecursiveSearch(".", true,&Directories))
         {
             printf("\nsleeping...\n");
-            sleep(1);
+            sleep(5);
         }
 }
 
