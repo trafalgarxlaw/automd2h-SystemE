@@ -98,7 +98,7 @@ struct Arguments
 
 struct Directory
 {
-    char*name;
+    char *name[100];
 };
 
 struct VisitedDirectories
@@ -689,8 +689,8 @@ bool Dir_is_Visited(char *Dir,struct VisitedDirectories *Directories){
     bool isVisited = false;
     for (int i = 0; i < Directories->num_dir_visited; i++)
     {
-        printf("comparing %s and %s\n",Dir,Directories->DirectoriesTable[i].name);
-        if (strcmp(Dir,Directories->DirectoriesTable[i].name)==0)
+        printf("comparing %s and %s, i = %d\n",Dir,*Directories->DirectoriesTable[i].name,i);
+        if (strcmp(Dir,*Directories->DirectoriesTable[i].name)==0)
         {
             isVisited = true;
         }
@@ -700,19 +700,6 @@ bool Dir_is_Visited(char *Dir,struct VisitedDirectories *Directories){
 }
 
 int watch(char *Dir,struct VisitedDirectories *Directories){
-
-    // if (Dir_is_Visited(Dir,Directories)==true)
-    // {
-    //     return 1;
-    // }else
-    // {
-    //     printf("adding %s Dir to the list\n",Dir);
-    //     // printf("Visited dir : %d\n",Directories->num_dir_visited);
-    //     struct Directory directory;
-    //     directory.name = Dir;
-    //     Directories->DirectoriesTable[Directories->num_dir_visited]=directory;
-    //     Directories->num_dir_visited++;
-    // }
 
     printf("starting watching..\n");
             int length, i = 0;
@@ -756,17 +743,18 @@ int watch(char *Dir,struct VisitedDirectories *Directories){
     return 0;
 }
 
-void Watch_fork(char *Dir,struct VisitedDirectories *Directories){
+int Watch_fork(char *Dir,struct VisitedDirectories *Directories){
     if (Dir_is_Visited(Dir,Directories)==true)
     {
         printf("%s is already visited\n",Dir);
         return 1;
     }else
     {
-        printf("adding %s Dir to the list\n",Dir);
+        printf("adding %s Dir to the list at the positon : %d\n",Dir,Directories->num_dir_visited);
         // printf("Visited dir : %d\n",Directories->num_dir_visited);
         struct Directory directory;
-        directory.name = Dir;
+        strncpy(*directory.name, Dir, sizeof(directory.name));
+        directory.name[sizeof(directory.name) - 1] = '\0';
         Directories->DirectoriesTable[Directories->num_dir_visited]=directory;
         Directories->num_dir_visited++;
     }
@@ -789,6 +777,7 @@ void Watch_fork(char *Dir,struct VisitedDirectories *Directories){
         perror("fork failed");
         _exit(2); //exit failure, hard
     }
+    return 0;
 
 }
 bool RecursiveSearch(char *Dir, bool AddWatcher,struct VisitedDirectories *Directories)
