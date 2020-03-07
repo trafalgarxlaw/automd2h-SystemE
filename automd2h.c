@@ -78,7 +78,7 @@ struct File
     /* data */
     enum Format format;
     time_t time;    //the last modification time
-    char *filename; //The name of the file
+    char filename[50]; //The name of the file
 };
 
 /**
