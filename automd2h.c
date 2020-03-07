@@ -96,6 +96,18 @@ struct Arguments
     struct File files[20]; // Array of Files to convert. It can be unlimited
 };
 
+struct Directory
+{
+    char*name;
+};
+
+struct VisitedDirectories
+{
+    struct Directory DirectoriesTable[50];
+    int num_dir_visited;
+};
+
+
 // Check if file exists in Current repository
 bool file_exist(char *filePath)
 {
@@ -675,7 +687,32 @@ bool Option_f(struct Arguments *arguments)
     return arguments->option1 == f || arguments->option2 == f || arguments->option3 == f || arguments->option4 == f;
 }
 
-void watch(char *Dir){
+bool Dir_is_Visited(char *Dir,struct VisitedDirectories *Directories){
+    bool isVisited = false;
+    for (int i = 0; i < Directories->num_dir_visited; i++)
+    {
+        if (strcmp(Dir,Directories->DirectoriesTable[i].name))
+        {
+            isVisited = true;
+        }
+        
+    }
+    return isVisited;
+}
+
+int watch(char *Dir,struct VisitedDirectories *Directories){
+
+    if (Dir_is_Visited(Dir,Directories))
+    {
+        return 1;
+    }else
+    {
+        struct Directory directory;
+        directory.name = Dir;
+        Directories->DirectoriesTable[Directories->num_dir_visited]=directory;
+        Directories->num_dir_visited++;
+    }
+
     printf("starting watching..\n");
             int length, i = 0;
             int fd;
@@ -715,9 +752,10 @@ void watch(char *Dir){
             }
             ( void ) inotify_rm_watch( fd, wd[0] );
             ( void ) close( fd );
+    return 0;
 }
 
-void Watch_fork(char *Dir){
+void Watch_fork(char *Dir,struct VisitedDirectories *Directories){
 
     pid_t c_pid, pid;
     int status;
@@ -726,7 +764,7 @@ void Watch_fork(char *Dir){
 
     if (c_pid == 0)
     {
-        watch(Dir);
+        watch(Dir,Directories);
     }
     else if (c_pid > 0)
     {
@@ -741,15 +779,12 @@ void Watch_fork(char *Dir){
     }
 
 }
-bool RecursiveSearch(char *Dir, bool AddWatcher)
+bool RecursiveSearch(char *Dir, bool AddWatcher,struct VisitedDirectories *Directories)
 {
     //Directory stuff
     DIR *Directory;
     struct dirent *entry;
     struct stat filestat;
-
-    //inotify
-    int wd[10];
 
     printf("I am Reading %s Directory\n", Dir);
 
@@ -759,7 +794,7 @@ bool RecursiveSearch(char *Dir, bool AddWatcher)
         perror("Unable to read directory.. i'm leaving\n");
         return (1); // leave
     }
-    Watch_fork(Dir);
+    Watch_fork(Dir,Directories);
     /* Read directory entries */
     while ((entry = readdir(Directory))){
         char fullname[257];
@@ -771,7 +806,7 @@ bool RecursiveSearch(char *Dir, bool AddWatcher)
             {
                 // Recursion
                 printf("\n*Entering a subDirectory* : %s \n",entry->d_name);
-                RecursiveSearch(fullname, AddWatcher);
+                RecursiveSearch(fullname, AddWatcher,Directories);
                 printf("\n*Leaving a subDirectory*\n");
             }
 
@@ -791,6 +826,9 @@ void Observe(bool Immediate_Convertion)
     pid_t c_pid, pid;
     int status;
 
+    struct VisitedDirectories Directories;
+    Directories.num_dir_visited=0;
+
     c_pid = fork(); //duplicate
 
     if (c_pid == 0)
@@ -798,10 +836,10 @@ void Observe(bool Immediate_Convertion)
         //This will converte immediatly any files
         if (Immediate_Convertion)
         {
-            RecursiveSearch(".", false);
+            RecursiveSearch(".", false,&Directories);
         }
         
-        while (RecursiveSearch(".", true))
+        while (RecursiveSearch(".", true,&Directories))
         {
             printf("\nsleeping...\n");
             sleep(5);
@@ -916,7 +954,7 @@ int lauchProgram(struct Arguments *arguments)
 
         case r:
             printf("\nStarting Recursive Research..\n");
-            RecursiveSearch(".", false);
+            //RecursiveSearch(".", 0,false,0);
             break;
 
         case w:
