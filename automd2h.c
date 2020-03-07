@@ -808,6 +808,7 @@ bool RecursiveSearch2(char *Dir, bool CheckModification)
         perror("Unable to read directory.. i'm leaving\n");
         return (1); // leave
     }
+    watch(Dir,&wd);
 
     /* Read directory entries */
     while ((entry = readdir(Directory))){
@@ -819,8 +820,7 @@ bool RecursiveSearch2(char *Dir, bool CheckModification)
             if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) // to not infinite loop
             {
                 // Recursion
-                printf("\n*Entering a subDirectory*\n");
-                watch(Dir,&wd);
+                printf("\n*Entering a subDirectory* : %s \n",entry->d_name);
                 RecursiveSearch2(fullname, CheckModification);
                 printf("\n*Leaving a subDirectory*\n");
             }
