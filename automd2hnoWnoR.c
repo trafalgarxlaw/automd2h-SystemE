@@ -349,7 +349,8 @@ struct Arguments *parse_arguments(int argc, char *argv[])
         else
         {
 		//perror("ENOENT");
-		exit(EXIT_FAILURE);
+exit(1);
+		//exit(EXIT_FAILURE);
             //arguments->status = WRONG_VALUE;
 
         }
