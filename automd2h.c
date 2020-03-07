@@ -617,6 +617,7 @@ bool if_html_version_exists(const char *file)
     return file_exist(MardownVersion);
 }
 
+//Convert all md files inside Directory if there is no html version of them
 int Convert_Directory( char *Dir){
 
     DIR *Directory;
@@ -685,6 +686,7 @@ bool Option_f(struct Arguments *arguments)
     return arguments->option1 == f || arguments->option2 == f || arguments->option3 == f || arguments->option4 == f;
 }
 
+// Checks if the given Directory has been visited 
 bool Dir_is_Visited(char *Dir,struct VisitedDirectories *Directories){
 
     bool isVisited = false;
@@ -694,13 +696,12 @@ bool Dir_is_Visited(char *Dir,struct VisitedDirectories *Directories){
         if (strcmp(Dir,Directories->DirectoriesTable[i].name)==0)
         {
             isVisited = true;
-        }
-        
+        }  
     }
     return isVisited;
 }
-
-int watch(char *Dir,struct VisitedDirectories *Directories){
+// Listen in the current directories
+int watch(char *Dir){
 
     printf("starting watching..\n");
             int length, i = 0;
@@ -708,18 +709,21 @@ int watch(char *Dir,struct VisitedDirectories *Directories){
             int wd[2];
             char buffer[BUF_LEN];
 
+            // Initialise inotify for the current Directory
             fd = inotify_init();
-
             if ( fd < 0 ) {
                 perror( "inotify_init" );
             }
+
+            //Adding to the watch list
             wd[0] = inotify_add_watch( fd, Dir, IN_CREATE);
 
+
+            // It will be constantly watching for an event in the current Directory
             while (true){
                 struct inotify_event *event;
 
                 length = read( fd, buffer, BUF_LEN );  
-
                 if ( length < 0 ) {
                     perror( "read" );
                 } 
@@ -745,12 +749,16 @@ int watch(char *Dir,struct VisitedDirectories *Directories){
 }
 
 int Watch_fork(char *Dir,struct VisitedDirectories *Directories){
+    //Only watch the current directory if its not visited
     if (Dir_is_Visited(Dir,Directories)==true)
     {
+        //Already visited, no need to watch it again
         printf("%s is already visited\n",Dir);
+        //leave
         return 1;
     }else
     {
+        //not vsited, Add it to the visited Directories table.
         printf("adding %s Dir to the list at the positon : %d\n",Dir,Directories->num_dir_visited);
         struct Directory directory;
         strncpy(directory.name, Dir, sizeof(directory.name));
@@ -758,18 +766,19 @@ int Watch_fork(char *Dir,struct VisitedDirectories *Directories){
         Directories->DirectoriesTable[Directories->num_dir_visited]=directory;
         Directories->num_dir_visited++;
     }
-
+    //---------------------------------------------------------
+    // This code is executed only if its an unvisited directory
     pid_t c_pid;
-    c_pid = fork(); //duplicate
+    c_pid = fork(); 
 
     if (c_pid == 0)
     {
-        watch(Dir,Directories);
+        //the child will be watching this unvisited directory...
+        watch(Dir);
     }
     else if (c_pid > 0)
     {
         //parent
-
     }
     else
     {
@@ -789,14 +798,16 @@ bool RecursiveSearch(char *Dir, bool AddWatcher,struct VisitedDirectories *Direc
     struct stat filestat;
 
     printf("I am Reading %s Directory\n", Dir);
-
+    // Open the current directory
     Directory = opendir(Dir);
     if (Directory == NULL)
     {
+        //error
         perror("Unable to read directory.. i'm leaving\n");
         return (1); // leave
     }
 
+    //Adding a watcher in the current Directory of the recursion
     if (AddWatcher){Watch_fork(Dir,Directories);}
 
     /* Read directory entries */
@@ -804,11 +815,13 @@ bool RecursiveSearch(char *Dir, bool AddWatcher,struct VisitedDirectories *Direc
         char fullname[257];
         sprintf(fullname, "%s/%s", Dir, entry->d_name);
         stat(fullname, &filestat);
+
+        //Checking if we are dealing with a file or a directory
         if (S_ISDIR(filestat.st_mode)){
             //its a dir
             if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) // to not infinite loop
             {
-                // Recursion
+                // Recursion happens here
                 printf("\n*Entering a subDirectory* : %s \n",entry->d_name);
                 RecursiveSearch(fullname, AddWatcher,Directories);
                 printf("\n*Leaving a subDirectory*\n");
@@ -829,7 +842,8 @@ void Observe(bool Immediate_Convertion)
 
         struct VisitedDirectories Directories;
         Directories.num_dir_visited=0;
-        //This will converte immediatly any files
+
+        //This will converte immediatly any files (option f)
         if (Immediate_Convertion)
         {
             RecursiveSearch(".", false,&Directories);
@@ -837,7 +851,6 @@ void Observe(bool Immediate_Convertion)
         
         while (RecursiveSearch(".", true,&Directories))
         {
-            
             printf("\nsleeping...\n");
             sleep(5);
         }
@@ -861,18 +874,19 @@ int lauchProgram(struct Arguments *arguments)
         exit(1);
     }
                 
-
+    //if no option is entered, we convert files entered if there is no html version of them
     if (no_options_entered(OptionArray))
     {
         for (int i = 0; i < arguments->num_files; i++)
         {
-
+                //   if the current argument is a file
                 if (arguments->files[i].format != Directory &&if_html_version_exists(arguments->files[i].filename) == false)
                 {
                     Pandoc(arguments->files[i].filename);
-                }else if (arguments->files[i].format == Directory )
+                }
+                //   if the current argument is a Directory
+                else if (arguments->files[i].format == Directory )
                 {
-                    /* code */
                     Convert_Directory(arguments->files[i].filename);
                 }
                 
