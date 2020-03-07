@@ -45,9 +45,6 @@ automd2h convertit les fichiers au format Markdown en fichiers au format HTML.\n
                               Combiné avec -w, l'option -f force la conversion immédiate des fichiers trouvés puis surveille les modifications futures.\n\
 "
 
-// utiliser un max d'appel system : opendir, closedir (pour se promenet dans les rep de facon recurive)
-// fork() wait() etc...
-
 /**
  * The status of the program.
  */
@@ -106,7 +103,6 @@ bool file_exist(char *filePath)
 };
 
 // Function to replace a string with another
-// string
 char *replaceWord(const char *s, const char *oldW, const char *newW)
 {
     char *result;
@@ -682,7 +678,6 @@ bool Option_f(struct Arguments *arguments)
 // The sys/stat.h header file also defines macros to test for file type, which work similarly to the ctype.h macros that examine characters. For a directory entry, the S_ISDIR macro is used
 // The stat() function requires two arguments. The first is the name (or pathname) to a filename. The second argument is the address of a stat structure. This structure is filled with oodles of good info about a directory entry and it’s consistent across all file systems.
 
-// i cant detected properly if an element is a file or a dir
 bool RecursiveSearch(char *Dir, bool CheckModification)
 {
     DIR *Directory;
@@ -756,8 +751,6 @@ void watch(char *Dir){
                 perror( "inotify_init" );
             }
             wd[0] = inotify_add_watch( fd, Dir, IN_CREATE);
-            //wd[1] = inotify_add_watch (fd, "/tmp/inotify2", IN_CREATE);
-            //bool SomethingChanged=false;
 
             while (true){
                 struct inotify_event *event;
@@ -776,17 +769,14 @@ void watch(char *Dir){
                     if ( event->mask & IN_CREATE ) {
                         if ( event->mask & IN_ISDIR ) {
                             printf( "The directory %s was created.\n", event->name ); 
-                            //SomethingChanged = true;      
                         }
                         else {
-                            //SomethingChanged=true;
                             printf( "The file %s was created.\n", event->name );
                         }
                     }
                 }
             }
             ( void ) inotify_rm_watch( fd, wd[0] );
-            //( void ) inotify_rm_watch( fd, wd[1]);
             ( void ) close( fd );
 }
 
@@ -804,12 +794,7 @@ void Watch_fork(char *Dir){
     else if (c_pid > 0)
     {
         //parent
-        //waiting for child to terminate
-        // pid = wait(&status);
-        // if (WIFEXITED(status))
-        // {
-        //     printf("Parent: Child exited with status: %d\n", WEXITSTATUS(status));
-        // }
+
     }
     else
     {
@@ -826,10 +811,8 @@ bool RecursiveSearch2(char *Dir, bool AddWatcher)
     struct dirent *entry;
     struct stat filestat;
 
-
     //inotify
     int wd[10];
-
 
     printf("I am Reading %s Directory\n", Dir);
 
@@ -863,13 +846,7 @@ bool RecursiveSearch2(char *Dir, bool AddWatcher)
     }
     return true;
 }
-//option w
 
-// Avec l'option -w, automd2h bloque et surveille les modifications des fichiers
-//et des répertoires passés en argument. Lors de la modification d'un fichier source,
-//celui-ci est automatiquement reconverti. Si dans un répertoire surveillé un
-//fichier .md apparait, est modifié, est déplacé ou est renommé, celui-ci aussi
-// est automatiquement converti.
 void Observe(bool Immediate_Convertion)
 {
     printf("\nStarting to observe Sub Directories ...\n");
@@ -887,8 +864,6 @@ void Observe(bool Immediate_Convertion)
             RecursiveSearch2(".", false);
         }
         
-
-
         while (RecursiveSearch2(".", true))
         {
             printf("\nsleeping...\n");
@@ -917,9 +892,8 @@ void Observe(bool Immediate_Convertion)
 
 
 
-int ReadOptions(struct Arguments *arguments)
+int lauchProgram(struct Arguments *arguments)
 {
-
     //Array of options
     enum Options OptionArray[5];
     OptionArray[0] = arguments->option1;
@@ -1009,7 +983,6 @@ int ReadOptions(struct Arguments *arguments)
             break;
 
         case w:
-            //Watch(false, arguments, false);
             
             if (OptionArray[i + 1] == f)
             {
@@ -1039,9 +1012,6 @@ int main(int argc, char *argv[])
 {
     printf("\nStarting the program... \n");
 
-    //printf ("%d", is_directory("README.md"));
-    //printf ("%d", is_directory("Directories"));
-
     //printf(USAGE);
     struct Arguments *arguments = parse_arguments(argc, argv); //takes the arguments in the structure
     if (arguments->status != OK)
@@ -1058,7 +1028,7 @@ int main(int argc, char *argv[])
         printf("\n");
 
         Print_num_Options(arguments);
-        ReadOptions(arguments);
+        lauchProgram(arguments);
     }
 
     free_arguments(arguments);
