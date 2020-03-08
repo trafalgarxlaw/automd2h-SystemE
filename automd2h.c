@@ -652,7 +652,7 @@ int Pandoc(char *file)
         }
        // printf("status: %d\n",status);
     }
-     printf("pandoc ends with stat 0\n");
+     //printf("pandoc ends with stat 0\n");
     return 0;
 }
 
