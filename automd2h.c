@@ -1002,17 +1002,17 @@ int lauchProgram(struct Arguments *arguments)
             //alors il n'y a pas de conversion.
             for (int file = 0; i < arguments->num_files; i++)
             {
-                printf("\nOption t Detected.\n");
-                printf("file name : %s \n", arguments->files[file].filename);
+                //printf("\nOption t Detected.\n");
+                //printf("file name : %s \n", arguments->files[file].filename);
                 if (file_needs_conversion(arguments->files[file].filename))
                 {
 
-                    printf("%s needs to be converted again.\n", arguments->files[file].filename);
+                    //printf("%s needs to be converted again.\n", arguments->files[file].filename);
                     if(Pandoc(arguments->files[file].filename)==1){return 1;}
                 }
                 else
                 {
-                    printf("no convertion needed for %s \n", arguments->files[file].filename);
+                    //printf("no convertion needed for %s \n", arguments->files[file].filename);
                 }
             }
             break;
