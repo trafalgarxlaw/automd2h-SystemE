@@ -268,16 +268,6 @@ enum Options option_detection(char *option)
     return Detected_option;
 }
 
-void initialise_Arguments(struct Arguments *arguments)
-{
-    arguments->option1 = no_option;
-    arguments->option2 = no_option;
-    arguments->option3 = no_option;
-    arguments->option4 = no_option;
-    arguments->argv_index = 1;
-    arguments->num_files = 0;
-    arguments->num_options = 0;
-}
 
 void No_arg_Failure(int argc)
 {
@@ -287,105 +277,6 @@ void No_arg_Failure(int argc)
     }
 }
 
-struct Arguments *parse_arguments(int argc, char *argv[])
-{
-    //fails if no arguments
-    No_arg_Failure(argc);
-
-    //printf("Parsing Arguments..\n");
-    struct Arguments *arguments = malloc(sizeof(struct Arguments));
-    initialise_Arguments(arguments);
-
-    // ---Option detection Part ---
-    if (is_Option(argv[1]))
-    {
-        for (int i = 1; i < argc; i++)
-        {
-            //counting number of options and incrementing the arg index
-            if (is_Option(argv[i]))
-            {
-                arguments->num_options++;
-                arguments->argv_index++;
-            }
-        }
-        //if we have one option as argument
-        if (arguments->num_options == 1)
-        {
-            arguments->option1 = option_detection(argv[1]);
-            arguments->status = OK;
-        }
-        //if we have two option as argument
-        else if (arguments->num_options == 2)
-        {
-            arguments->option1 = option_detection(argv[1]);
-            arguments->option2 = option_detection(argv[2]);
-            arguments->status = OK;
-        }
-        else if (arguments->num_options == 3)
-        {
-            arguments->option1 = option_detection(argv[1]);
-            arguments->option2 = option_detection(argv[2]);
-            arguments->option3 = option_detection(argv[3]);
-            arguments->status = OK;
-        }
-        else if (arguments->num_options == 4)
-        {
-            arguments->option1 = option_detection(argv[1]);
-            arguments->option2 = option_detection(argv[2]);
-            arguments->option3 = option_detection(argv[3]);
-            arguments->option4 = option_detection(argv[4]);
-            arguments->status = OK;
-        }
-
-        // ---File detection Part ---
-    }
-    //Looping through the rest of arguments (files)
-    for (int i = arguments->argv_index; i < argc; i++)
-    {
-        if (is_Markdown(argv[arguments->argv_index]))
-        {
-
-            strncpy(arguments->files[arguments->num_files].filename, argv[arguments->argv_index], sizeof(arguments->files[arguments->num_files].filename));
-            arguments->files[arguments->num_files].filename[sizeof(arguments->files[arguments->num_files].filename) - 1] = '\0';
-            //printf("You want me to convert a md file (%s) \n",argv[arguments->argv_index]);
-            arguments->files[arguments->num_files].format = markdown;
-            arguments->status = OK;
-            arguments->num_files++;
-        }
-        else if (is_HTML(argv[arguments->argv_index]))
-        {
-            //printf("You want me to convert a html file \n");
-            strncpy(arguments->files[arguments->num_files].filename, argv[arguments->argv_index], sizeof(arguments->files[arguments->num_files].filename));
-            arguments->files[arguments->num_files].filename[sizeof(arguments->files[arguments->num_files].filename) - 1] = '\0';
-            arguments->files[arguments->num_files].format = html;
-            arguments->status = OK;
-            arguments->num_files++;
-        }
-        else if (is_directory(argv[arguments->argv_index]))
-        {
-            //printf("You want me to convert files inside (%s) directory \n", argv[arguments->argv_index]);
-            strncpy(arguments->files[arguments->num_files].filename, argv[arguments->argv_index], sizeof(arguments->files[arguments->num_files].filename));
-            arguments->files[arguments->num_files].filename[sizeof(arguments->files[arguments->num_files].filename) - 1] = '\0';
-            arguments->files[arguments->num_files].format = Directory;
-            arguments->status = OK;
-            arguments->num_files++;
-        }
-        else
-        {
-            //printf("You want me to convert a another file \n");
-            strncpy(arguments->files[arguments->num_files].filename, argv[arguments->argv_index], sizeof(arguments->files[arguments->num_files].filename));
-            arguments->files[arguments->num_files].filename[sizeof(arguments->files[arguments->num_files].filename) - 1] = '\0';
-            arguments->files[arguments->num_files].format = another;
-            arguments->status = OK;
-            arguments->num_files++;
-        }
-        //next argument
-        arguments->argv_index++;
-    }
-
-    arguments->status = OK;
-    return arguments;
-}
 
 void print_args(struct Arguments *arguments)
 {
@@ -601,17 +492,6 @@ void print_arguments_files(struct Arguments *arguments, bool checkTime)
     }
 }
 
-// To review
-void free_arguments(struct Arguments *arguments)
-{
-    free(arguments);
-}
-
-void Print_num_Options(struct Arguments *arguments)
-{
-    printf("Number of options entered :%d \n", arguments->num_options);
-}
-
 int Pandoc(char *file)
 {
     //printf("Pandoc is trying to convert the file...\n");
@@ -769,6 +649,16 @@ bool Option_w(struct Arguments *arguments)
 bool Option_f(struct Arguments *arguments)
 {
     return arguments->option1 == f || arguments->option2 == f || arguments->option3 == f || arguments->option4 == f;
+}
+// To review
+void free_arguments(struct Arguments *arguments)
+{
+    free(arguments);
+}
+
+void Print_num_Options(struct Arguments *arguments)
+{
+    printf("Number of options entered :%d \n", arguments->num_options);
 }
 
 // Checks if the given Directory has been visited
@@ -1157,6 +1047,115 @@ int lauchProgram(struct Arguments *arguments)
     }
     printf("lauchProgram ends with stat 0\n");
     return 0;
+}
+void initialise_Arguments(struct Arguments *arguments)
+{
+    arguments->option1 = no_option;
+    arguments->option2 = no_option;
+    arguments->option3 = no_option;
+    arguments->option4 = no_option;
+    arguments->argv_index = 1;
+    arguments->num_files = 0;
+    arguments->num_options = 0;
+}
+struct Arguments *parse_arguments(int argc, char *argv[])
+{
+    //fails if no arguments
+    No_arg_Failure(argc);
+
+    //printf("Parsing Arguments..\n");
+    struct Arguments *arguments = malloc(sizeof(struct Arguments));
+    initialise_Arguments(arguments);
+
+    // ---Option detection Part ---
+    if (is_Option(argv[1]))
+    {
+        for (int i = 1; i < argc; i++)
+        {
+            //counting number of options and incrementing the arg index
+            if (is_Option(argv[i]))
+            {
+                arguments->num_options++;
+                arguments->argv_index++;
+            }
+        }
+        //if we have one option as argument
+        if (arguments->num_options == 1)
+        {
+            arguments->option1 = option_detection(argv[1]);
+            arguments->status = OK;
+        }
+        //if we have two option as argument
+        else if (arguments->num_options == 2)
+        {
+            arguments->option1 = option_detection(argv[1]);
+            arguments->option2 = option_detection(argv[2]);
+            arguments->status = OK;
+        }
+        else if (arguments->num_options == 3)
+        {
+            arguments->option1 = option_detection(argv[1]);
+            arguments->option2 = option_detection(argv[2]);
+            arguments->option3 = option_detection(argv[3]);
+            arguments->status = OK;
+        }
+        else if (arguments->num_options == 4)
+        {
+            arguments->option1 = option_detection(argv[1]);
+            arguments->option2 = option_detection(argv[2]);
+            arguments->option3 = option_detection(argv[3]);
+            arguments->option4 = option_detection(argv[4]);
+            arguments->status = OK;
+        }
+
+        // ---File detection Part ---
+    }
+    //Looping through the rest of arguments (files)
+    for (int i = arguments->argv_index; i < argc; i++)
+    {
+        if (is_Markdown(argv[arguments->argv_index]))
+        {
+
+            strncpy(arguments->files[arguments->num_files].filename, argv[arguments->argv_index], sizeof(arguments->files[arguments->num_files].filename));
+            arguments->files[arguments->num_files].filename[sizeof(arguments->files[arguments->num_files].filename) - 1] = '\0';
+            //printf("You want me to convert a md file (%s) \n",argv[arguments->argv_index]);
+            arguments->files[arguments->num_files].format = markdown;
+            arguments->status = OK;
+            arguments->num_files++;
+        }
+        else if (is_HTML(argv[arguments->argv_index]))
+        {
+            //printf("You want me to convert a html file \n");
+            strncpy(arguments->files[arguments->num_files].filename, argv[arguments->argv_index], sizeof(arguments->files[arguments->num_files].filename));
+            arguments->files[arguments->num_files].filename[sizeof(arguments->files[arguments->num_files].filename) - 1] = '\0';
+            arguments->files[arguments->num_files].format = html;
+            arguments->status = OK;
+            arguments->num_files++;
+        }
+        else if (is_directory(argv[arguments->argv_index]))
+        {
+            //printf("You want me to convert files inside (%s) directory \n", argv[arguments->argv_index]);
+            strncpy(arguments->files[arguments->num_files].filename, argv[arguments->argv_index], sizeof(arguments->files[arguments->num_files].filename));
+            arguments->files[arguments->num_files].filename[sizeof(arguments->files[arguments->num_files].filename) - 1] = '\0';
+            arguments->files[arguments->num_files].format = Directory;
+            arguments->status = OK;
+            arguments->num_files++;
+        }
+        else
+        {
+            //printf("You want me to convert a another file \n");
+            strncpy(arguments->files[arguments->num_files].filename, argv[arguments->argv_index], sizeof(arguments->files[arguments->num_files].filename));
+            arguments->files[arguments->num_files].filename[sizeof(arguments->files[arguments->num_files].filename) - 1] = '\0';
+            arguments->files[arguments->num_files].format = another;
+            arguments->status = OK;
+            arguments->num_files++;
+        }
+        //next argument
+        arguments->argv_index++;
+    }
+
+    arguments->status = OK;
+    return arguments;
 }
 
 int main(int argc, char *argv[])
