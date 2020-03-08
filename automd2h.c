@@ -515,11 +515,6 @@ bool file_needs_conversion(char *filename)
                         convert = true;
                         //printf("..Convertion needed for: %s\n",filename);
                     }
-                    else
-                    {
-                        //if not, no convertion needed.
-                        //printf("%s..no convertion needed\n",filename);
-                    }
                 }
                 else
                 {
@@ -695,7 +690,7 @@ bool Check_Duplicates(enum Options OptionArray[])
 bool if_html_version_exists(const char *file)
 {
     char *MardownConvertedVersion = replaceWord(file, ".md", ".html"); //will return file if fails
-    char *txtConvertedVersion = replaceWord(file, ".txt", ".html");
+    char *txtConvertedVersion = replaceWord(file, ".txt", ".txt.html");
     bool htmlExists = false;
     //Checking if the html version of a md file exists if its a md file
     if (file_exist(MardownConvertedVersion) && strcmp(file, MardownConvertedVersion) != 0)
@@ -751,7 +746,7 @@ int Convert_Directory(char *Dir,bool Arg_is_Dir_Then_Convert,bool checktime)
                 }            
             }else if (checktime)
             {
-                if(file_needs_conversion(fullname)){
+                if(is_Markdown(fullname) && file_needs_conversion(fullname)){
                     if (Pandoc(fullname) == 1){return 1;}
                 }
             }
@@ -829,7 +824,7 @@ void Delete_Child(pid_t c_pid_To_Delete, int sec)
 int watch(char *Dir)
 {
 
-    printf("starting watching..\n");
+    //printf("starting watching..\n");
     int length, i = 0;
     int fd;
     int wd[2];
@@ -863,17 +858,22 @@ int watch(char *Dir)
                 printf("In %s\n", Dir);
             else
                 continue;
-            if (event->mask & IN_CREATE)
-            {
-                if (event->mask & IN_ISDIR)
-                {
-                    printf("The directory %s was created.\n", event->name);
-                }
-                else
-                {
-                    printf("The file %s was created.\n", event->name);
-                }
-            }
+            //if (event->mask & IN_CREATE)
+            //{
+              //  if (event->mask & IN_ISDIR)
+              //  {
+               //     printf("The directory %s was created.\n", event->name);
+               // }
+               // else
+              //  {
+               //     printf("The file %s was created.\n", event->name);
+               // }
+            //}
+		if(event->mask & IN_MODIFY){
+			if (Pandoc(event->name) == 1){
+                    		return 1;
+                	}
+		}
         }
     }
     (void)inotify_rm_watch(fd, wd[0]);
