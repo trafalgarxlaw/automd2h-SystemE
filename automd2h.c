@@ -591,35 +591,37 @@ int Pandoc(char *file)
     }
     // child process because return value zero
     else if (c_pid == 0)
-    {
-
-        //printf("Hello from Child!\n");
+    {        
         // Pandoc will run here.
-
-        //calling pandoc
-        // argv array for: ls -l
-        // Just like in main, the argv array must be NULL terminated.
-        // try to run ./a.out -x -y, it will work
-        char *output = replaceWord(file, ".md", ".html");
-        //checking if the file exists
-        
-        char *ls_args[] = {"pandoc", file, "-o", output, NULL};
-        //                    ^
-        //  use the name ls
-        //  rather than the
-        //  path to /bin/ls
-
-        // Little explaination
-        // The primary difference between execv and execvp is that with execv you have to provide the full path to the binary file (i.e., the program).
-        // With execvp, you do not need to specify the full path because execvp will search the local environment variable PATH for the executable.
-        if(file_exist(file)){
-            execvp(ls_args[0], ls_args);}
-        else
+        if (is_Markdown(file))
         {
-            //Error Handeler
-            perror("ENOENT");
-            exit(EXIT_FAILURE);
+            printf("ismd\n");
+            char *output = replaceWord(file, ".md", ".html");        
+            char *ls_args[] = {"pandoc", file, "-o", output, NULL};
+        
+            if(file_exist(file)){
+                execvp(ls_args[0], ls_args);}
+            else
+            {
+                //Error Handeler
+                perror("ENOENT");
+                exit(EXIT_FAILURE);
+            }
+        }else if (is_txt(file))
+        {
+            char *output = replaceWord(file, ".txt", ".txt.html");        
+            char *ls_args[] = {"pandoc", file, "-o", output, NULL};
+        
+            if(file_exist(file)){
+                execvp(ls_args[0], ls_args);}
+            else
+            {
+                //Error Handeler
+                perror("ENOENT");
+                exit(EXIT_FAILURE);
+            }
         }
+        
         return 0;
 
     }else{
@@ -659,14 +661,26 @@ bool Check_Duplicates(enum Options OptionArray[])
     return DuplicateOption;
 }
 
-bool if_html_version_exists(const char *file)
-{
-    char *MardownVersion = replaceWord(file, ".md", ".html");
-    return file_exist(MardownVersion);
-}
+// bool if_html_version_exists_Myversion(const char *file)
+// {
+//     char *MardownConvertedVersion = replaceWord(file, ".md", ".html");//will return file if fails
+//     char *txtConvertedVersion = replaceWord(file, ".txt", ".html");
+//     bool htmlExists = false;
+//     //Checking if the html version of a md file exists if its a md file
+//     if (file_exist(MardownConvertedVersion) && strcmp(file,MardownConvertedVersion)!=0)
+//     {
+//         htmlExists = true;
+//     }
+//     if (file_exist(txtConvertedVersion)&& strcmp(file,txtConvertedVersion)!=0)
+//     {
+//         htmlExists = true;
+//     }
+//     return htmlExists;
+// }
+
 
 //Convert all md files inside Directory if there is no html version of them
-int Convert_Directory( char *Dir){
+int Convert_Directory(char *Dir){
 
     DIR *Directory;
     struct dirent *entry;
@@ -944,7 +958,7 @@ int lauchProgram(struct Arguments *arguments)
         for (int i = 0; i < arguments->num_files; i++)
         {
                 //   if the current argument is a file
-                if (arguments->files[i].format != Directory &&if_html_version_exists(arguments->files[i].filename) == false)
+                if (arguments->files[i].format != Directory && if_html_version_exists(arguments->files[i].filename) == false)
                 {
                     if(Pandoc(arguments->files[i].filename)==1){return 1;}
                 }
