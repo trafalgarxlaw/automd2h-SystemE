@@ -522,7 +522,7 @@ bool file_needs_conversion(char *filename)
                 }
                 else
                 {
-                    printf("Unable to get file properties.\n");
+                    //printf("Unable to get file properties.\n");
                 }
             }
             else
@@ -534,8 +534,8 @@ bool file_needs_conversion(char *filename)
         }
         else
         {
-            printf("Unable to get file properties.\n");
-            printf("Please check whether '%s' file exists.\n", filename);
+            //printf("Unable to get file properties.\n");
+            //printf("Please check whether '%s' file exists.\n", filename);
         }
     }
     else
@@ -755,7 +755,6 @@ bool Option_f(struct Arguments *arguments)
 // Checks if the given Directory has been visited
 bool Dir_is_Visited(char *Dir, struct VisitedDirectories *Directories)
 {
-
     bool isVisited = false;
     for (int i = 0; i < Directories->num_dir_visited; i++)
     {
