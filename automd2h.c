@@ -480,7 +480,7 @@ void print_args(struct Arguments *arguments)
 //Check if converted document has a newer version (option t)
 bool has_new_doc_version(time_t sourceFile, time_t destFile)
 {
-    return sourceFile > destFile;
+    return (difftime(sourceFile, destFile) > 0);
 }
 
 //Check if documents has a new version to convert
