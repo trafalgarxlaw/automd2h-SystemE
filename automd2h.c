@@ -98,7 +98,6 @@ struct Arguments
     bool Default; /**< Default Args  */
     int argv_index;
     int num_files;
-    int num_directories;
     int num_options;
     struct File files[200]; // Array of Files to convert. It can be unlimited
 };
@@ -272,13 +271,14 @@ void initialise_Arguments(struct Arguments *arguments)
     arguments->option4 = no_option;
     arguments->argv_index = 1;
     arguments->num_files = 0;
-    arguments->num_directories = 0;
     arguments->num_options = 0;
 }
 
 void No_arg_Failure(int argc){
     if (argc == 1) {exit(EXIT_FAILURE);}
 }
+
+
 struct Arguments *parse_arguments(int argc, char *argv[])
 {
     //fails if no arguments
@@ -294,6 +294,7 @@ struct Arguments *parse_arguments(int argc, char *argv[])
     {
         for (int i = 1; i < argc; i++)
         {
+            //counting number of options and incrementing the arg index
             if (is_Option(argv[i]))
             {
                 arguments->num_options++;
@@ -341,6 +342,7 @@ struct Arguments *parse_arguments(int argc, char *argv[])
                 arguments->files[arguments->num_files].filename[sizeof(arguments->files[arguments->num_files].filename) - 1] = '\0';
                 //printf("You want me to convert a md file (%s) \n",argv[arguments->argv_index]);
                 arguments->files[arguments->num_files].format = markdown;
+                arguments->status = OK;
                 arguments->num_files++;
             
 				}
@@ -350,6 +352,7 @@ struct Arguments *parse_arguments(int argc, char *argv[])
                 strncpy(arguments->files[arguments->num_files].filename, argv[arguments->argv_index], sizeof(arguments->files[arguments->num_files].filename));
                 arguments->files[arguments->num_files].filename[sizeof(arguments->files[arguments->num_files].filename) - 1] = '\0';
                 arguments->files[arguments->num_files].format = html;
+                arguments->status = OK;
                 arguments->num_files++;
         }
         else if (is_directory(argv[arguments->argv_index]))
@@ -358,6 +361,7 @@ struct Arguments *parse_arguments(int argc, char *argv[])
             strncpy(arguments->files[arguments->num_files].filename, argv[arguments->argv_index], sizeof(arguments->files[arguments->num_files].filename));
             arguments->files[arguments->num_files].filename[sizeof(arguments->files[arguments->num_files].filename) - 1] = '\0';
             arguments->files[arguments->num_files].format = Directory;
+            arguments->status = OK;
             arguments->num_files++;
         }
         else
@@ -366,6 +370,7 @@ struct Arguments *parse_arguments(int argc, char *argv[])
                 strncpy(arguments->files[arguments->num_files].filename, argv[arguments->argv_index], sizeof(arguments->files[arguments->num_files].filename));
                 arguments->files[arguments->num_files].filename[sizeof(arguments->files[arguments->num_files].filename) - 1] = '\0';
                 arguments->files[arguments->num_files].format = another;
+                arguments->status = OK;
                 arguments->num_files++;
 
         }
@@ -373,6 +378,7 @@ struct Arguments *parse_arguments(int argc, char *argv[])
         arguments->argv_index++;
     }
 
+    arguments->status = OK;
     return arguments;
 }
 
@@ -627,7 +633,7 @@ int Pandoc(char *file)
                 perror("ENOENT");
                 exit(EXIT_FAILURE);
             }
-        exit(EXIT_SUCCESS);
+        //exit(EXIT_SUCCESS);
     }
     else
     {
@@ -641,11 +647,12 @@ int Pandoc(char *file)
             int exit_status = WEXITSTATUS(status);
             if (exit_status != EXIT_SUCCESS)
             {
-                exit(exit_status);
+                exit(EXIT_FAILURE);
             }
         }
        // printf("status: %d\n",status);
     }
+     printf("pandoc ends with stat 0\n");
     return 0;
 }
 
@@ -697,7 +704,8 @@ int Convert_Directory(char *Dir,bool Arg_is_Dir_Then_Convert,bool checktime)
     if (Directory == NULL)
     {
         //perror("Unable to read directory.. i'm leaving\n");
-        return (1); // leave
+         printf("Convert_Directory ends with stat 0\n");
+        return (0); // leave
     }
 
     /* Read directory entries */
@@ -716,12 +724,14 @@ int Convert_Directory(char *Dir,bool Arg_is_Dir_Then_Convert,bool checktime)
             //printf("%4s: %s\n", "File", fullname);
             //its a file
 		        if(is_Markdown(fullname) && (file_needs_conversion(fullname) || checktime == false)){
+                    //printf("%s needs to be converted\n",fullname);
 		            if (Pandoc(fullname) == 1){return 1;}
 		        }
             
         }
     }
     closedir(Directory);
+    printf("Convert_Directory ends with stat 0\n");
     return (0);
 }
 
@@ -1019,7 +1029,7 @@ int launch_with_options(struct Arguments *arguments,enum Options *option,enum Op
                      Convert_Directory(".",false,true);
                      return 0;
                  }
-                 
+                 //looping through files given as arguments
                 for (int file = 0; file < arguments->num_files; file++)
                 {
                     if (is_directory(arguments->files[file].filename)==false )
@@ -1084,14 +1094,15 @@ int launch_with_options(struct Arguments *arguments,enum Options *option,enum Op
             break;
 
         case Optionerror:
-            fprintf(stderr, "Option parsing failed\n");
+            //fprintf(stderr, "Option parsing failed\n");
             arguments->status = WRONG_VALUE;
-            exit(EXIT_FAILURE);
+            //exit(EXIT_FAILURE);
             break;
 
         default:
             break;
         }
+        printf("launch_with_options ends with stat 0\n");
     return 0;
 }
 
@@ -1128,6 +1139,7 @@ int lauchProgram(struct Arguments *arguments)
         if( launch_with_options(arguments,&OptionArray[index_option],&OptionArray[index_option+1],&index_option) == 1)
         {return 1;}
     }
+    printf("lauchProgram ends with stat 0\n");
     return 0;
 }
 
@@ -1152,5 +1164,6 @@ int main(int argc, char *argv[])
         }
     }
     free_arguments(arguments);
+    printf("MAIN ends with stat 0\n");
     return 0;
 }
