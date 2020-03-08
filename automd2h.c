@@ -548,7 +548,7 @@ void print_current_directory(char *currentDir, bool checkTime)
     }
     while ((d = readdir(dir)) != NULL)
     {
-        if (is_Markdown(d->d_name) || is_txt(d->d_name))
+        if (is_Markdown(d->d_name))
         {
             if (!checkTime || file_needs_conversion(d->d_name))
             {
