@@ -543,6 +543,21 @@ bool file_needs_conversion(char *filename)
     return convert;
 };
 
+char* concatenate_file_extension(char *filePath){
+ 	char *newFileName = (char *) malloc(255);
+ 	if (file_exist(filePath)){
+ 		if(is_Markdown(filePath)){
+			//copy all except .md
+			newFileName = replaceWord(filePath, ".md", ".html");
+		}
+		else if (is_directory(filePath) == false){
+			strcpy(newFileName, filePath);
+			strcat(newFileName, ".html");
+ 		}
+ 	}
+ 		return newFileName;
+}
+
 //pritn all txt and md file in a directory (option n)
 void print_current_directory(char *currentDir, bool checkTime)
 {
@@ -626,10 +641,8 @@ int Pandoc(char *file)
     else if (c_pid == 0)
     {
         //Pandoc will run here.
-        if (is_Markdown(file))
-        {
-            char *output = replaceWord(file, ".md", ".html");
-            char *ls_args[] = {"pandoc", file, "-o", output, NULL};
+	char *output = concatenate_file_extension(file);
+    	char *ls_args[] = {"pandoc", file, "-o", output, NULL};
 
 
             //calling pandoc
@@ -643,24 +656,6 @@ int Pandoc(char *file)
                 perror("ENOENT");
                 exit(EXIT_FAILURE);
             }
-        }
-        //if its another type of file
-        else if (is_txt(file))
-        {
-            char *output = replaceWord(file, ".txt", ".txt.html");
-            char *ls_args[] = {"pandoc", file, "-o", output, NULL};
-
-            if (file_exist(file))
-            {
-                execvp(ls_args[0], ls_args);
-            }
-            else
-            {
-                //Error Handeler
-                perror("ENOENT");
-                exit(EXIT_FAILURE);
-            }
-        }
 
         return 0;
     }
