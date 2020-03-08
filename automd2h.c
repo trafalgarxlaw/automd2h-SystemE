@@ -491,7 +491,7 @@ bool file_needs_conversion(char *filename)
     struct stat newAttrib;
     char *newFileName = new_file_name(filename);//replaceWord(filename, ".md", ".html");
 
-    printf("\nChecking if %s needs to be converted\n", filename);
+    //printf("\nChecking if %s needs to be converted\n", filename);
     //Checking if the given file exists and if its a .md
     if (file_exist(filename) && is_Markdown(filename))
     {
