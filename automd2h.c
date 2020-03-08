@@ -669,15 +669,10 @@ bool Check_Duplicates(enum Options OptionArray[])
 }
 bool if_html_version_exists(const char *file)
 {
-    char *MardownConvertedVersion = replaceWord(file, ".md", ".html"); //will return file if fails
-    char *txtConvertedVersion = replaceWord(file, ".txt", ".txt.html");
+    char *newFileName = concatenate_file_extension(file); //will return file if fails
     bool htmlExists = false;
     //Checking if the html version of a md file exists if its a md file
-    if (file_exist(MardownConvertedVersion) && strcmp(file, MardownConvertedVersion) != 0)
-    {
-        htmlExists = true;
-    }
-    if (file_exist(txtConvertedVersion) && strcmp(file, txtConvertedVersion) != 0)
+    if (file_exist(newFileName) && strcmp(file, newFileName) != 0)
     {
         htmlExists = true;
     }
