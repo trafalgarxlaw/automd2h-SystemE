@@ -689,11 +689,11 @@ int Convert_Directory(char *Dir, bool checktime)
     //printf("I am converting (%s) Directory\n", Dir);
 
     Directory = opendir(Dir);
-    if (Directory == NULL)
-    {
+    //if (Directory == NULL)
+    //{
         //perror("Unable to read directory.. i'm leaving\n");
-        return (1); // leave
-    }
+     //   return (1); // leave
+    //}
 
     /* Read directory entries */
     while ((entry = readdir(Directory)))
