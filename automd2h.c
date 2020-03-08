@@ -680,7 +680,7 @@ bool if_html_version_exists(char *file)
 }
 
 //Convert all md (ASKED SPECIFICALLY) files inside Directory if there is no html version of them
-int Convert_Directory(char *Dir,bool Arg_is_Dir_Then_Convert,bool checktime)
+int Convert_Directory(char *Dir, bool checktime)
 {
     DIR *Directory;
     struct dirent *entry;
@@ -971,7 +971,7 @@ int launch_with_no_options(struct Arguments *arguments){
             //   if the current argument is a Directory
             else if (is_directory(arguments->files[i].filename))
             {
-                if (Convert_Directory(arguments->files[i].filename,true,false) == 1)
+                if (Convert_Directory(arguments->files[i].filename,false) == 1)
                 {
                     return 1;
                 }
@@ -1011,7 +1011,7 @@ int launch_with_options(struct Arguments *arguments,enum Options *option,enum Op
                  if (arguments->num_files==0)
                  {
                      //printf("num files = 0.\n");
-                     Convert_Directory(".",false,true);
+                     Convert_Directory(".",true);
                      return 0;
                  }
                  
@@ -1031,7 +1031,7 @@ int launch_with_options(struct Arguments *arguments,enum Options *option,enum Op
                         //printf("DIR %s needs to be converted .\n", arguments->files[file].filename);
                         //elements of the directory needs to be converted, needs to checktime
                         // convertir juste les md avec une nouvelle version par rapport au html ou sans html du tout
-                        Convert_Directory(arguments->files[file].filename,false,true);
+                        Convert_Directory(arguments->files[file].filename,true);
                     }else
                     {
                         //no need to be converted
