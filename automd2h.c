@@ -65,7 +65,7 @@ enum Format
     txt,
     markdown,
     html,
-	another,
+    another,
     Directory
 };
 
@@ -84,7 +84,7 @@ struct File
 {
     /* data */
     enum Format format;
-    time_t time;       //the last modification time
+    time_t time;        //the last modification time
     char filename[300]; //The name of the file
 };
 
@@ -164,9 +164,11 @@ char *replaceWord(const char *s, const char *oldW, const char *newW)
  * File Validation functions.
  */
 
-char *get_filename_ext(char *filename) {
+char *get_filename_ext(char *filename)
+{
     char *dot = strrchr(filename, '.');
-    if(!dot || dot == filename) return "";
+    if (!dot || dot == filename)
+        return "";
     return dot;
 }
 
@@ -177,7 +179,7 @@ bool is_Markdown(char *filename)
 
 bool is_HTML(char *filename)
 {
-	return strcmp(get_filename_ext(filename), ".html") == 0;
+    return strcmp(get_filename_ext(filename), ".html") == 0;
 }
 
 bool is_directory(char *filename)
@@ -186,11 +188,14 @@ bool is_directory(char *filename)
     DIR *dir;
 
     dir = opendir(filename);
-    if (dir == NULL) {
-       // printf("Couldn't open dir\n");
-    } else {
+    if (dir == NULL)
+    {
+        // printf("Couldn't open dir\n");
+    }
+    else
+    {
         //printf("Opened dir\n");
-        is_directory=true;
+        is_directory = true;
     }
 
     if (dir != NULL)
@@ -202,29 +207,29 @@ bool is_directory(char *filename)
  * Option Validation functions.
  */
 bool is_Option(char *option)
-    {
-        return strstr(option, "-") != NULL && strlen(option) == 2;
-    }
-    bool is_Option_t(char *option)
-    {
-        return strstr(option, "-t") != NULL;
-    }
-    bool is_Option_n(char *option)
-    {
-        return strstr(option, "-n") != NULL;
-    }
-    bool is_Option_r(char *option)
-    {
-        return strstr(option, "-r") != NULL;
-    }
-    bool is_Option_w(char *option)
-    {
-        return strstr(option, "-w") != NULL;
-    }
-    bool is_Option_f(char *option)
-    {
-        return strstr(option, "-f") != NULL;
-    }
+{
+    return strstr(option, "-") != NULL && strlen(option) == 2;
+}
+bool is_Option_t(char *option)
+{
+    return strstr(option, "-t") != NULL;
+}
+bool is_Option_n(char *option)
+{
+    return strstr(option, "-n") != NULL;
+}
+bool is_Option_r(char *option)
+{
+    return strstr(option, "-r") != NULL;
+}
+bool is_Option_w(char *option)
+{
+    return strstr(option, "-w") != NULL;
+}
+bool is_Option_f(char *option)
+{
+    return strstr(option, "-f") != NULL;
+}
 enum Options option_detection(char *option)
 {
     enum Options Detected_option = no_option;
@@ -274,16 +279,18 @@ void initialise_Arguments(struct Arguments *arguments)
     arguments->num_options = 0;
 }
 
-void No_arg_Failure(int argc){
-    if (argc == 1) {exit(EXIT_FAILURE);}
+void No_arg_Failure(int argc)
+{
+    if (argc == 1)
+    {
+        exit(EXIT_FAILURE);
+    }
 }
-
 
 struct Arguments *parse_arguments(int argc, char *argv[])
 {
     //fails if no arguments
     No_arg_Failure(argc);
-
 
     //printf("Parsing Arguments..\n");
     struct Arguments *arguments = malloc(sizeof(struct Arguments));
@@ -338,22 +345,21 @@ struct Arguments *parse_arguments(int argc, char *argv[])
         if (is_Markdown(argv[arguments->argv_index]))
         {
 
-                strncpy(arguments->files[arguments->num_files].filename, argv[arguments->argv_index], sizeof(arguments->files[arguments->num_files].filename));
-                arguments->files[arguments->num_files].filename[sizeof(arguments->files[arguments->num_files].filename) - 1] = '\0';
-                //printf("You want me to convert a md file (%s) \n",argv[arguments->argv_index]);
-                arguments->files[arguments->num_files].format = markdown;
-                arguments->status = OK;
-                arguments->num_files++;
-            
-				}
-    		else if (is_HTML(argv[arguments->argv_index]))
+            strncpy(arguments->files[arguments->num_files].filename, argv[arguments->argv_index], sizeof(arguments->files[arguments->num_files].filename));
+            arguments->files[arguments->num_files].filename[sizeof(arguments->files[arguments->num_files].filename) - 1] = '\0';
+            //printf("You want me to convert a md file (%s) \n",argv[arguments->argv_index]);
+            arguments->files[arguments->num_files].format = markdown;
+            arguments->status = OK;
+            arguments->num_files++;
+        }
+        else if (is_HTML(argv[arguments->argv_index]))
         {
-                //printf("You want me to convert a html file \n");
-                strncpy(arguments->files[arguments->num_files].filename, argv[arguments->argv_index], sizeof(arguments->files[arguments->num_files].filename));
-                arguments->files[arguments->num_files].filename[sizeof(arguments->files[arguments->num_files].filename) - 1] = '\0';
-                arguments->files[arguments->num_files].format = html;
-                arguments->status = OK;
-                arguments->num_files++;
+            //printf("You want me to convert a html file \n");
+            strncpy(arguments->files[arguments->num_files].filename, argv[arguments->argv_index], sizeof(arguments->files[arguments->num_files].filename));
+            arguments->files[arguments->num_files].filename[sizeof(arguments->files[arguments->num_files].filename) - 1] = '\0';
+            arguments->files[arguments->num_files].format = html;
+            arguments->status = OK;
+            arguments->num_files++;
         }
         else if (is_directory(argv[arguments->argv_index]))
         {
@@ -367,12 +373,11 @@ struct Arguments *parse_arguments(int argc, char *argv[])
         else
         {
             //printf("You want me to convert a another file \n");
-                strncpy(arguments->files[arguments->num_files].filename, argv[arguments->argv_index], sizeof(arguments->files[arguments->num_files].filename));
-                arguments->files[arguments->num_files].filename[sizeof(arguments->files[arguments->num_files].filename) - 1] = '\0';
-                arguments->files[arguments->num_files].format = another;
-                arguments->status = OK;
-                arguments->num_files++;
-
+            strncpy(arguments->files[arguments->num_files].filename, argv[arguments->argv_index], sizeof(arguments->files[arguments->num_files].filename));
+            arguments->files[arguments->num_files].filename[sizeof(arguments->files[arguments->num_files].filename) - 1] = '\0';
+            arguments->files[arguments->num_files].format = another;
+            arguments->status = OK;
+            arguments->num_files++;
         }
         //next argument
         arguments->argv_index++;
@@ -474,19 +479,23 @@ void print_args(struct Arguments *arguments)
     }
 }
 
-char* concatenate_file_extension(char *filePath){
- 	char *newFileName = (char *) malloc(255);
- 	if (file_exist(filePath)){
- 		if(is_Markdown(filePath)){
-			//copy all except .md
-			newFileName = replaceWord(filePath, ".md", ".html");
-		}
-		else if (is_directory(filePath) == false){
-			strcpy(newFileName, filePath);
-			strcat(newFileName, ".html");
- 		}
- 	}
- 		return newFileName;
+char *concatenate_file_extension(char *filePath)
+{
+    char *newFileName = (char *)malloc(255);
+    if (file_exist(filePath))
+    {
+        if (is_Markdown(filePath))
+        {
+            //copy all except .md
+            newFileName = replaceWord(filePath, ".md", ".html");
+        }
+        else if (is_directory(filePath) == false)
+        {
+            strcpy(newFileName, filePath);
+            strcat(newFileName, ".html");
+        }
+    }
+    return newFileName;
 }
 
 //Check if converted document has a newer version (option t)
@@ -577,7 +586,6 @@ void print_current_directory(char *currentDir, bool checkTime)
     closedir(dir);
 }
 
-
 void print_arguments_files(struct Arguments *arguments, bool checkTime)
 {
     for (int i = 0; i < arguments->num_files; i++)
@@ -619,20 +627,20 @@ int Pandoc(char *file)
     else if (c_pid == 0)
     {
         //Pandoc will run here.
-	    char *output = concatenate_file_extension(file);
-    	char *ls_args[] = {"pandoc", file, "-o", output, NULL};
+        char *output = concatenate_file_extension(file);
+        char *ls_args[] = {"pandoc", file, "-o", output, NULL};
 
-            //calling pandoc
-            if (file_exist(file))
-            {
-                execvp(ls_args[0], ls_args);
-            }
-            else
-            {
-                //Error Handeler
-                perror("ENOENT");
-                exit(EXIT_FAILURE);
-            }
+        //calling pandoc
+        if (file_exist(file))
+        {
+            execvp(ls_args[0], ls_args);
+        }
+        else
+        {
+            //Error Handeler
+            perror("ENOENT");
+            exit(EXIT_FAILURE);
+        }
         //exit(EXIT_SUCCESS);
     }
     else
@@ -650,9 +658,9 @@ int Pandoc(char *file)
                 exit(EXIT_FAILURE);
             }
         }
-       // printf("status: %d\n",status);
+        // printf("status: %d\n",status);
     }
-     //printf("pandoc ends with stat 0\n");
+    //printf("pandoc ends with stat 0\n");
     return 0;
 }
 
@@ -699,9 +707,11 @@ int Convert_Directory(char *Dir, bool checktime)
     if (Directory == NULL)
     {
         //perror("Unable to read directory.. i'm leaving\n");
-         //printf("Convert_Directory ends with stat 0\n");
+        //printf("Convert_Directory ends with stat 0\n");
         return (0); // leave
-    }else{
+    }
+    else
+    {
         /* Read directory entries */
         while ((entry = readdir(Directory)))
         {
@@ -717,16 +727,18 @@ int Convert_Directory(char *Dir, bool checktime)
             {
                 //printf("%4s: %s\n", "File", fullname);
                 //its a file
-                    if(is_Markdown(fullname) && (file_needs_conversion(fullname) || checktime == false)){
-                        //printf("%s needs to be converted\n",fullname);
-                        if (Pandoc(fullname) == 1){//printf("pandoc ends with stat 0\n");
-                        return 1;}
+                if (is_Markdown(fullname) && (file_needs_conversion(fullname) || checktime == false))
+                {
+                    //printf("%s needs to be converted\n",fullname);
+                    if (Pandoc(fullname) == 1)
+                    { //printf("pandoc ends with stat 0\n");
+                        return 1;
                     }
-                
+                }
             }
         }
         closedir(Directory);
-       // printf("Convert_Directory ends with stat 0\n");
+        // printf("Convert_Directory ends with stat 0\n");
     }
     return (0);
 }
@@ -833,21 +845,22 @@ int watch(char *Dir)
                 continue;
             //if (event->mask & IN_CREATE)
             //{
-              //  if (event->mask & IN_ISDIR)
-              //  {
-               //     printf("The directory %s was created.\n", event->name);
-               // }
-               // else
-              //  {
-               //     printf("The file %s was created.\n", event->name);
-               // }
+            //  if (event->mask & IN_ISDIR)
+            //  {
+            //     printf("The directory %s was created.\n", event->name);
+            // }
+            // else
+            //  {
+            //     printf("The file %s was created.\n", event->name);
+            // }
             //}
-						if(event->mask & IN_MODIFY){
-								//if (Pandoc(event->name) == 1){
-                 // 		return 1;
-              	//}
-						}
-      	}
+            //if (event->mask & IN_MODIFY)
+            {
+                //if (Pandoc(event->name) == 1){
+                // 		return 1;
+                //}
+            }
+        }
     }
     (void)inotify_rm_watch(fd, wd[0]);
     (void)close(fd);
@@ -968,142 +981,144 @@ void Observe(bool Immediate_Convertion)
     }
 }
 // launching the program with no option entered.
-int launch_with_no_options(struct Arguments *arguments){
-        for (int i = 0; i < arguments->num_files; i++)
+int launch_with_no_options(struct Arguments *arguments)
+{
+    for (int i = 0; i < arguments->num_files; i++)
+    {
+        //   if the current argument is a file
+        if (is_directory(arguments->files[i].filename) == false)
         {
-            //   if the current argument is a file
-            if (is_directory(arguments->files[i].filename)==false)
+            if (Pandoc(arguments->files[i].filename) == 1)
             {
-                if (Pandoc(arguments->files[i].filename) == 1)
-                {
-                    return 1;
-                }
-            }
-            //   if the current argument is a Directory
-            else if (is_directory(arguments->files[i].filename))
-            {
-                if (Convert_Directory(arguments->files[i].filename,false) == 1)
-                {
-                    return 1;
-                }
+                return 1;
             }
         }
-        return 0;
-}
-
-// launching the program with options
-int launch_with_options(struct Arguments *arguments,enum Options *option,enum Options *next_option, int *option_index){
-        switch (*option)
+        //   if the current argument is a Directory
+        else if (is_directory(arguments->files[i].filename))
         {
-        case t:
-            // OPTION -T -N
-             if (*next_option == n){
-                 *next_option = no_option;
-                 *option_index++; // because we already considered the next option (which is n)
-
-                 //t combined with n
-                for (int file = 0; file < arguments->num_files; file++)
-                {
-                    //printf("file name : %s \n", arguments->files[file].filename);
-                    if (file_needs_conversion(arguments->files[file].filename))
-                    {
-                        printf("%s\n",arguments->files[file].filename);
-                    }
-                    else
-                    {
-                        //no need to be converted
-                        //  printf("no convertion needed for %s \n", arguments->files[file].filename);
-                    }
-                } 
-                return 0;
-
-             }else// OPTION T
-             {
-                 //printf("option t detected\n");                 
-                for (int file = 0; file < arguments->num_files; file++)
-                {
-                    if (is_directory(arguments->files[file].filename)==false 
-                    && file_exist(arguments->files[file].filename)==true)
-                    {
-                        //file Need to be converted
-                        //printf("%s needs to be converted .\n", arguments->files[file].filename);
-                        if (file_needs_conversion(arguments->files[file].filename))
-                        {
-                            if(Pandoc(arguments->files[file].filename) == 1){return 1;}
-                        }
-                    }
-                    else if(is_directory(arguments->files[file].filename)==true)
-                    {
-                        //printf("DIR %s needs to be converted .\n", arguments->files[file].filename);
-                        //elements of the directory needs to be converted, needs to checktime
-                        // convertir juste les md avec une nouvelle version par rapport au html ou sans html du tout
-                        Convert_Directory(arguments->files[file].filename,true);
-                    }else
-                    {
-                       // printf("not a directory %s \n", arguments->files[file].filename);
-
-                        return 0;
-                        //no need to be converted
-                    }
-                    
-                } 
-                return 0;            
-            }     
-            break;
-
-        case n:
-
-            if (*next_option == t)
+            if (Convert_Directory(arguments->files[i].filename, false) == 1)
             {
-                ///printf("\nOption n combined with t Detected.\n");
-                print_arguments_files(arguments, true);
-                *option_index++; // because we already considered the next option (which is t)
+                return 1;
             }
-            else
-            {
-                //printf("\nOption n Detected.\n");
-                print_arguments_files(arguments, false);
-            }
-            break;
-
-        case r:
-            printf("\nStarting Recursive Research..\n");
-            RecursiveSearch(".", false, NULL);
-            break;
-
-        case w:
-
-            if (*next_option == f)
-            {
-                printf("\nOption w combined with f Detected...Immediate convertion\n");
-                *option_index++; // because we already considered the next option (which is f)
-                //Observe(true);
-            }
-            else
-            {
-								for (int file = 0; file < arguments->num_files; file++)
-                {
-									watch(arguments->files[file].filename);
-								}
-                //printf("\nOption w Detected.\n");
-                //Observe(false);
-            }
-
-            break;
-
-        case Optionerror:
-            //fprintf(stderr, "Option parsing failed\n");
-            arguments->status = WRONG_VALUE;
-            //exit(EXIT_FAILURE);
-            break;
-
-        default:
-            break;
         }
-        //printf("launch_with_options ends with stat 0\n");
+    }
     return 0;
 }
 
+// launching the program with options
+int launch_with_options(struct Arguments *arguments, enum Options *option, enum Options *next_option, int *option_index)
+{
+    switch (*option)
+    {
+    case t:
+        // OPTION -T -N
+        if (*next_option == n)
+        {
+            *next_option = no_option;
+            *option_index++; // because we already considered the next option (which is n)
+
+            //t combined with n
+            for (int file = 0; file < arguments->num_files; file++)
+            {
+                //printf("file name : %s \n", arguments->files[file].filename);
+                if (file_needs_conversion(arguments->files[file].filename))
+                {
+                    printf("%s\n", arguments->files[file].filename);
+                }
+                else
+                {
+                    //no need to be converted
+                    //  printf("no convertion needed for %s \n", arguments->files[file].filename);
+                }
+            }
+            return 0;
+        }
+        else // OPTION T
+        {
+            //printf("option t detected\n");
+            for (int file = 0; file < arguments->num_files; file++)
+            {
+                if (is_directory(arguments->files[file].filename) == true)
+                {
+                    Convert_Directory(arguments->files[file].filename, true);
+                    //file Need to be converted
+                    //printf("%s needs to be converted .\n", arguments->files[file].filename);
+                }
+                else if (file_exist(arguments->files[file].filename))
+                {
+                    //printf("DIR %s needs to be converted .\n", arguments->files[file].filename);
+                    //elements of the directory needs to be converted, needs to checktime
+                    // convertir juste les md avec une nouvelle version par rapport au html ou sans html du tout
+                    if (file_needs_conversion(arguments->files[file].filename))
+                    {
+                        if (Pandoc(arguments->files[file].filename) == 1)
+                        {
+                            return 1;
+                        }
+                    }
+                }
+                else
+                {
+                    // printf("not a directory %s \n", arguments->files[file].filename);
+
+                    return 0;
+                    //no need to be converted
+                }
+            }
+            return 0;
+        }
+        break;
+
+    case n:
+
+        if (*next_option == t)
+        {
+            ///printf("\nOption n combined with t Detected.\n");
+            print_arguments_files(arguments, true);
+            *option_index++; // because we already considered the next option (which is t)
+        }
+        else
+        {
+            //printf("\nOption n Detected.\n");
+            print_arguments_files(arguments, false);
+        }
+        break;
+
+    case r:
+        printf("\nStarting Recursive Research..\n");
+        RecursiveSearch(".", false, NULL);
+        break;
+
+    case w:
+
+        if (*next_option == f)
+        {
+            printf("\nOption w combined with f Detected...Immediate convertion\n");
+            *option_index++; // because we already considered the next option (which is f)
+            //Observe(true);
+        }
+        else
+        {
+            for (int file = 0; file < arguments->num_files; file++)
+            {
+                watch(arguments->files[file].filename);
+            }
+            //printf("\nOption w Detected.\n");
+            //Observe(false);
+        }
+
+        break;
+
+    case Optionerror:
+        //fprintf(stderr, "Option parsing failed\n");
+        arguments->status = WRONG_VALUE;
+        //exit(EXIT_FAILURE);
+        break;
+
+    default:
+        break;
+    }
+    return 0;
 int lauchProgram(struct Arguments *arguments)
 {
     //Array of options
@@ -1123,7 +1138,7 @@ int lauchProgram(struct Arguments *arguments)
     //if no option is entered, we convert files entered if there is no html version of them
     if (no_options_entered(OptionArray))
     {
-        if (launch_with_no_options(arguments)==1)
+        if (launch_with_no_options(arguments) == 1)
         {
             return 1;
         }
@@ -1134,8 +1149,10 @@ int lauchProgram(struct Arguments *arguments)
     //looping through the options // 4 options max
     for (int index_option = 0; index_option < 4; index_option++)
     {
-        if( launch_with_options(arguments,&OptionArray[index_option],&OptionArray[index_option+1],&index_option) == 1)
-        {return 1;}
+        if (launch_with_options(arguments, &OptionArray[index_option], &OptionArray[index_option + 1], &index_option) == 1)
+        {
+            return 1;
+        }
     }
     //printf("lauchProgram ends with stat 0\n");
     return 0;
@@ -1157,7 +1174,7 @@ int main(int argc, char *argv[])
         //print_args(arguments);
         //Print_num_Options(arguments);
         if (lauchProgram(arguments) == 1)
-        {  
+        {
             return 1;
         }
     }
