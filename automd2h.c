@@ -566,15 +566,15 @@ int Pandoc(char *file)
     //printf("Pandoc is trying to convert the file...\n");
 
     // Forking
-    pid_t pid;
-    pid = fork();
+    pid_t c_pid;
+    c_pid = fork();
 
-    if (pid == -1)
+    if (c_pid == -1)
     {
         perror("Fork Error");
     }
     // child process because return value zero
-    else if (pid == 0)
+    else if (c_pid == 0)
     {
 
         //printf("Hello from Child!\n");
@@ -600,12 +600,30 @@ int Pandoc(char *file)
         else
         {
             //Error Handeler
-            fprintf(stdout, "pandoc failed\n");
-            exit(EXIT_FAILURE);
+            fprintf(stdout, "pandoc should failed with exit 42\n");
+            exit(42);
+            printf( "hello\n");
         }
+    }else{
+        //parent
+  
+        int status; 
+        
+        waitpid(c_pid, &status, 0); 
+    
+        if ( WIFEXITED(status) ) 
+        { 
+            int exit_status = WEXITSTATUS(status);         
+            printf("Exit status of the child was %d\n",  
+                                        exit_status); 
+            exit(exit_status);
+        } 
+
+
     }
     return 0;
 }
+
 
 // Check if the user entered the same option twice.
 bool Check_Duplicates(enum Options OptionArray[])
@@ -1038,5 +1056,16 @@ int main(int argc, char *argv[])
         
     }
     free_arguments(arguments);
-    return 0;
+    return 5;
 }
+
+//upload
+// scp automd2h.c jk091087@java.labunix.uqam.ca:.
+
+//move
+// mv automd2h.c test8
+
+//compile
+//gcc -Wall -Wextra automd2h.c -o automd2h
+
+
