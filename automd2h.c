@@ -746,7 +746,7 @@ int Convert_Directory(char *Dir,bool Arg_is_Dir_Then_Convert,bool checktime)
                 }            
             }else if (checktime)
             {
-                if(file_needs_conversion(fullname)){
+                if(is_Markdown(fullname) && file_needs_conversion(fullname)){
                     if (Pandoc(fullname) == 1){return 1;}
                 }
             }
