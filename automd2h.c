@@ -652,7 +652,7 @@ int Pandoc(char *file)
         }
        // printf("status: %d\n",status);
     }
-     printf("pandoc ends with stat 0\n");
+     //printf("pandoc ends with stat 0\n");
     return 0;
 }
 
@@ -699,34 +699,35 @@ int Convert_Directory(char *Dir, bool checktime)
     if (Directory == NULL)
     {
         //perror("Unable to read directory.. i'm leaving\n");
-         printf("Convert_Directory ends with stat 0\n");
+         //printf("Convert_Directory ends with stat 0\n");
         return (0); // leave
-    }
-
-    /* Read directory entries */
-    while ((entry = readdir(Directory)))
-    {
-        char fullname[257];
-        sprintf(fullname, "%s/%s", Dir, entry->d_name);
-        stat(fullname, &filestat);
-
-        if (S_ISDIR(filestat.st_mode))
+    }else{
+        /* Read directory entries */
+        while ((entry = readdir(Directory)))
         {
-            //printf("%4s: %s\n", "Dir", fullname);
+            char fullname[257];
+            sprintf(fullname, "%s/%s", Dir, entry->d_name);
+            stat(fullname, &filestat);
+
+            if (S_ISDIR(filestat.st_mode))
+            {
+                //printf("%4s: %s\n", "Dir", fullname);
+            }
+            else
+            {
+                //printf("%4s: %s\n", "File", fullname);
+                //its a file
+                    if(is_Markdown(fullname) && (file_needs_conversion(fullname) || checktime == false)){
+                        //printf("%s needs to be converted\n",fullname);
+                        if (Pandoc(fullname) == 1){//printf("pandoc ends with stat 0\n");
+                        return 1;}
+                    }
+                
+            }
         }
-        else
-        {
-            //printf("%4s: %s\n", "File", fullname);
-            //its a file
-		        if(is_Markdown(fullname) && (file_needs_conversion(fullname) || checktime == false)){
-                    //printf("%s needs to be converted\n",fullname);
-		            if (Pandoc(fullname) == 1){return 1;}
-		        }
-            
-        }
+        closedir(Directory);
+       // printf("Convert_Directory ends with stat 0\n");
     }
-    closedir(Directory);
-    printf("Convert_Directory ends with stat 0\n");
     return (0);
 }
 
@@ -1014,13 +1015,15 @@ int launch_with_options(struct Arguments *arguments,enum Options *option,enum Op
                         //  printf("no convertion needed for %s \n", arguments->files[file].filename);
                     }
                 } 
+                return 0;
 
              }else// OPTION T
              {
                  //printf("option t detected\n");                 
                 for (int file = 0; file < arguments->num_files; file++)
                 {
-                    if (is_directory(arguments->files[file].filename)==false )
+                    if (is_directory(arguments->files[file].filename)==false 
+                    && file_exist(arguments->files[file].filename)==true)
                     {
                         //file Need to be converted
                         //printf("%s needs to be converted .\n", arguments->files[file].filename);
@@ -1037,11 +1040,14 @@ int launch_with_options(struct Arguments *arguments,enum Options *option,enum Op
                         Convert_Directory(arguments->files[file].filename,true);
                     }else
                     {
+                       // printf("not a directory %s \n", arguments->files[file].filename);
+
+                        return 0;
                         //no need to be converted
-                        //  printf("no convertion needed for %s \n", arguments->files[file].filename);
                     }
                     
-                }             
+                } 
+                return 0;            
             }     
             break;
 
@@ -1094,7 +1100,7 @@ int launch_with_options(struct Arguments *arguments,enum Options *option,enum Op
         default:
             break;
         }
-        printf("launch_with_options ends with stat 0\n");
+        //printf("launch_with_options ends with stat 0\n");
     return 0;
 }
 
@@ -1131,7 +1137,7 @@ int lauchProgram(struct Arguments *arguments)
         if( launch_with_options(arguments,&OptionArray[index_option],&OptionArray[index_option+1],&index_option) == 1)
         {return 1;}
     }
-    printf("lauchProgram ends with stat 0\n");
+    //printf("lauchProgram ends with stat 0\n");
     return 0;
 }
 
@@ -1156,6 +1162,6 @@ int main(int argc, char *argv[])
         }
     }
     free_arguments(arguments);
-    printf("MAIN ends with stat 0\n");
+    //printf("MAIN ends with stat 0\n");
     return 0;
 }
