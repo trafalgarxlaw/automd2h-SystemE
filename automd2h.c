@@ -1006,7 +1006,7 @@ void Observe(bool Immediate_Convertion)
     }
 }
 
-int launch_with_no_options(struct Arguments *arguments,enum Options *OptionArray[]){
+int launch_with_no_options(struct Arguments *arguments){
         for (int i = 0; i < arguments->num_files; i++)
         {
             //   if the current argument is a file
@@ -1026,6 +1026,8 @@ int launch_with_no_options(struct Arguments *arguments,enum Options *OptionArray
                 }
             }
         }
+        return 0;
+
 }
 
 int lauchProgram(struct Arguments *arguments)
@@ -1047,7 +1049,7 @@ int lauchProgram(struct Arguments *arguments)
     //if no option is entered, we convert files entered if there is no html version of them
     if (no_options_entered(OptionArray))
     {
-        if (launch_with_no_options(arguments,OptionArray)==1)
+        if (launch_with_no_options(arguments)==1)
         {
             return 1;
         }
