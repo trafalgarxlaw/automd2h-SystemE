@@ -715,9 +715,24 @@ int Convert_Directory(char *Dir,bool Arg_is_Dir_Then_Convert,bool checktime)
         {
             //printf("%4s: %s\n", "File", fullname);
             //its a file
-		        if(is_Markdown(fullname) && (file_needs_conversion(fullname) || checktime == false)){
-		            if (Pandoc(fullname) == 1){return 1;}
-		        }
+            if (Arg_is_Dir_Then_Convert)
+            {
+                //printf("is dir then conv \n");
+                if (is_Markdown(fullname) && if_html_version_exists(fullname) == false)
+                {
+                    if (Pandoc(fullname) == 1)
+                    {
+                        return 1;
+                    }
+                }            
+            }else if (checktime)
+            {
+                //printf("checktime is on\n");
+                if(is_Markdown(fullname) && file_needs_conversion(fullname)){
+                    //printf("converting..\n");
+                    if (Pandoc(fullname) == 1){return 1;}
+                }
+            }
             
         }
     }
@@ -967,7 +982,7 @@ int launch_with_no_options(struct Arguments *arguments){
         for (int i = 0; i < arguments->num_files; i++)
         {
             //   if the current argument is a file
-            if (is_directory(arguments->files[i].filename)==false)
+            if (is_directory(arguments->files[i].filename)==false&& if_html_version_exists(arguments->files[i].filename) == false)
             {
                 if (Pandoc(arguments->files[i].filename) == 1)
                 {
