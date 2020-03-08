@@ -1030,7 +1030,8 @@ int launch_with_no_options(struct Arguments *arguments){
         return 0;
 }
 
-int lauch_with_options(struct Arguments *arguments,enum Options *option,enum Options *next_option, int *option_index){
+// launching the program with options
+int launch_with_options(struct Arguments *arguments,enum Options *option,enum Options *next_option, int *option_index){
         switch (*option)
         {
         case t:
@@ -1165,10 +1166,11 @@ int lauchProgram(struct Arguments *arguments)
 
     //of there are options
 
-    //looping through the options
+    //looping through the options // 4 options max
     for (int index_option = 0; index_option < 4; index_option++)
     {
-        lauch_with_options(arguments,&OptionArray[index_option],&OptionArray[index_option+1],&index_option);
+        if( launch_with_options(arguments,&OptionArray[index_option],&OptionArray[index_option+1],&index_option) == 1)
+        return 1;
     }
     return 0;
 }
