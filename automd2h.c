@@ -724,7 +724,7 @@ int Convert_Directory(char *Dir,bool Arg_is_Dir_Then_Convert,bool checktime)
     while ((entry = readdir(Directory)))
     {
         char fullname[257];
-        //sprintf(fullname, "%s/%s", Dir, entry->d_name);
+        sprintf(fullname, "%s/%s", Dir, entry->d_name);
         stat(fullname, &filestat);
 
         if (S_ISDIR(filestat.st_mode))
