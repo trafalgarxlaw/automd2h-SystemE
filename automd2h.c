@@ -508,12 +508,12 @@ bool file_needs_conversion(char *filename)
                     {
                         //If there is, a convertion is needed
                         convert = true;
-                        printf("..Convertion needed\n");
+                        //printf("..Convertion needed\n");
                     }
                     else
                     {
                         //if not, no convertion needed.
-                        printf("..no convertion needed\n");
+                        //printf("..no convertion needed\n");
                     }
                 }
                 else
