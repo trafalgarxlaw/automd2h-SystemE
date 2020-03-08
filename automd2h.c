@@ -530,7 +530,7 @@ void print_current_directory(char *currentDir, bool checkTime)
 {
     struct dirent *d;
 
-    printf("printing current directory...\n");
+    //printf("printing current directory...\n");
     DIR *dir = opendir(currentDir);
     if (dir == NULL)
     {
@@ -547,7 +547,22 @@ void print_current_directory(char *currentDir, bool checkTime)
         }
     }
     closedir(dir);
-    printf("\n");
+}
+void print_SourcePath(struct Arguments *arguments)
+{
+    for (int i = 0; i < arguments->num_files; i++)
+    {
+        //printing files
+        if (arguments->files[i].format!=Directory)
+        {
+            printf("%s\n",arguments->files[i].filename);
+        }else if (arguments->files[i].format==Directory)
+        {
+           printf("%s\n",arguments->files[i].filename);
+        }
+           
+    }
+
 }
 
 // To review
@@ -938,8 +953,6 @@ int lauchProgram(struct Arguments *arguments)
                 {
                     if(Convert_Directory(arguments->files[i].filename)==1){return 1;}
                 }
-                
-            
         }
 
         return 0;
@@ -988,8 +1001,9 @@ int lauchProgram(struct Arguments *arguments)
             }
             else
             {
-                printf("\nOption n Detected.\n");
-                print_current_directory(".", false);
+                //printf("\nOption n Detected.\n");
+               // print_current_directory(".", false);
+               print_SourcePath(arguments);
             }
             break;
 
@@ -1037,7 +1051,6 @@ int main(int argc, char *argv[])
         //fprintf(stderr, "failed to read arguments\n");
 
         //free_arguments(arguments);
-        //exit(EXIT_FAILURE);
         return 1;
     }else
     {
