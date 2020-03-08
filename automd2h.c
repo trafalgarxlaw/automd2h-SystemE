@@ -566,6 +566,7 @@ void print_current_directory(char *currentDir, bool checkTime)
     closedir(dir);
 }
 
+
 void print_arguments_files(struct Arguments *arguments, bool checkTime)
 {
     for (int i = 0; i < arguments->num_files; i++)
@@ -665,6 +666,29 @@ int Pandoc(char *file)
     }
     return 0;
 }
+void convert_current_directory(char *currentDir, bool checkTime)
+{
+    struct dirent *d;
+
+    //printf("printing current directory...\n");
+    DIR *dir = opendir(currentDir);
+    if (dir == NULL)
+    {
+        fprintf(stderr, "Can't access directory\n");
+    }
+    while ((d = readdir(dir)) != NULL)
+    {
+        if (is_Markdown(d->d_name) || is_txt(d->d_name))
+        {
+            if (!checkTime || file_needs_conversion(d->d_name))
+            {
+                Pandoc(d->d_name);
+            }
+        }
+    }
+    closedir(dir);
+}
+
 
 // Check if the user entered the same option twice.
 bool Check_Duplicates(enum Options OptionArray[])
@@ -1029,7 +1053,9 @@ int lauchProgram(struct Arguments *arguments)
         switch (OptionArray[i])
         {
         case t:
+            // OPTION -T -N
              if (OptionArray[i + 1] == n){
+
                  OptionArray[i + 1] = no_option;
                  //t combined with n
                 for (int file = 0; file < arguments->num_files; file++)
@@ -1047,27 +1073,37 @@ int lauchProgram(struct Arguments *arguments)
                     }
                 } 
 
-             }else
+             }else// OPTION T
              {
+                 if (arguments->num_files==0)
+                 {
+                     convert_current_directory(".",true);
+                     return 0;
+                 }
+                 
                 for (int file = 0; file < arguments->num_files; file++)
                 {
                     //printf("\nOption t Detected.\n");
                     //  printf("file name : %s \n", arguments->files[file].filename);
-                    if (file_needs_conversion(arguments->files[file].filename))
+                    if (file_needs_conversion(arguments->files[file].filename)&&is_directory(arguments->files[file].filename)==false)
                     {
 
-                        //Need to be converted
-                        // printf("%s needs to be converted again.\n", arguments->files[file].filename);
+                        //file Need to be converted
+                        //printf("%s needs to be converted again.\n", arguments->files[file].filename);
                         if (Pandoc(arguments->files[file].filename) == 1)
                         {
                             return 1;
                         }
                     }
-                    else
+                    else if(is_directory(arguments->files[file].filename)==true)
                     {
-                        //no need to be converted
+                        convert_current_directory(arguments->files[file].filename,true);
+                    }else
+                    {
+                                                //no need to be converted
                         //  printf("no convertion needed for %s \n", arguments->files[file].filename);
                     }
+                    
                 }             
             }     
             break;
