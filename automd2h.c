@@ -187,6 +187,22 @@ bool is_directory(char *filename)
     return d;
 }
 
+// char* new_file_name(char *filePath){
+//  	char *newFileName = (char *) malloc(255);
+//  	if (file_exist(filePath)){
+//  		if(is_Markdown(filePath)){
+// 			//copy all except .md
+// 				char *p = strstr(filePath, ".md");
+// 					strncpy(newFileName, filePath, p - filePath);
+// 		}
+// 		else if (is_txt(filePath)){
+// 			strcpy(newFileName, filePath);
+//  		}
+// 			strcat(newFileName, ".html");
+//  	}
+//  		return newFileName;
+// }
+
 /**
  * Option Validation functions.
  */
@@ -467,17 +483,32 @@ bool has_new_doc_version(time_t sourceFile, time_t destFile)
     return sourceFile > destFile;
 }
 
+
+char *ConvertFileName(char *filename){
+
+    if (is_Markdown(filename))
+    {
+        char *newFileName = replaceWord(filename, ".md", ".html");
+        return newFileName;
+    }else if (is_txt(filename))
+    {
+        char *newFileName = replaceWord(filename, ".txt", ".txt.html"); 
+        return newFileName;
+    }
+    return NULL;
+}
 //Check if documents has a new version to convert
 bool file_needs_conversion(char *filename)
 {
     bool convert = false;
     struct stat attrib;
     struct stat newAttrib;
-    char *newFileName = replaceWord(filename, ".md", ".html");
 
-    printf("\nChecking if %s needs to be converted\n", filename);
+    char *newFileName = ConvertFileName(filename);
+
+    //printf("\nChecking if %s needs to be converted\n", filename);
     //Checking if the given file exists and if its a .md
-    if (file_exist(filename) && is_Markdown(filename))
+    if (file_exist(filename))
     {
         //getting the file stats
         if (stat(filename, &attrib) == 0)
@@ -492,12 +523,12 @@ bool file_needs_conversion(char *filename)
                     {
                         //If there is, a convertion is needed
                         convert = true;
-                        printf("..Convertion needed\n");
+                       // printf("..Convertion needed\n");
                     }
                     else
                     {
                         //if not, no convertion needed.
-                        printf("..no convertion needed\n");
+                      //  printf("..no convertion needed\n");
                     }
                 }
                 else
@@ -507,7 +538,9 @@ bool file_needs_conversion(char *filename)
             }
             else
             {
-                printf("'%s' file do not exists, i can't compare them.\n", newFileName);
+                //destFile does not exists, need to convert the source file
+                //printf("'%s' file do not exists, i can't compare them.\n", newFileName);
+                convert = true;
             }
         }
         else
@@ -519,7 +552,7 @@ bool file_needs_conversion(char *filename)
     else
     {
         convert = false;
-        printf("The file %s does not exists or is not .md\n\n", filename);
+        //printf("The file %s does not exists or is not .md\n\n", filename);
     }
 
     return convert;
@@ -565,6 +598,19 @@ void print_SourcePath(struct Arguments *arguments)
 
 }
 
+void print_arguments_files(struct Arguments *arguments, bool checkTime)
+{
+	for (int i = 0; i < arguments->num_files; i++)
+    {
+		if(is_directory(arguments->files[i].filename)){
+			print_current_directory(arguments->files[i].filename, checkTime);
+		}
+		else{
+			printf("%s\n", arguments->files[i].filename);
+		}
+	}
+}
+
 // To review
 void free_arguments(struct Arguments *arguments)
 {
@@ -592,13 +638,18 @@ int Pandoc(char *file)
     // child process because return value zero
     else if (c_pid == 0)
     {        
-        // Pandoc will run here.
+        //Pandoc will run here.
         if (is_Markdown(file))
         {
-            printf("ismd\n");
             char *output = replaceWord(file, ".md", ".html");        
             char *ls_args[] = {"pandoc", file, "-o", output, NULL};
-        
+            //calling pandoc
+            // argv array for: ls -l
+            // Just like in main, the argv array must be NULL terminated.
+            // try to run ./a.out -x -y, it will work
+            //char *output = new_file_name(file);//replaceWord(file, ".md", ".html");
+            //checking if the file exists
+            
             if(file_exist(file)){
                 execvp(ls_args[0], ls_args);}
             else
@@ -660,24 +711,27 @@ bool Check_Duplicates(enum Options OptionArray[])
     }
     return DuplicateOption;
 }
-
-// bool if_html_version_exists_Myversion(const char *file)
+bool if_html_version_exists(const char *file)
+{
+    char *MardownConvertedVersion = replaceWord(file, ".md", ".html");//will return file if fails
+    char *txtConvertedVersion = replaceWord(file, ".txt", ".html");
+    bool htmlExists = false;
+    //Checking if the html version of a md file exists if its a md file
+    if (file_exist(MardownConvertedVersion) && strcmp(file,MardownConvertedVersion)!=0)
+    {
+        htmlExists = true;
+    }
+    if (file_exist(txtConvertedVersion)&& strcmp(file,txtConvertedVersion)!=0)
+    {
+        htmlExists = true;
+    }
+    return htmlExists;
+}
+// bool if_html_version_exists(char *file)
 // {
-//     char *MardownConvertedVersion = replaceWord(file, ".md", ".html");//will return file if fails
-//     char *txtConvertedVersion = replaceWord(file, ".txt", ".html");
-//     bool htmlExists = false;
-//     //Checking if the html version of a md file exists if its a md file
-//     if (file_exist(MardownConvertedVersion) && strcmp(file,MardownConvertedVersion)!=0)
-//     {
-//         htmlExists = true;
-//     }
-//     if (file_exist(txtConvertedVersion)&& strcmp(file,txtConvertedVersion)!=0)
-//     {
-//         htmlExists = true;
-//     }
-//     return htmlExists;
+//     char *MardownVersion = new_file_name(file);//replaceWord(file, ".md", ".html");
+//     return file_exist(MardownVersion);
 // }
-
 
 //Convert all md files inside Directory if there is no html version of them
 int Convert_Directory(char *Dir){
@@ -985,19 +1039,21 @@ int lauchProgram(struct Arguments *arguments)
             //ou si le fichier .html cible n'existe pas, alors il y a conversion.
             //Si la date est identique ou si le fichier .html cible est plus récent,
             //alors il n'y a pas de conversion.
-            for (int file = 0; i < arguments->num_files; i++)
+            for (int file = 0; file < arguments->num_files; file++)
             {
-                printf("\nOption t Detected.\n");
-                printf("file name : %s \n", arguments->files[file].filename);
+                //printf("\nOption t Detected.\n");
+              //  printf("file name : %s \n", arguments->files[file].filename);
                 if (file_needs_conversion(arguments->files[file].filename))
                 {
 
-                    printf("%s needs to be converted again.\n", arguments->files[file].filename);
+                    //Need to be converted
+                   // printf("%s needs to be converted again.\n", arguments->files[file].filename);
                     if(Pandoc(arguments->files[file].filename)==1){return 1;}
                 }
                 else
                 {
-                    printf("no convertion needed for %s \n", arguments->files[file].filename);
+                    //no need to be converted
+                  //  printf("no convertion needed for %s \n", arguments->files[file].filename);
                 }
             }
             break;
@@ -1009,15 +1065,17 @@ int lauchProgram(struct Arguments *arguments)
             //if combined with t
             if (OptionArray[i + 1] == t)
             {
-                printf("\nOption n combined with t Detected.\n");
-                print_current_directory(".", true);
+                ///printf("\nOption n combined with t Detected.\n");
+                //print_current_directory(".", true);
+print_arguments_files(arguments, true);
                 i++; // because we already considered the next option (which is t)
             }
             else
             {
                 //printf("\nOption n Detected.\n");
                // print_current_directory(".", false);
-               print_SourcePath(arguments);
+print_arguments_files(arguments, false);
+               //print_SourcePath(arguments);
             }
             break;
 
@@ -1057,7 +1115,6 @@ int lauchProgram(struct Arguments *arguments)
 int main(int argc, char *argv[])
 {
     //printf("\nStarting the program... \n");
-
     //printf(USAGE);
     struct Arguments *arguments = parse_arguments(argc, argv); //takes the arguments in the structure
     if (arguments->status != OK)
