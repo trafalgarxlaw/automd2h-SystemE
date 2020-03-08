@@ -510,11 +510,6 @@ bool file_needs_conversion(char *filename)
                         convert = true;
                         //printf("..Convertion needed for: %s\n",filename);
                     }
-                    else
-                    {
-                        //if not, no convertion needed.
-                        //printf("%s..no convertion needed\n",filename);
-                    }
                 }
                 else
                 {
@@ -690,7 +685,7 @@ bool Check_Duplicates(enum Options OptionArray[])
 bool if_html_version_exists(const char *file)
 {
     char *MardownConvertedVersion = replaceWord(file, ".md", ".html"); //will return file if fails
-    char *txtConvertedVersion = replaceWord(file, ".txt", ".html");
+    char *txtConvertedVersion = replaceWord(file, ".txt", ".txt.html");
     bool htmlExists = false;
     //Checking if the html version of a md file exists if its a md file
     if (file_exist(MardownConvertedVersion) && strcmp(file, MardownConvertedVersion) != 0)
