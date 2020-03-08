@@ -593,6 +593,21 @@ void Print_num_Options(struct Arguments *arguments)
 {
     printf("Number of options entered :%d \n", arguments->num_options);
 }
+// char* concatenat_file_extension(char *filePath){
+//  	char *newFileName = (char *) malloc(255);
+//  	if (file_exist(filePath)){
+//  		if(is_Markdown(filePath)){
+// 			//copy all except .md
+// 				char *p = strstr(filePath, ".md");
+// 					strncpy(newFileName, filePath, p - filePath);
+// 		}
+// 		else if (is_txt(filePath)){
+// 			strcpy(newFileName, filePath);
+//  		}
+// 			strncat(newFileName, ".html", 5);
+//  	}
+//  		return newFileName;
+// }
 
 int Pandoc(char *file)
 {
@@ -629,6 +644,7 @@ int Pandoc(char *file)
                 exit(EXIT_FAILURE);
             }
         }
+        //if its another type of file
         else if (is_txt(file))
         {
             char *output = replaceWord(file, ".txt", ".txt.html");
@@ -995,25 +1011,7 @@ void Observe(bool Immediate_Convertion)
     }
 }
 
-int lauchProgram(struct Arguments *arguments)
-{
-    //Array of options
-    enum Options OptionArray[5];
-    OptionArray[0] = arguments->option1;
-    OptionArray[1] = arguments->option2;
-    OptionArray[2] = arguments->option3;
-    OptionArray[3] = arguments->option4;
-    OptionArray[4] = no_option;
-
-    if (Check_Duplicates(OptionArray))
-    {
-        fprintf(stderr, "Error duplicates options.\n");
-        return 1;
-    }
-
-    //if no option is entered, we convert files entered if there is no html version of them
-    if (no_options_entered(OptionArray))
-    {
+int launch_with_no_options(struct Arguments *arguments,enum Options *OptionArray[]){
         for (int i = 0; i < arguments->num_files; i++)
         {
             //   if the current argument is a file
@@ -1033,7 +1031,31 @@ int lauchProgram(struct Arguments *arguments)
                 }
             }
         }
+}
 
+int lauchProgram(struct Arguments *arguments)
+{
+    //Array of options
+    enum Options OptionArray[5];
+    OptionArray[0] = arguments->option1;
+    OptionArray[1] = arguments->option2;
+    OptionArray[2] = arguments->option3;
+    OptionArray[3] = arguments->option4;
+    OptionArray[4] = no_option;
+
+    if (Check_Duplicates(OptionArray))
+    {
+        fprintf(stderr, "Error duplicates options.\n");
+        return 1;
+    }
+
+    //if no option is entered, we convert files entered if there is no html version of them
+    if (no_options_entered(OptionArray))
+    {
+        if (launch_with_no_options(arguments,OptionArray)==1)
+        {
+            return 1;
+        }
         return 0;
     }
 
