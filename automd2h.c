@@ -723,21 +723,9 @@ int Convert_Directory(char *Dir,bool Arg_is_Dir_Then_Convert,bool checktime)
         {
             //printf("%4s: %s\n", "File", fullname);
             //its a file
-            if (Arg_is_Dir_Then_Convert)
-            {
-                if (is_Markdown(fullname) && if_html_version_exists(fullname) == false)
-                {
-                    if (Pandoc(fullname) == 1)
-                    {
-                        return 1;
-                    }
-                }            
-            }else if (checktime)
-            {
-                if(is_Markdown(fullname) && file_needs_conversion(fullname)){
+                if(is_Markdown(fullname) && (file_needs_conversion(fullname) || checktime == false)){
                     if (Pandoc(fullname) == 1){return 1;}
                 }
-            }
             
         }
     }
