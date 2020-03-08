@@ -160,7 +160,6 @@ char *replaceWord(const char *s, const char *oldW, const char *newW)
     result[i] = '\0';
     return result;
 }
-
 /**
  * File Validation functions.
  */
@@ -188,7 +187,6 @@ bool is_directory(char *filename)
     d = opendir(filename);
     return d;
 }
-
 /**
  * Option Validation functions.
  */
@@ -254,9 +252,6 @@ enum Options option_detection(char *option)
     return Detected_option;
 }
 
-//  Note: les option -x sont entree en premier, ensuite les noms de fichiers
-//  NomProgramme -options(4options Max) NomsFichiers(Unlimited)
-//  ex automd2h foo.txt -˛> foo.txt.html
 void initialise_Arguments(struct Arguments *arguments)
 {
     arguments->option1 = no_option;
@@ -608,21 +603,6 @@ void Print_num_Options(struct Arguments *arguments)
 {
     printf("Number of options entered :%d \n", arguments->num_options);
 }
-// char* concatenat_file_extension(char *filePath){
-//  	char *newFileName = (char *) malloc(255);
-//  	if (file_exist(filePath)){
-//  		if(is_Markdown(filePath)){
-// 			//copy all except .md
-// 				char *p = strstr(filePath, ".md");
-// 					strncpy(newFileName, filePath, p - filePath);
-// 		}
-// 		else if (is_txt(filePath)){
-// 			strcpy(newFileName, filePath);
-//  		}
-// 			strncat(newFileName, ".html", 5);
-//  	}
-//  		return newFileName;
-// }
 
 int Pandoc(char *file)
 {
@@ -1164,8 +1144,7 @@ int lauchProgram(struct Arguments *arguments)
         return 0;
     }
 
-    //of there are options
-
+    //if there are options
     //looping through the options // 4 options max
     for (int index_option = 0; index_option < 4; index_option++)
     {
@@ -1183,8 +1162,6 @@ int main(int argc, char *argv[])
     if (arguments->status != OK)
     {
         //fprintf(stderr, "failed to read arguments\n");
-
-        //free_arguments(arguments);
         return 1;
     }
     else
