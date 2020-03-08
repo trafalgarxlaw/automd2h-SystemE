@@ -510,17 +510,15 @@ bool file_needs_conversion(char *filename)
                         convert = true;
                         //printf("..Convertion needed\n");
                     }
-                    else
-                    {
-                        //if not, no convertion needed.
-                        //printf("..no convertion needed\n");
-                    }
                 }
                 else
                 {
                     printf("Unable to get file properties.\n");
                 }
             }
+						else{
+							convert = true;
+						}
         }
         else
         {
