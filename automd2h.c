@@ -831,12 +831,12 @@ int watch(char *Dir)
                //     printf("The file %s was created.\n", event->name);
                // }
             //}
-		if(event->mask & IN_MODIFY){
-			if (Pandoc(event->name) == 1){
-                    		return 1;
-                	}
-		}
-        }
+						if(event->mask & IN_MODIFY){
+								//if (Pandoc(event->name) == 1){
+                 // 		return 1;
+              	//}
+						}
+      	}
     }
     (void)inotify_rm_watch(fd, wd[0]);
     (void)close(fd);
@@ -1007,14 +1007,7 @@ int launch_with_options(struct Arguments *arguments,enum Options *option,enum Op
 
              }else// OPTION T
              {
-                 //printf("option t detected\n");
-                 if (arguments->num_files==0)
-                 {
-                     //printf("num files = 0.\n");
-                     Convert_Directory(".",true);
-                     return 0;
-                 }
-                 
+                 //printf("option t detected\n");                 
                 for (int file = 0; file < arguments->num_files; file++)
                 {
                     if (is_directory(arguments->files[file].filename)==false )
