@@ -362,7 +362,7 @@ struct Arguments *parse_arguments(int argc, char *argv[])
         }
         else
         {
-            //printf("You want me to convert a txt file \n");
+            //printf("You want me to convert a another file \n");
                 strncpy(arguments->files[arguments->num_files].filename, argv[arguments->argv_index], sizeof(arguments->files[arguments->num_files].filename));
                 arguments->files[arguments->num_files].filename[sizeof(arguments->files[arguments->num_files].filename) - 1] = '\0';
                 arguments->files[arguments->num_files].format = another;
@@ -1072,6 +1072,10 @@ int launch_with_options(struct Arguments *arguments,enum Options *option,enum Op
             }
             else
             {
+								for (int file = 0; file < arguments->num_files; file++)
+                {
+									watch(arguments->files[i].filename);
+								}
                 //printf("\nOption w Detected.\n");
                 //Observe(false);
             }
