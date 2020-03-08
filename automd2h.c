@@ -493,7 +493,7 @@ bool file_needs_conversion(char *filename)
 
     //printf("\nChecking if %s needs to be converted\n", filename);
     //Checking if the given file exists and if its a .md
-    if (file_exist(filename))
+    if (file_exist(filename) && !is_HTML(filename))
     {
         //getting the file stats
         if (stat(filename, &attrib) == 0)
