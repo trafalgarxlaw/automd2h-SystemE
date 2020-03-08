@@ -1020,25 +1020,25 @@ int launch_with_options(struct Arguments *arguments,enum Options *option,enum Op
                  //printf("option t detected\n");                 
                 for (int file = 0; file < arguments->num_files; file++)
                 {
-                    if (is_directory(arguments->files[file].filename)==false )
+                    if (is_directory(arguments->files[file].filename)==true)
                     {
+Convert_Directory(arguments->files[file].filename,true);
                         //file Need to be converted
                         //printf("%s needs to be converted .\n", arguments->files[file].filename);
-                        if (file_needs_conversion(arguments->files[file].filename))
-                        {
-                            if(Pandoc(arguments->files[file].filename) == 1){return 1;}
-                        }
                     }
-                    else if(is_directory(arguments->files[file].filename)==true)
+                    else if(file_exist(arguments->files[file].filename))
                     {
                         //printf("DIR %s needs to be converted .\n", arguments->files[file].filename);
                         //elements of the directory needs to be converted, needs to checktime
                         // convertir juste les md avec une nouvelle version par rapport au html ou sans html du tout
-                        Convert_Directory(arguments->files[file].filename,true);
+												if (file_needs_conversion(arguments->files[file].filename))
+                        {
+                            if(Pandoc(arguments->files[file].filename) == 1){return 1;}
+                        }
                     }else
                     {
                         //no need to be converted
-                        //  printf("no convertion needed for %s \n", arguments->files[file].filename);
+												return 0;
                     }
                     
                 }             
@@ -1094,7 +1094,6 @@ int launch_with_options(struct Arguments *arguments,enum Options *option,enum Op
         default:
             break;
         }
-        printf("launch_with_options ends with stat 0\n");
     return 0;
 }
 
@@ -1131,7 +1130,7 @@ int lauchProgram(struct Arguments *arguments)
         if( launch_with_options(arguments,&OptionArray[index_option],&OptionArray[index_option+1],&index_option) == 1)
         {return 1;}
     }
-    printf("lauchProgram ends with stat 0\n");
+    //printf("lauchProgram ends with stat 0\n");
     return 0;
 }
 
@@ -1156,6 +1155,6 @@ int main(int argc, char *argv[])
         }
     }
     free_arguments(arguments);
-    printf("MAIN ends with stat 0\n");
+    //printf("MAIN ends with stat 0\n");
     return 0;
 }
