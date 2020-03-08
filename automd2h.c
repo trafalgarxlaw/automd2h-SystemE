@@ -356,8 +356,9 @@ struct Arguments *parse_arguments(int argc, char *argv[])
         else
         {
         //Pandoc(arguments->files[arguments->num_files].filename);
-		//perror("ENOENT");
         arguments->status = WRONG_VALUE;
+        //perror("ENOENT");
+        //exit(EXIT_FAILURE);
 		//exit(EXIT_FAILURE);
 
         }
@@ -588,8 +589,6 @@ int Pandoc(char *file)
         //checking if the file exists
         
         char *ls_args[] = {"pandoc", file, "-o", output, NULL};
-
-        printf("looking for : %s\n",output);
         //                    ^
         //  use the name ls
         //  rather than the
@@ -599,12 +598,12 @@ int Pandoc(char *file)
         // The primary difference between execv and execvp is that with execv you have to provide the full path to the binary file (i.e., the program).
         // With execvp, you do not need to specify the full path because execvp will search the local environment variable PATH for the executable.
         if(file_exist(file)){
-            printf("the file exists\n");
             execvp(ls_args[0], ls_args);}
         else
         {
             //Error Handeler
-            exit(1);
+            perror("ENOENT");
+            exit(EXIT_FAILURE);
         }
         return 0;
 
@@ -618,9 +617,7 @@ int Pandoc(char *file)
         if ( WIFEXITED(status) ) 
         { 
             int exit_status = WEXITSTATUS(status);         
-            printf("Exit status of the child was %d\n",  
-                                        exit_status); 
-            if(exit_status!=0){exit(exit_status);}
+            if(exit_status!=EXIT_SUCCESS){exit(exit_status);}
             
         } 
     }
@@ -768,7 +765,7 @@ int watch(char *Dir){
             fd = inotify_init();
             if ( fd < 0 ) {
                 perror( "inotify_init" );
-                exit(1);
+                exit(EXIT_FAILURE);
             }
 
             //Adding to the watch list
@@ -779,7 +776,7 @@ int watch(char *Dir){
                 length = read( fd, buffer, BUF_LEN );  
                 if ( length < 0 ) {
                     perror( "read" );
-                    exit(1);
+                    exit(EXIT_FAILURE);
                 } 
                 event = ( struct inotify_event * ) &buffer[ i ];
 
@@ -838,10 +835,8 @@ int Watch_fork(char *Dir,struct VisitedDirectories *Directories){
     {
         //error: The return of fork() is negative
         perror("fork failed");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
-
-
     return 0;
 
 }
@@ -911,8 +906,6 @@ void Observe(bool Immediate_Convertion)
             sleep(2);
         }
 }
-
-
 
 int lauchProgram(struct Arguments *arguments)
 {
@@ -1023,8 +1016,7 @@ int lauchProgram(struct Arguments *arguments)
         case Optionerror:
             fprintf(stderr, "Option parsing failed\n");
             arguments->status = WRONG_VALUE;
-            return 1;
-
+            exit(EXIT_FAILURE);
             break;
 
         default:
@@ -1061,14 +1053,4 @@ int main(int argc, char *argv[])
     free_arguments(arguments);
     return 0;
 }
-
-//upload
-// scp automd2h.c jk091087@java.labunix.uqam.ca:.
-
-//move
-// mv automd2h.c test8
-
-//compile
-//gcc -Wall -Wextra automd2h.c -o automd2h
-
 
