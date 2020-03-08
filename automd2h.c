@@ -1,6 +1,6 @@
 /**
  * @author yassine Hasnaoui (HASY04089702)
- * @author Philippe
+ * @author Philippe (LEBP11129502)
 */
 
 #include <stdio.h>
@@ -65,6 +65,7 @@ enum Format
     txt,
     markdown,
     html,
+	another,
     Directory
 };
 
@@ -164,21 +165,20 @@ char *replaceWord(const char *s, const char *oldW, const char *newW)
  * File Validation functions.
  */
 
-bool is_HTML(char *filename)
-{
-    return strstr(filename, ".html") != NULL;
+char *get_filename_ext(char *filename) {
+    char *dot = strrchr(filename, '.');
+    if(!dot || dot == filename) return "";
+    return dot;
 }
+
 bool is_Markdown(char *filename)
 {
-    return strstr(filename, ".md") != NULL;
+    return strcmp(get_filename_ext(filename), ".md") == 0;
 }
-bool is_txt(char *filename)
+
+bool is_HTML(char *filename)
 {
-    return strstr(filename, ".txt") != NULL;
-}
-bool Filename_is_Valide(char *filename)
-{
-    return is_txt(filename) || is_Markdown(filename) || is_HTML(filename);
+	return strcmp(get_filename_ext(filename), ".html") == 0;
 }
 
 bool is_directory(char *filename)
@@ -316,35 +316,23 @@ struct Arguments *parse_arguments(int argc, char *argv[])
     //Looping through the rest of arguments (files)
     for (int i = arguments->argv_index; i < argc; i++)
     {
-        if (Filename_is_Valide(argv[arguments->argv_index]))
+        if (is_Markdown(argv[arguments->argv_index]))
         {
 
-            if (is_Markdown(argv[arguments->argv_index]))
-            {
                 strncpy(arguments->files[arguments->num_files].filename, argv[arguments->argv_index], sizeof(arguments->files[arguments->num_files].filename));
                 arguments->files[arguments->num_files].filename[sizeof(arguments->files[arguments->num_files].filename) - 1] = '\0';
                 //printf("You want me to convert a md file (%s) \n",argv[arguments->argv_index]);
                 arguments->files[arguments->num_files].format = markdown;
                 arguments->num_files++;
-            }
-
-            if (is_HTML(argv[arguments->argv_index]))
-            {
+            
+				}
+    		else if (is_HTML(argv[arguments->argv_index]))
+        {
                 //printf("You want me to convert a html file \n");
                 strncpy(arguments->files[arguments->num_files].filename, argv[arguments->argv_index], sizeof(arguments->files[arguments->num_files].filename));
                 arguments->files[arguments->num_files].filename[sizeof(arguments->files[arguments->num_files].filename) - 1] = '\0';
                 arguments->files[arguments->num_files].format = html;
                 arguments->num_files++;
-            }
-
-            if (is_txt(argv[arguments->argv_index]))
-            {
-                //printf("You want me to convert a txt file \n");
-                strncpy(arguments->files[arguments->num_files].filename, argv[arguments->argv_index], sizeof(arguments->files[arguments->num_files].filename));
-                arguments->files[arguments->num_files].filename[sizeof(arguments->files[arguments->num_files].filename) - 1] = '\0';
-                arguments->files[arguments->num_files].format = txt;
-                arguments->num_files++;
-            }
         }
         else if (is_directory(argv[arguments->argv_index]))
         {
@@ -356,8 +344,11 @@ struct Arguments *parse_arguments(int argc, char *argv[])
         }
         else
         {
-            arguments->status = WRONG_VALUE;
-            //perror("ENOENT");
+            //printf("You want me to convert a txt file \n");
+                strncpy(arguments->files[arguments->num_files].filename, argv[arguments->argv_index], sizeof(arguments->files[arguments->num_files].filename));
+                arguments->files[arguments->num_files].filename[sizeof(arguments->files[arguments->num_files].filename) - 1] = '\0';
+                arguments->files[arguments->num_files].format = another;
+                arguments->num_files++;
 
         }
         //next argument
@@ -459,27 +450,27 @@ void print_args(struct Arguments *arguments)
     }
 }
 
+char* concatenate_file_extension(char *filePath){
+ 	char *newFileName = (char *) malloc(255);
+ 	if (file_exist(filePath)){
+ 		if(is_Markdown(filePath)){
+			//copy all except .md
+			newFileName = replaceWord(filePath, ".md", ".html");
+		}
+		else if (is_directory(filePath) == false){
+			strcpy(newFileName, filePath);
+			strcat(newFileName, ".html");
+ 		}
+ 	}
+ 		return newFileName;
+}
+
 //Check if converted document has a newer version (option t)
 bool has_new_doc_version(time_t sourceFile, time_t destFile)
 {
     return sourceFile > destFile;
 }
 
-char *ConvertFileName(char *filename)
-{
-
-    if (is_Markdown(filename))
-    {
-        char *newFileName = replaceWord(filename, ".md", ".html");
-        return newFileName;
-    }
-    else if (is_txt(filename))
-    {
-        char *newFileName = replaceWord(filename, ".txt", ".txt.html");
-        return newFileName;
-    }
-    return NULL;
-}
 //Check if documents has a new version to convert
 bool file_needs_conversion(char *filename)
 {
@@ -488,7 +479,7 @@ bool file_needs_conversion(char *filename)
     struct stat attrib;
     struct stat newAttrib;
 
-    char *newFileName = ConvertFileName(filename);
+    char *newFileName = concatenate_file_extension(filename);
 
     //printf("\nChecking if %s needs to be converted\n", filename);
     //Checking if the given file exists and if its a .md
@@ -538,20 +529,6 @@ bool file_needs_conversion(char *filename)
     return convert;
 };
 
-char* concatenate_file_extension(char *filePath){
- 	char *newFileName = (char *) malloc(255);
- 	if (file_exist(filePath)){
- 		if(is_Markdown(filePath)){
-			//copy all except .md
-			newFileName = replaceWord(filePath, ".md", ".html");
-		}
-		else if (is_directory(filePath) == false){
-			strcpy(newFileName, filePath);
-			strcat(newFileName, ".html");
- 		}
- 	}
- 		return newFileName;
-}
 
 //pritn all txt and md file in a directory (option n)
 void print_current_directory(char *currentDir, bool checkTime)
@@ -566,7 +543,7 @@ void print_current_directory(char *currentDir, bool checkTime)
     }
     while ((d = readdir(dir)) != NULL)
     {
-        if (is_Markdown(d->d_name) || is_txt(d->d_name))
+        if (is_Markdown(d->d_name))
         {
             if (!checkTime || file_needs_conversion(d->d_name))
             {
