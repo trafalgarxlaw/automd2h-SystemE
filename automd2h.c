@@ -355,9 +355,10 @@ struct Arguments *parse_arguments(int argc, char *argv[])
         }
         else
         {
-		perror("ENOENT");
-		exit(0);
-            //arguments->status = WRONG_VALUE;
+        //Pandoc(arguments->files[arguments->num_files].filename);
+		//perror("ENOENT");
+        arguments->status = WRONG_VALUE;
+		//exit(EXIT_FAILURE);
 
         }
         //next argument
@@ -802,7 +803,7 @@ int Watch_fork(char *Dir,struct VisitedDirectories *Directories){
     }
     else if (c_pid > 0)//parent
     {
-        //Deleting the child after 3 seconds
+        //Deleting the child after ? secondes
         Delete_Child(c_pid,10);
     }
     else
@@ -1011,20 +1012,19 @@ int main(int argc, char *argv[])
     if (arguments->status != OK)
     {
         fprintf(stderr, "failed to read arguments\n");
-        return arguments->status;
+
+        //free_arguments(arguments);
+        return 1;
     }
     else
     {
-
         // All good
-        //printf("\n");
         //print_args(arguments);
-        //printf("\n");
-
         //Print_num_Options(arguments);
-        lauchProgram(arguments);
-    }
 
-    free_arguments(arguments);
-    return 0;
+        lauchProgram(arguments);
+        free_arguments(arguments);
+        return 0;
+    }
+    
 }
