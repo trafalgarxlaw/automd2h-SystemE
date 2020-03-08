@@ -819,7 +819,7 @@ void Delete_Child(pid_t c_pid_To_Delete, int sec)
 int watch(char *Dir)
 {
 
-    printf("starting watching..\n");
+    //printf("starting watching..\n");
     int length, i = 0;
     int fd;
     int wd[2];
@@ -853,17 +853,22 @@ int watch(char *Dir)
                 printf("In %s\n", Dir);
             else
                 continue;
-            if (event->mask & IN_CREATE)
-            {
-                if (event->mask & IN_ISDIR)
-                {
-                    printf("The directory %s was created.\n", event->name);
-                }
-                else
-                {
-                    printf("The file %s was created.\n", event->name);
-                }
-            }
+            //if (event->mask & IN_CREATE)
+            //{
+              //  if (event->mask & IN_ISDIR)
+              //  {
+               //     printf("The directory %s was created.\n", event->name);
+               // }
+               // else
+              //  {
+               //     printf("The file %s was created.\n", event->name);
+               // }
+            //}
+		if(event->mask & IN_MODIFY){
+			if (Pandoc(event->name) == 1){
+                    		return 1;
+                	}
+		}
         }
     }
     (void)inotify_rm_watch(fd, wd[0]);
