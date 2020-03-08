@@ -1030,6 +1030,7 @@ int lauchProgram(struct Arguments *arguments)
         {
         case t:
              if (OptionArray[i + 1] == n){
+                 OptionArray[i + 1] = no_option;
                  //t combined with n
                 for (int file = 0; file < arguments->num_files; file++)
                 {
