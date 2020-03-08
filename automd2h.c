@@ -667,7 +667,7 @@ bool Check_Duplicates(enum Options OptionArray[])
     }
     return DuplicateOption;
 }
-bool if_html_version_exists(const char *file)
+bool if_html_version_exists(char *file)
 {
     char *newFileName = concatenate_file_extension(file); //will return file if fails
     bool htmlExists = false;
