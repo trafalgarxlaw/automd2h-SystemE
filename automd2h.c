@@ -538,6 +538,21 @@ bool file_needs_conversion(char *filename)
     return convert;
 };
 
+char* concatenate_file_extension(char *filePath){
+ 	char *newFileName = (char *) malloc(255);
+ 	if (file_exist(filePath)){
+ 		if(is_Markdown(filePath)){
+			//copy all except .md
+			newFileName = replaceWord(filePath, ".md", ".html");
+		}
+		else if (is_directory(filePath) == false){
+			strcpy(newFileName, filePath);
+			strcat(newFileName, ".html");
+ 		}
+ 	}
+ 		return newFileName;
+}
+
 //pritn all txt and md file in a directory (option n)
 void print_current_directory(char *currentDir, bool checkTime)
 {
