@@ -184,22 +184,6 @@ bool is_directory(char *filename)
     return d;
 }
 
-// char* new_file_name(char *filePath){
-//  	char *newFileName = (char *) malloc(255);
-//  	if (file_exist(filePath)){
-//  		if(is_Markdown(filePath)){
-// 			//copy all except .md
-// 				char *p = strstr(filePath, ".md");
-// 					strncpy(newFileName, filePath, p - filePath);
-// 		}
-// 		else if (is_txt(filePath)){
-// 			strcpy(newFileName, filePath);
-//  		}
-// 			strcat(newFileName, ".html");
-//  	}
-//  		return newFileName;
-// }
-
 /**
  * Option Validation functions.
  */
@@ -372,11 +356,9 @@ struct Arguments *parse_arguments(int argc, char *argv[])
         }
         else
         {
-            //Pandoc(arguments->files[arguments->num_files].filename);
             arguments->status = WRONG_VALUE;
             //perror("ENOENT");
-            //exit(EXIT_FAILURE);
-            //exit(EXIT_FAILURE);
+
         }
         //next argument
         arguments->argv_index++;
@@ -583,21 +565,6 @@ void print_current_directory(char *currentDir, bool checkTime)
     }
     closedir(dir);
 }
-// void print_SourcePath(struct Arguments *arguments)
-// {
-//     for (int i = 0; i < arguments->num_files; i++)
-//     {
-//         //printing files
-//         if (arguments->files[i].format != Directory)
-//         {
-//             printf("%s\n", arguments->files[i].filename);
-//         }
-//         else if (arguments->files[i].format == Directory)
-//         {
-//             printf("%s\n", arguments->files[i].filename);
-//         }
-//     }
-// }
 
 void print_arguments_files(struct Arguments *arguments, bool checkTime)
 {
@@ -646,13 +613,9 @@ int Pandoc(char *file)
         {
             char *output = replaceWord(file, ".md", ".html");
             char *ls_args[] = {"pandoc", file, "-o", output, NULL};
-            //calling pandoc
-            // argv array for: ls -l
-            // Just like in main, the argv array must be NULL terminated.
-            // try to run ./a.out -x -y, it will work
-            //char *output = new_file_name(file);//replaceWord(file, ".md", ".html");
-            //checking if the file exists
 
+
+            //calling pandoc
             if (file_exist(file))
             {
                 execvp(ls_args[0], ls_args);
@@ -737,11 +700,6 @@ bool if_html_version_exists(const char *file)
     }
     return htmlExists;
 }
-// bool if_html_version_exists(char *file)
-// {
-//     char *MardownVersion = new_file_name(file);//replaceWord(file, ".md", ".html");
-//     return file_exist(MardownVersion);
-// }
 
 //Convert all md files inside Directory if there is no html version of them
 int Convert_Directory(char *Dir)
