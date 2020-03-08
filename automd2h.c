@@ -621,10 +621,8 @@ int Pandoc(char *file)
     else if (c_pid == 0)
     {
         //Pandoc will run here.
-        if (is_Markdown(file))
-        {
-            char *output = replaceWord(file, ".md", ".html");
-            char *ls_args[] = {"pandoc", file, "-o", output, NULL};
+	char *output = concatenate_file_extension(file);
+    	char *ls_args[] = {"pandoc", file, "-o", output, NULL};
 
 
             //calling pandoc
@@ -638,23 +636,6 @@ int Pandoc(char *file)
                 perror("ENOENT");
                 exit(EXIT_FAILURE);
             }
-        }
-        else if (is_txt(file))
-        {
-            char *output = replaceWord(file, ".txt", ".txt.html");
-            char *ls_args[] = {"pandoc", file, "-o", output, NULL};
-
-            if (file_exist(file))
-            {
-                execvp(ls_args[0], ls_args);
-            }
-            else
-            {
-                //Error Handeler
-                perror("ENOENT");
-                exit(EXIT_FAILURE);
-            }
-        }
 
         return 0;
     }
