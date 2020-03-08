@@ -483,6 +483,7 @@ char *ConvertFileName(char *filename)
 //Check if documents has a new version to convert
 bool file_needs_conversion(char *filename)
 {
+    //printf("analysing %s\n",filename);
     bool convert = false;
     struct stat attrib;
     struct stat newAttrib;
@@ -507,12 +508,12 @@ bool file_needs_conversion(char *filename)
                     {
                         //If there is, a convertion is needed
                         convert = true;
-                        // printf("..Convertion needed\n");
+                        //printf("..Convertion needed for: %s\n",filename);
                     }
                     else
                     {
                         //if not, no convertion needed.
-                        //  printf("..no convertion needed\n");
+                        //printf("%s..no convertion needed\n",filename);
                     }
                 }
                 else
@@ -666,28 +667,6 @@ int Pandoc(char *file)
     }
     return 0;
 }
-void convert_current_directory(char *currentDir, bool checkTime)
-{
-    struct dirent *d;
-
-    //printf("printing current directory...\n");
-    DIR *dir = opendir(currentDir);
-    if (dir == NULL)
-    {
-        fprintf(stderr, "Can't access directory\n");
-    }
-    while ((d = readdir(dir)) != NULL)
-    {
-        if (is_Markdown(d->d_name) || is_txt(d->d_name))
-        {
-            if (!checkTime || file_needs_conversion(d->d_name))
-            {
-                Pandoc(d->d_name);
-            }
-        }
-    }
-    closedir(dir);
-}
 
 
 // Check if the user entered the same option twice.
@@ -725,10 +704,9 @@ bool if_html_version_exists(const char *file)
     return htmlExists;
 }
 
-//Convert all md files inside Directory if there is no html version of them
-int Convert_Directory(char *Dir)
+//Convert all md (ASKED SPECIFICALLY) files inside Directory if there is no html version of them
+int Convert_Directory(char *Dir,bool Arg_is_Dir_Then_Convert,bool checktime)
 {
-
     DIR *Directory;
     struct dirent *entry;
     struct stat filestat;
@@ -751,20 +729,28 @@ int Convert_Directory(char *Dir)
 
         if (S_ISDIR(filestat.st_mode))
         {
-
             //printf("%4s: %s\n", "Dir", fullname);
         }
         else
         {
-            //its a file
             //printf("%4s: %s\n", "File", fullname);
-            if (is_Markdown(fullname) && if_html_version_exists(fullname) == false)
+            //its a file
+            if (Arg_is_Dir_Then_Convert)
             {
-                if (Pandoc(fullname) == 1)
+                if (is_Markdown(fullname) && if_html_version_exists(fullname) == false)
                 {
-                    return 1;
+                    if (Pandoc(fullname) == 1)
+                    {
+                        return 1;
+                    }
+                }            
+            }else if (checktime)
+            {
+                if(file_needs_conversion(fullname)){
+                    if (Pandoc(fullname) == 1){return 1;}
                 }
             }
+            
         }
     }
     closedir(Directory);
@@ -1026,7 +1012,7 @@ int lauchProgram(struct Arguments *arguments)
         for (int i = 0; i < arguments->num_files; i++)
         {
             //   if the current argument is a file
-            if (arguments->files[i].format != Directory && if_html_version_exists(arguments->files[i].filename) == false)
+            if (is_directory(arguments->files[i].filename)==false&& if_html_version_exists(arguments->files[i].filename) == false)
             {
                 if (Pandoc(arguments->files[i].filename) == 1)
                 {
@@ -1034,9 +1020,9 @@ int lauchProgram(struct Arguments *arguments)
                 }
             }
             //   if the current argument is a Directory
-            else if (arguments->files[i].format == Directory)
+            else if (is_directory(arguments->files[i].filename))
             {
-                if (Convert_Directory(arguments->files[i].filename) == 1)
+                if (Convert_Directory(arguments->files[i].filename,true,false) == 1)
                 {
                     return 1;
                 }
@@ -1060,8 +1046,7 @@ int lauchProgram(struct Arguments *arguments)
                  //t combined with n
                 for (int file = 0; file < arguments->num_files; file++)
                 {
-                    //printf("\nOption t Detected.\n");
-                    //  printf("file name : %s \n", arguments->files[file].filename);
+                    //printf("file name : %s \n", arguments->files[file].filename);
                     if (file_needs_conversion(arguments->files[file].filename))
                     {
                         printf("%s\n",arguments->files[file].filename);
@@ -1077,30 +1062,29 @@ int lauchProgram(struct Arguments *arguments)
              {
                  if (arguments->num_files==0)
                  {
-                     convert_current_directory(".",true);
+                     //printf("num files = 0.\n");
+                     Convert_Directory(".",false,true);
                      return 0;
                  }
                  
                 for (int file = 0; file < arguments->num_files; file++)
                 {
-                    //printf("\nOption t Detected.\n");
-                    //  printf("file name : %s \n", arguments->files[file].filename);
-                    if (file_needs_conversion(arguments->files[file].filename)&&is_directory(arguments->files[file].filename)==false)
+                    if (is_directory(arguments->files[file].filename)==false )
                     {
-
                         //file Need to be converted
                         //printf("%s needs to be converted again.\n", arguments->files[file].filename);
-                        if (Pandoc(arguments->files[file].filename) == 1)
+                        if (file_needs_conversion(arguments->files[file].filename))
                         {
-                            return 1;
+                            if(Pandoc(arguments->files[file].filename) == 1){return 1;}
                         }
                     }
                     else if(is_directory(arguments->files[file].filename)==true)
                     {
-                        convert_current_directory(arguments->files[file].filename,true);
+                        //elements of the directory needs to be converted, needs to checktime
+                        Convert_Directory(arguments->files[file].filename,false,true);
                     }else
                     {
-                                                //no need to be converted
+                        //no need to be converted
                         //  printf("no convertion needed for %s \n", arguments->files[file].filename);
                     }
                     
@@ -1137,7 +1121,7 @@ int lauchProgram(struct Arguments *arguments)
             }
             else
             {
-                printf("\nOption w Detected.\n");
+                //printf("\nOption w Detected.\n");
                 //Observe(false);
             }
 
