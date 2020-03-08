@@ -366,7 +366,7 @@ struct Arguments *parse_arguments(int argc, char *argv[])
         }
         else
         {
-            //printf("You want me to convert a txt file \n");
+            //printf("You want me to convert a another file \n");
                 strncpy(arguments->files[arguments->num_files].filename, argv[arguments->argv_index], sizeof(arguments->files[arguments->num_files].filename));
                 arguments->files[arguments->num_files].filename[sizeof(arguments->files[arguments->num_files].filename) - 1] = '\0';
                 arguments->files[arguments->num_files].format = another;
@@ -674,17 +674,12 @@ bool Check_Duplicates(enum Options OptionArray[])
     }
     return DuplicateOption;
 }
-bool if_html_version_exists(const char *file)
+bool if_html_version_exists(char *file)
 {
-    char *MardownConvertedVersion = replaceWord(file, ".md", ".html"); //will return file if fails
-    char *txtConvertedVersion = replaceWord(file, ".txt", ".txt.html");
+    char *newFileName = concatenate_file_extension(file); //will return file if fails
     bool htmlExists = false;
     //Checking if the html version of a md file exists if its a md file
-    if (file_exist(MardownConvertedVersion) && strcmp(file, MardownConvertedVersion) != 0)
-    {
-        htmlExists = true;
-    }
-    if (file_exist(txtConvertedVersion) && strcmp(file, txtConvertedVersion) != 0)
+    if (file_exist(newFileName) && strcmp(file, newFileName) != 0)
     {
         htmlExists = true;
     }
@@ -692,7 +687,7 @@ bool if_html_version_exists(const char *file)
 }
 
 //Convert all md (ASKED SPECIFICALLY) files inside Directory if there is no html version of them
-int Convert_Directory(char *Dir,bool Arg_is_Dir_Then_Convert,bool checktime)
+int Convert_Directory(char *Dir, bool checktime)
 {
     DIR *Directory;
     struct dirent *entry;
@@ -846,12 +841,12 @@ int watch(char *Dir)
                //     printf("The file %s was created.\n", event->name);
                // }
             //}
-		if(event->mask & IN_MODIFY){
-			if (Pandoc(event->name) == 1){
-                    		return 1;
-                	}
-		}
-        }
+						if(event->mask & IN_MODIFY){
+								//if (Pandoc(event->name) == 1){
+                 // 		return 1;
+              	//}
+						}
+      	}
     }
     (void)inotify_rm_watch(fd, wd[0]);
     (void)close(fd);
@@ -986,7 +981,7 @@ int launch_with_no_options(struct Arguments *arguments){
             //   if the current argument is a Directory
             else if (is_directory(arguments->files[i].filename))
             {
-                if (Convert_Directory(arguments->files[i].filename,true,false) == 1)
+                if (Convert_Directory(arguments->files[i].filename,false) == 1)
                 {
                     return 1;
                 }
@@ -1022,14 +1017,7 @@ int launch_with_options(struct Arguments *arguments,enum Options *option,enum Op
 
              }else// OPTION T
              {
-                 //printf("option t detected\n");
-                 if (arguments->num_files==0)
-                 {
-                     //printf("num files = 0.\n");
-                     Convert_Directory(".",false,true);
-                     return 0;
-                 }
-                 //looping through files given as arguments
+                 //printf("option t detected\n");                 
                 for (int file = 0; file < arguments->num_files; file++)
                 {
                     if (is_directory(arguments->files[file].filename)==false )
@@ -1046,7 +1034,7 @@ int launch_with_options(struct Arguments *arguments,enum Options *option,enum Op
                         //printf("DIR %s needs to be converted .\n", arguments->files[file].filename);
                         //elements of the directory needs to be converted, needs to checktime
                         // convertir juste les md avec une nouvelle version par rapport au html ou sans html du tout
-                        Convert_Directory(arguments->files[file].filename,false,true);
+                        Convert_Directory(arguments->files[file].filename,true);
                     }else
                     {
                         //no need to be converted
@@ -1087,6 +1075,10 @@ int launch_with_options(struct Arguments *arguments,enum Options *option,enum Op
             }
             else
             {
+								for (int file = 0; file < arguments->num_files; file++)
+                {
+									watch(arguments->files[file].filename);
+								}
                 //printf("\nOption w Detected.\n");
                 //Observe(false);
             }
