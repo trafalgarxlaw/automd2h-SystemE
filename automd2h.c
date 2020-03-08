@@ -1028,46 +1028,17 @@ int launch_with_no_options(struct Arguments *arguments){
             }
         }
         return 0;
-
 }
 
-int lauchProgram(struct Arguments *arguments)
-{
-    //Array of options
-    enum Options OptionArray[5];
-    OptionArray[0] = arguments->option1;
-    OptionArray[1] = arguments->option2;
-    OptionArray[2] = arguments->option3;
-    OptionArray[3] = arguments->option4;
-    OptionArray[4] = no_option;
-
-    if (Check_Duplicates(OptionArray))
-    {
-        fprintf(stderr, "Error duplicates options.\n");
-        return 1;
-    }
-
-    //if no option is entered, we convert files entered if there is no html version of them
-    if (no_options_entered(OptionArray))
-    {
-        if (launch_with_no_options(arguments)==1)
-        {
-            return 1;
-        }
-        return 0;
-    }
-
-    //looping through the options
-    for (int i = 0; i < 4; i++)
-    {
-
-        switch (OptionArray[i])
+int lauch_with_options(struct Arguments *arguments,enum Options *option,enum Options *next_option, int *option_index){
+        switch (*option)
         {
         case t:
             // OPTION -T -N
-             if (OptionArray[i + 1] == n){
+             if (*next_option == n){
+                 *next_option = no_option;
+                 *option_index++; // because we already considered the next option (which is n)
 
-                 OptionArray[i + 1] = no_option;
                  //t combined with n
                 for (int file = 0; file < arguments->num_files; file++)
                 {
@@ -1119,11 +1090,11 @@ int lauchProgram(struct Arguments *arguments)
 
         case n:
 
-            if (OptionArray[i + 1] == t)
+            if (*next_option == t)
             {
                 ///printf("\nOption n combined with t Detected.\n");
                 print_arguments_files(arguments, true);
-                i++; // because we already considered the next option (which is t)
+                *option_index++; // because we already considered the next option (which is t)
             }
             else
             {
@@ -1139,9 +1110,11 @@ int lauchProgram(struct Arguments *arguments)
 
         case w:
 
-            if (OptionArray[i + 1] == f)
+            if (*next_option == f)
             {
                 printf("\nOption w combined with f Detected...Immediate convertion\n");
+                *option_index++; // because we already considered the next option (which is f)
+
                 //Observe(true);
             }
             else
@@ -1161,6 +1134,41 @@ int lauchProgram(struct Arguments *arguments)
         default:
             break;
         }
+    return 0;
+}
+
+int lauchProgram(struct Arguments *arguments)
+{
+    //Array of options
+    enum Options OptionArray[5];
+    OptionArray[0] = arguments->option1;
+    OptionArray[1] = arguments->option2;
+    OptionArray[2] = arguments->option3;
+    OptionArray[3] = arguments->option4;
+    OptionArray[4] = no_option;
+
+    if (Check_Duplicates(OptionArray))
+    {
+        fprintf(stderr, "Error duplicates options.\n");
+        return 1;
+    }
+
+    //if no option is entered, we convert files entered if there is no html version of them
+    if (no_options_entered(OptionArray))
+    {
+        if (launch_with_no_options(arguments)==1)
+        {
+            return 1;
+        }
+        return 0;
+    }
+
+    //of there are options
+
+    //looping through the options
+    for (int index_option = 0; index_option < 4; index_option++)
+    {
+        lauch_with_options(arguments,&OptionArray[index_option],&OptionArray[index_option+1],&index_option);
     }
     return 0;
 }
