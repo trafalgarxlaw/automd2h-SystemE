@@ -1006,6 +1006,7 @@ void Observe(bool Immediate_Convertion)
     }
 }
 
+// launching the program with no option entered.
 int launch_with_no_options(struct Arguments *arguments){
         for (int i = 0; i < arguments->num_files; i++)
         {
