@@ -697,7 +697,7 @@ int Convert_Directory( char *Dir){
     struct dirent *entry;
     struct stat filestat;
 
-    printf("I am converting (%s) Directory\n", Dir);
+    //printf("I am converting (%s) Directory\n", Dir);
 
     Directory = opendir(Dir);
     if (Directory == NULL)
@@ -716,12 +716,12 @@ int Convert_Directory( char *Dir){
         if (S_ISDIR(filestat.st_mode))
         {
 
-            printf("%4s: %s\n", "Dir", fullname);
+            //printf("%4s: %s\n", "Dir", fullname);
         }
         else
         {
             //its a file
-            printf("%4s: %s\n", "File", fullname);
+            //printf("%4s: %s\n", "File", fullname);
             if (is_Markdown(fullname) && if_html_version_exists(fullname) == false)
             {
                 if(Pandoc(fullname)==1){return 1;}
