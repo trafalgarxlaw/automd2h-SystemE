@@ -641,6 +641,7 @@ int Pandoc(char *file)
             perror("ENOENT");
             exit(EXIT_FAILURE);
         }
+        return 0;
         //exit(EXIT_SUCCESS);
     }
     else
@@ -660,7 +661,7 @@ int Pandoc(char *file)
         }
         // printf("status: %d\n",status);
     }
-    //printf("pandoc ends with stat 0\n");
+    printf("pandoc ends with stat 0\n");
     return 0;
 }
 
@@ -707,7 +708,7 @@ int Convert_Directory(char *Dir, bool checktime)
     if (Directory == NULL)
     {
         //perror("Unable to read directory.. i'm leaving\n");
-        //printf("Convert_Directory ends with stat 0\n");
+        printf("Convert_Directory ends with stat 0\n");
         return (0); // leave
     }
     else
@@ -731,14 +732,14 @@ int Convert_Directory(char *Dir, bool checktime)
                 {
                     //printf("%s needs to be converted\n",fullname);
                     if (Pandoc(fullname) == 1)
-                    { //printf("pandoc ends with stat 0\n");
+                    { printf("pandoc ends with stat 0\n");
                         return 1;
                     }
                 }
             }
         }
         closedir(Directory);
-        // printf("Convert_Directory ends with stat 0\n");
+        printf("Convert_Directory ends with stat 0\n");
     }
     return (0);
 }
@@ -1059,8 +1060,7 @@ int launch_with_options(struct Arguments *arguments, enum Options *option, enum 
                 }
                 else
                 {
-                    // printf("not a directory %s \n", arguments->files[file].filename);
-
+                    printf("not a directory %s \n", arguments->files[file].filename);
                     return 0;
                     //no need to be converted
                 }
@@ -1119,6 +1119,7 @@ int launch_with_options(struct Arguments *arguments, enum Options *option, enum 
         break;
     }
     return 0;
+}
 int lauchProgram(struct Arguments *arguments)
 {
     //Array of options
@@ -1154,7 +1155,7 @@ int lauchProgram(struct Arguments *arguments)
             return 1;
         }
     }
-    //printf("lauchProgram ends with stat 0\n");
+    printf("lauchProgram ends with stat 0\n");
     return 0;
 }
 
@@ -1179,6 +1180,6 @@ int main(int argc, char *argv[])
         }
     }
     free_arguments(arguments);
-    //printf("MAIN ends with stat 0\n");
+    printf("MAIN ends with stat 0\n");
     return 0;
 }
