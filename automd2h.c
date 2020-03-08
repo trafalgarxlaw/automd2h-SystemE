@@ -693,7 +693,7 @@ bool if_html_version_exists(const char *file)
 }
 
 //Convert all md (ASKED SPECIFICALLY) files inside Directory if there is no html version of them
-int Convert_Directory(char *Dir, bool checktime)
+int Convert_Directory(char *Dir,bool Arg_is_Dir_Then_Convert,bool checktime)
 {
     DIR *Directory;
     struct dirent *entry;
@@ -723,13 +723,13 @@ int Convert_Directory(char *Dir, bool checktime)
         {
             //printf("%4s: %s\n", "File", fullname);
             //its a file
-            if (is_Markdown(fullname) && (file_needs_conversion(fullname) || !checktime))
-            {
-                if (Pandoc(fullname) == 1)
+                if (is_Markdown(fullname) && (file_needs_conversion(fullname) || !checktime))
                 {
-                    return 1;
+                    if (Pandoc(fullname) == 1)
+                    {
+                        return 1;
+                    }
                 }
-            }
             
         }
     }
@@ -980,7 +980,7 @@ int launch_with_no_options(struct Arguments *arguments){
         for (int i = 0; i < arguments->num_files; i++)
         {
             //   if the current argument is a file
-            if (is_directory(arguments->files[i].filename)==false)
+            if (is_directory(arguments->files[i].filename)==false&& if_html_version_exists(arguments->files[i].filename) == false)
             {
                 if (Pandoc(arguments->files[i].filename) == 1)
                 {
@@ -990,7 +990,7 @@ int launch_with_no_options(struct Arguments *arguments){
             //   if the current argument is a Directory
             else if (is_directory(arguments->files[i].filename))
             {
-                if (Convert_Directory(arguments->files[i].filename,false) == 1)
+                if (Convert_Directory(arguments->files[i].filename,true,false) == 1)
                 {
                     return 1;
                 }
@@ -1029,7 +1029,7 @@ int launch_with_options(struct Arguments *arguments,enum Options *option,enum Op
                  if (arguments->num_files==0)
                  {
                      //printf("num files = 0.\n");
-                     Convert_Directory(".", true);
+                     Convert_Directory(".",false,true);
                      return 0;
                  }
                  
@@ -1047,7 +1047,7 @@ int launch_with_options(struct Arguments *arguments,enum Options *option,enum Op
                     else if(is_directory(arguments->files[file].filename)==true)
                     {
                         //elements of the directory needs to be converted, needs to checktime
-                        Convert_Directory(arguments->files[file].filename,true);
+                        Convert_Directory(arguments->files[file].filename,false,true);
                     }else
                     {
                         //no need to be converted
