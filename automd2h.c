@@ -521,10 +521,6 @@ bool file_needs_conversion(char *filename)
                     printf("Unable to get file properties.\n");
                 }
             }
-            else
-            {
-                printf("'%s' file do not exists, i can't compare them.\n", newFileName);
-            }
         }
         else
         {
@@ -535,7 +531,7 @@ bool file_needs_conversion(char *filename)
     else
     {
         convert = false;
-        printf("The file %s does not exists or is not .md\n\n", filename);
+        //printf("The file %s does not exists or is not .md\n\n", filename);
     }
 
     return convert;
