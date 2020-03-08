@@ -246,7 +246,7 @@ enum Options option_detection(char *option)
     {
         Detected_option = Optionerror;
         fprintf(stderr, "Option detection error");
-        exit(1);
+        return 1;
     }
 
     return Detected_option;
@@ -560,7 +560,7 @@ void Print_num_Options(struct Arguments *arguments)
     printf("Number of options entered :%d \n", arguments->num_options);
 }
 
-void Pandoc(char *file)
+int Pandoc(char *file)
 {
 
     //printf("Pandoc is trying to convert the file...\n");
@@ -598,7 +598,8 @@ void Pandoc(char *file)
 
         //Error Handeler
         fprintf(stdout, "pandoc failed\n");
-        exit(1);
+        return 1;
+        //exit(1);
     }
 }
 
@@ -661,7 +662,7 @@ int Convert_Directory( char *Dir){
             printf("%4s: %s\n", "File", fullname);
             if (is_Markdown(fullname) && if_html_version_exists(fullname) == false)
             {
-                Pandoc(fullname);
+                if(Pandoc(fullname)==1){return 1;}
             }
         }
     }
@@ -742,6 +743,7 @@ int watch(char *Dir){
             fd = inotify_init();
             if ( fd < 0 ) {
                 perror( "inotify_init" );
+                exit(1);
             }
 
             //Adding to the watch list
@@ -752,6 +754,7 @@ int watch(char *Dir){
                 length = read( fd, buffer, BUF_LEN );  
                 if ( length < 0 ) {
                     perror( "read" );
+                    exit(1);
                 } 
                 event = ( struct inotify_event * ) &buffer[ i ];
 
@@ -780,7 +783,7 @@ int Watch_fork(char *Dir,struct VisitedDirectories *Directories){
         //Already visited, no need to watch it again
         printf("%s is already visited\n",Dir);
         //leave
-        return 1;
+        return 0;
     }else
     {
         //not vsited, Add it to the visited Directories table.
@@ -810,7 +813,7 @@ int Watch_fork(char *Dir,struct VisitedDirectories *Directories){
     {
         //error: The return of fork() is negative
         perror("fork failed");
-        _exit(2); //exit failure, hard
+        exit(1);
     }
 
 
@@ -899,7 +902,7 @@ int lauchProgram(struct Arguments *arguments)
     if (Check_Duplicates(OptionArray))
     {
         fprintf(stderr, "Error duplicates options.\n");
-        exit(1);
+        return 1;
     }
                 
     //if no option is entered, we convert files entered if there is no html version of them
@@ -910,12 +913,12 @@ int lauchProgram(struct Arguments *arguments)
                 //   if the current argument is a file
                 if (arguments->files[i].format != Directory &&if_html_version_exists(arguments->files[i].filename) == false)
                 {
-                    Pandoc(arguments->files[i].filename);
+                    if(Pandoc(arguments->files[i].filename)==1){return 1;}
                 }
                 //   if the current argument is a Directory
                 else if (arguments->files[i].format == Directory )
                 {
-                    Convert_Directory(arguments->files[i].filename);
+                    if(Convert_Directory(arguments->files[i].filename)==1){return 1;}
                 }
                 
             
@@ -945,7 +948,7 @@ int lauchProgram(struct Arguments *arguments)
                 {
 
                     printf("%s needs to be converted again.\n", arguments->files[file].filename);
-                    Pandoc(arguments->files[file].filename);
+                    if(Pandoc(arguments->files[file].filename)==1){return 1;}
                 }
                 else
                 {
@@ -994,6 +997,9 @@ int lauchProgram(struct Arguments *arguments)
 
         case Optionerror:
             fprintf(stderr, "Option parsing failed\n");
+            arguments->status = WRONG_VALUE;
+            return 1;
+
             break;
 
         default:
@@ -1011,20 +1017,22 @@ int main(int argc, char *argv[])
     struct Arguments *arguments = parse_arguments(argc, argv); //takes the arguments in the structure
     if (arguments->status != OK)
     {
-        fprintf(stderr, "failed to read arguments\n");
+        //fprintf(stderr, "failed to read arguments\n");
 
         //free_arguments(arguments);
+        //exit(EXIT_FAILURE);
         return 1;
-    }
-    else
+    }else
     {
         // All good
         //print_args(arguments);
         //Print_num_Options(arguments);
-
-        lauchProgram(arguments);
-        free_arguments(arguments);
-        return 0;
+        if (lauchProgram(arguments)==1)
+        {
+            return 1;
+        }
+        
     }
-    
+    free_arguments(arguments);
+    return 0;
 }
