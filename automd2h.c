@@ -187,6 +187,22 @@ bool is_directory(char *filename)
     return d;
 }
 
+char* new_file_name(char *filePath){
+ 	char *newFileName = (char *) malloc(255);
+ 	if (file_exist(filePath)){
+ 		if(is_Markdown(filePath)){
+			//copy all except .md
+				char *p = strstr(filePath, ".md");
+					strncpy(newFileName, filePath, p - filePath);
+		}
+		else if (is_txt(filePath)){
+			strcpy(newFileName, filePath);
+ 		}
+			strncat(newFileName, ".html", 5);
+ 	}
+ 		return newFileName;
+}
+
 /**
  * Option Validation functions.
  */
@@ -461,21 +477,6 @@ void print_args(struct Arguments *arguments)
     }
 }
 
-char* new_file_name(char *filePath){
- 	char *newFileName = (char *) malloc(255);
- 	if (file_exist(filePath)){
- 		if(is_txt(filePath)){
-			strcpy(newFileName, filePath);
- 		}else if(is_Markdown(filePath)){
-			//copy all except .md
-			//			strncpy(newFileName, filePath, sizeof(filePath) -4);
-			//			 		}
-			//			 				strncat(newFileName, html, 6);
-			//			 						strncat(newFileName, ".html", 5);
-			//			 						 	}
-			//			 						 		return newFileName;
-			//			 						 		}
-
 //Check if converted document has a newer version (option t)
 bool has_new_doc_version(time_t sourceFile, time_t destFile)
 {
@@ -488,7 +489,7 @@ bool file_needs_conversion(char *filename)
     bool convert = false;
     struct stat attrib;
     struct stat newAttrib;
-    char *newFileName = replaceWord(filename, ".md", ".html");
+    char *newFileName = new_file_name(filename);//replaceWord(filename, ".md", ".html");
 
     printf("\nChecking if %s needs to be converted\n", filename);
     //Checking if the given file exists and if its a .md
@@ -628,7 +629,7 @@ int Pandoc(char *file)
         // argv array for: ls -l
         // Just like in main, the argv array must be NULL terminated.
         // try to run ./a.out -x -y, it will work
-        char *output = replaceWord(file, ".md", ".html");
+        char *output = new_file_name(file);//replaceWord(file, ".md", ".html");
         //checking if the file exists
         
         char *ls_args[] = {"pandoc", file, "-o", output, NULL};
@@ -687,9 +688,9 @@ bool Check_Duplicates(enum Options OptionArray[])
     return DuplicateOption;
 }
 
-bool if_html_version_exists(const char *file)
+bool if_html_version_exists(char *file)
 {
-    char *MardownVersion = replaceWord(file, ".md", ".html");
+    char *MardownVersion = new_file_name(file);//replaceWord(file, ".md", ".html");
     return file_exist(MardownVersion);
 }
 
@@ -1073,7 +1074,8 @@ print_arguments_files(arguments, false);
 int main(int argc, char *argv[])
 {
     //printf("\nStarting the program... \n");
-
+		printf("%s\n", new_file_name("test.txt.md"));
+printf("%s\n", new_file_name("test.md"));
     //printf(USAGE);
     struct Arguments *arguments = parse_arguments(argc, argv); //takes the arguments in the structure
     if (arguments->status != OK)
