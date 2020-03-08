@@ -830,7 +830,7 @@ int watch(char *Dir)
     }
 
     //Adding to the watch list
-    wd[0] = inotify_add_watch(fd, Dir, IN_CREATE);
+    wd[0] = inotify_add_watch(fd, Dir, IN_CREATE | IN_MODIFY);
     while (true)
     {
         struct inotify_event *event;
