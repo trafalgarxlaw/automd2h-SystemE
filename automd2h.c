@@ -1074,8 +1074,6 @@ print_arguments_files(arguments, false);
 int main(int argc, char *argv[])
 {
     //printf("\nStarting the program... \n");
-		printf("%s\n", new_file_name("test.txt.md"));
-printf("%s\n", new_file_name("test.md"));
     //printf(USAGE);
     struct Arguments *arguments = parse_arguments(argc, argv); //takes the arguments in the structure
     if (arguments->status != OK)
