@@ -699,7 +699,7 @@ int Convert_Directory(char *Dir, bool checktime)
     if (Directory == NULL)
     {
         //perror("Unable to read directory.. i'm leaving\n");
-         printf("Convert_Directory ends with stat 0\n");
+         //printf("Convert_Directory ends with stat 0\n");
         return (0); // leave
     }
 
@@ -726,7 +726,7 @@ int Convert_Directory(char *Dir, bool checktime)
         }
     }
     closedir(Directory);
-    printf("Convert_Directory ends with stat 0\n");
+    //printf("Convert_Directory ends with stat 0\n");
     return (0);
 }
 
