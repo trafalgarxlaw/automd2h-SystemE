@@ -269,13 +269,6 @@ enum Options option_detection(char *option)
 }
 
 
-void No_arg_Failure(int argc)
-{
-    if (argc == 1)
-    {
-        exit(EXIT_FAILURE);
-    }
-}
 
 
 void print_args(struct Arguments *arguments)
@@ -869,6 +862,13 @@ void Observe(bool Immediate_Convertion)
     {
         printf("\nsleeping...\n");
         sleep(2);
+    }
+}
+void No_arg_Failure(int argc)
+{
+    if (argc == 1)
+    {
+        exit(EXIT_FAILURE);
     }
 }
 // launching the program with no option entered.
