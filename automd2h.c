@@ -588,6 +588,8 @@ int Pandoc(char *file)
         //checking if the file exists
         
         char *ls_args[] = {"pandoc", file, "-o", output, NULL};
+
+        printf("looking for : %s\n",output);
         //                    ^
         //  use the name ls
         //  rather than the
@@ -596,14 +598,16 @@ int Pandoc(char *file)
         // Little explaination
         // The primary difference between execv and execvp is that with execv you have to provide the full path to the binary file (i.e., the program).
         // With execvp, you do not need to specify the full path because execvp will search the local environment variable PATH for the executable.
-        if(file_exist(output)){execvp(ls_args[0], ls_args);}
+        if(file_exist(file)){
+            printf("the file exists\n");
+            execvp(ls_args[0], ls_args);}
         else
         {
             //Error Handeler
-            fprintf(stdout, "pandoc should failed with exit 42\n");
-            exit(42);
-            printf( "hello\n");
+            exit(1);
         }
+        return 0;
+
     }else{
         //parent
   
@@ -616,10 +620,9 @@ int Pandoc(char *file)
             int exit_status = WEXITSTATUS(status);         
             printf("Exit status of the child was %d\n",  
                                         exit_status); 
-            exit(exit_status);
+            if(exit_status!=0){exit(exit_status);}
+            
         } 
-
-
     }
     return 0;
 }
@@ -1056,7 +1059,7 @@ int main(int argc, char *argv[])
         
     }
     free_arguments(arguments);
-    return 5;
+    return 0;
 }
 
 //upload
