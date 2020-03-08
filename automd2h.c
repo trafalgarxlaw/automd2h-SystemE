@@ -1074,7 +1074,7 @@ int launch_with_options(struct Arguments *arguments,enum Options *option,enum Op
             {
 								for (int file = 0; file < arguments->num_files; file++)
                 {
-									watch(arguments->files[i].filename);
+									watch(arguments->files[file].filename);
 								}
                 //printf("\nOption w Detected.\n");
                 //Observe(false);
