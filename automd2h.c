@@ -1,3 +1,8 @@
+/**
+ * @author yassine Hasnaoui (HASY04089702)
+ * @author Philippe
+*/
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
