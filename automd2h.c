@@ -461,6 +461,21 @@ void print_args(struct Arguments *arguments)
     }
 }
 
+char* new_file_name(char *filePath){
+ 	char *newFileName = (char *) malloc(255);
+ 	if (file_exist(filePath)){
+ 		if(is_txt(filePath)){
+			strcpy(newFileName, filePath);
+ 		}else if(is_Markdown(filePath)){
+			//copy all except .md
+			//			strncpy(newFileName, filePath, sizeof(filePath) -4);
+			//			 		}
+			//			 				strncat(newFileName, html, 6);
+			//			 						strncat(newFileName, ".html", 5);
+			//			 						 	}
+			//			 						 		return newFileName;
+			//			 						 		}
+
 //Check if converted document has a newer version (option t)
 bool has_new_doc_version(time_t sourceFile, time_t destFile)
 {
