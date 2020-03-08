@@ -219,27 +219,27 @@ enum Options option_detection(char *option)
     enum Options Detected_option = no_option;
     if (is_Option_t(option))
     {
-        /* code */
+        
         Detected_option = t;
     }
     else if (is_Option_n(option))
     {
-        /* code */
+        
         Detected_option = n;
     }
     else if (is_Option_r(option))
     {
-        /* code */
+        
         Detected_option = r;
     }
     else if (is_Option_w(option))
     {
-        /* code */
+        
         Detected_option = w;
     }
     else if (is_Option_f(option))
     {
-        /* code */
+        
         Detected_option = f;
     }
     else
@@ -585,6 +585,8 @@ int Pandoc(char *file)
         // Just like in main, the argv array must be NULL terminated.
         // try to run ./a.out -x -y, it will work
         char *output = replaceWord(file, ".md", ".html");
+        //checking if the file exists
+        
         char *ls_args[] = {"pandoc", file, "-o", output, NULL};
         //                    ^
         //  use the name ls
@@ -594,13 +596,15 @@ int Pandoc(char *file)
         // Little explaination
         // The primary difference between execv and execvp is that with execv you have to provide the full path to the binary file (i.e., the program).
         // With execvp, you do not need to specify the full path because execvp will search the local environment variable PATH for the executable.
-        execvp(ls_args[0], ls_args);
-
-        //Error Handeler
-        fprintf(stdout, "pandoc failed\n");
-        return 1;
-        //exit(1);
+        if(file_exist(output)){execvp(ls_args[0], ls_args);}
+        else
+        {
+            //Error Handeler
+            fprintf(stdout, "pandoc failed\n");
+            exit(EXIT_FAILURE);
+        }
     }
+    return 0;
 }
 
 // Check if the user entered the same option twice.
