@@ -198,7 +198,7 @@ char* new_file_name(char *filePath){
 		else if (is_txt(filePath)){
 			strcpy(newFileName, filePath);
  		}
-			strncat(newFileName, ".html", 5);
+			strcat(newFileName, ".html");
  	}
  		return newFileName;
 }
