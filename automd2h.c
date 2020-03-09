@@ -719,7 +719,7 @@ int watch(char *Dir)
   }  
 
   /*actually read return the list of change events happens. Here, read the change event one by one and process it accordingly.*/
-  while ( true) {     
+  while ( i < length ) {     
       struct inotify_event *event = ( struct inotify_event * ) &buffer[ i ];     
       if ( event->len ) {
       if ( event->mask & IN_CREATE ) {
