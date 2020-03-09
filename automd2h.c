@@ -749,7 +749,7 @@ int watch(char *Dir)
 }
 
 int watch2(char *file){
-		int inotifyFd, wd, j;
+	int inotifyFd, wd, j;
      char buf[BUF_LEN] __attribute__ ((aligned(8)));
      ssize_t numRead;
      char *p;
@@ -760,8 +760,9 @@ int watch2(char *file){
          exit(EXIT_FAILURE);
  
     /* For each command-line argument, add a watch for all events */
-
+	if(file_exist(file)){
          wd = inotify_add_watch(inotifyFd, file, IN_MODIFY);
+	}
          if (wd == -1)
              exit(EXIT_FAILURE);
  
