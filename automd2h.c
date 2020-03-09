@@ -704,7 +704,7 @@ int watch(char *Dir)
     }
 
     //Adding to the watch list
-    wd[0] = inotify_add_watch(fd, Dir, IN_CREATE | IN_MODIFY);
+    wd[0] = inotify_add_watch(fd, Dir, IN_MODIFY);
     while (true)
     {
         struct inotify_event *event;
@@ -716,13 +716,14 @@ int watch(char *Dir)
             exit(EXIT_FAILURE);
         }
         event = (struct inotify_event *)&buffer[i];
-
+	printf("qqchsepasse icitte\n");
         if (event->len)
         {
-            if (event->wd == wd[0])
-                printf("In %s\n", Dir);
-            else
-                continue;
+printf("qqchsepasse\n");
+            //if (event->wd == wd[0])
+             //   printf("In %s\n", Dir);
+            //else
+              //  continue;
             //if (event->mask & IN_CREATE)
             //{
             //  if (event->mask & IN_ISDIR)
@@ -734,11 +735,12 @@ int watch(char *Dir)
             //     printf("The file %s was created.\n", event->name);
             // }
             //}
-            //if (event->mask & IN_MODIFY)
+            if (event->mask & IN_MODIFY)
             {
-                //if (Pandoc(event->name) == 1){
-                // 		return 1;
-                //}
+		printf("ok\n");;
+                if (Pandoc(event->name) == 1){
+                 		return 1;
+                }
             }
         }
     }
@@ -780,7 +782,7 @@ int watch2(char *file){
          for (p = buf; p < buf + numRead; ) {
              event = (struct inotify_event *) p;
              //displayInotifyEvent(event);//
-						if (Pandoc(file) == 1){
+		if (Pandoc(file) == 1){
              		return 1;
             }
  //printf("%s",event->len);
@@ -1054,7 +1056,7 @@ int launch_with_options(struct Arguments *arguments, enum Options *option, enum 
         {
             for (int file = 0; file < arguments->num_files; file++)
             {
-                watch2(arguments->files[file].filename);
+                watch(arguments->files[file].filename);
             }
             //printf("\nOption w Detected.\n");
             //Observe(false);
