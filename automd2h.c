@@ -749,10 +749,7 @@ int watch(char *Dir)
                     else
                     {
                         //printf("New file %s created.\n", event->name);
-						if (Pandoc(Dir) == 1)
-					    {
-					        return 1;
-					    }
+						Convert_Directory(Dir, true);
 			
                     }
                 }
