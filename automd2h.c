@@ -19,8 +19,11 @@
 #include <sys/inotify.h>
 #include <signal.h>
 
-#define EVENT_SIZE (sizeof(struct inotify_event))
+#define EVENT_SIZE  ( sizeof (struct inotify_event) )
+#define EVENT_BUF_LEN     ( 1024 * ( EVENT_SIZE + 16 ) )
 #define BUF_LEN (1024 * (EVENT_SIZE + 16))
+
+
 #define USAGE "\n\
 Usage: [-h|--help] [-t| ] [-n| ] [-w| ] [-r| ] [-f| ]\n\
 \n\
@@ -685,110 +688,115 @@ void Delete_Child(pid_t c_pid_To_Delete, int sec)
     //killing the child after a certain delay.
     kill(c_pid_To_Delete, SIGKILL);
 }
+#define EVENT_SIZE  ( sizeof (struct inotify_event) )
+#define EVENT_BUF_LEN     ( 1024 * ( EVENT_SIZE + 16 ) )
 // Listen in the current directories
 int watch(char *Dir)
 {
+  int length, i = 0;
+  int fd;
+  int wd;
+  char buffer[EVENT_BUF_LEN];
 
-    //printf("starting watching..\n");
-    int length, i = 0;
-    int fd;
-    int wd[2];
-    char buffer[BUF_LEN];
+  /*creating the INOTIFY instance*/
+  fd = inotify_init();
 
-    // Initialise inotify for the current Directory
-    fd = inotify_init();
-    if (fd < 0)
-    {
-        perror("inotify_init");
-        exit(EXIT_FAILURE);
-    }
+  /*checking for error*/
+  if ( fd < 0 ) {
+    perror( "inotify_init" );
+  }
 
-    //Adding to the watch list
-    wd[0] = inotify_add_watch(fd, Dir, IN_CREATE | IN_MODIFY);
-    while (true)
-    {
-        struct inotify_event *event;
+  /*adding the “/tmp” directory into watch list. Here, the suggestion is to validate the existence of the directory before adding into monitoring list.*/
+  wd = inotify_add_watch( fd, Dir, IN_CREATE | IN_DELETE );
 
-        length = read(fd, buffer, BUF_LEN);
-        if (length < 0)
-        {
-            perror("read");
-            exit(EXIT_FAILURE);
+  /*read to determine the event change happens on “/tmp” directory. Actually this read blocks until the change event occurs*/ 
+
+  length = read( fd, buffer, EVENT_BUF_LEN ); 
+
+  /*checking for error*/
+  if ( length < 0 ) {
+    perror( "read" );
+  }  
+
+  /*actually read return the list of change events happens. Here, read the change event one by one and process it accordingly.*/
+  while ( i < length ) {     struct inotify_event *event = ( struct inotify_event * ) &buffer[ i ];     if ( event->len ) {
+      if ( event->mask & IN_CREATE ) {
+        if ( event->mask & IN_ISDIR ) {
+          printf( "New directory %s created.\n", event->name );
         }
-        event = (struct inotify_event *)&buffer[i];
-
-        if (event->len)
-        {
-            if (event->wd == wd[0])
-                printf("In %s\n", Dir);
-            else
-            if (event->mask & IN_CREATE)
-            {
-             if (event->mask & IN_ISDIR)
-             {
-                printf("The directory %s was created.\n", event->name);
-            }
-            else
-             {
-                printf("The file %s was created.\n", event->name);
-            }
-            }
-            if (event->mask & IN_MODIFY)
-            {
-                if (Pandoc(event->name) == 1){
-                		return 1;
-                }
-           }
+        else {
+          printf( "New file %s created.\n", event->name );
         }
+      }
+      else if ( event->mask & IN_DELETE ) {
+        if ( event->mask & IN_ISDIR ) {
+          printf( "Directory %s deleted.\n", event->name );
+        }
+        else {
+          printf( "File %s deleted.\n", event->name );
+        }
+      }
     }
-    (void)inotify_rm_watch(fd, wd[0]);
-    (void)close(fd);
-    return 0;
+    i += EVENT_SIZE + event->len;
+  }
+  /*removing the “/tmp” directory from the watch list.*/
+   inotify_rm_watch( fd, wd );
+
+  /*closing the INOTIFY instance*/
+   close( fd );
+   return 0;
+
 }
 
-int watch2(char *file){
-	int inotifyFd, wd, j;
-     char buf[BUF_LEN] __attribute__ ((aligned(8)));
-     ssize_t numRead;
-     char *p;
-     struct inotify_event *event;
- 
-     inotifyFd = inotify_init();                 /* Create inotify instance */
-     if (inotifyFd == -1)
-         exit(EXIT_FAILURE);
- 
+
+int watch2(char *file)
+{
+    int inotifyFd, wd, j;
+    char buf[BUF_LEN] __attribute__((aligned(8)));
+    ssize_t numRead;
+    char *p;
+    struct inotify_event *event;
+
+    inotifyFd = inotify_init(); /* Create inotify instance */
+    if (inotifyFd == -1)
+        exit(EXIT_FAILURE);
+
     /* For each command-line argument, add a watch for all events */
-	if(file_exist(file)){
-         wd = inotify_add_watch(inotifyFd, file, IN_MODIFY);
-	}
-         if (wd == -1)
-             exit(EXIT_FAILURE);
- 
-         //printf("Watching %s using wd %d\n", file, wd);
- 
-     for (;;) {                                  /* Read events forever */
-         numRead = read(inotifyFd, buf, BUF_LEN);
-         if (numRead == 0)
-             exit(EXIT_FAILURE);
- 
-         if (numRead == -1)
-             exit(EXIT_FAILURE);
- 
-         /* Process all of the events in buffer returned by read() */
- 
-         for (p = buf; p < buf + numRead; ) {
-             event = (struct inotify_event *) p;
-             //displayInotifyEvent(event);//
-						if (Pandoc(file) == 1){
-             		return 1;
+    if (file_exist(file))
+    {
+        wd = inotify_add_watch(inotifyFd, file, IN_MODIFY);
+    }
+    if (wd == -1)
+        exit(EXIT_FAILURE);
+
+    //printf("Watching %s using wd %d\n", file, wd);
+
+    for (;;)
+    { /* Read events forever */
+        numRead = read(inotifyFd, buf, BUF_LEN);
+        if (numRead == 0)
+            exit(EXIT_FAILURE);
+
+        if (numRead == -1)
+            exit(EXIT_FAILURE);
+
+        /* Process all of the events in buffer returned by read() */
+
+        for (p = buf; p < buf + numRead;)
+        {
+            event = (struct inotify_event *)p;
+            //displayInotifyEvent(event);//
+            if (Pandoc(file) == 1)
+            {
+                return 1;
             }
- //printf("%s",event->len);
- 
-             p += sizeof(struct inotify_event) + event->len;
-         }
-     }
- 
-     exit(EXIT_SUCCESS);
+            //printf("%s",event->len);
+
+            p += sizeof(struct inotify_event) + event->len;
+        }
+    }
+
+    exit(EXIT_SUCCESS);
 }
 
 int Watch_fork(char *Dir, struct VisitedDirectories *Directories)
@@ -924,16 +932,16 @@ int launch_with_no_options(struct Arguments *arguments)
                 if (Pandoc(arguments->files[i].filename) == 1)
                 {
                     return 1;
-                }            
-            }else
+                }
+            }
+            else
             {
-            perror("ENOENT");
-            exit(EXIT_FAILURE);            
-            }  
-
+                perror("ENOENT");
+                exit(EXIT_FAILURE);
+            }
         }
         //   if the current argument is a Directory
-        else if (is_directory(arguments->files[i].filename)==true)
+        else if (is_directory(arguments->files[i].filename) == true)
         {
             if (Convert_Directory(arguments->files[i].filename, false) == 1)
             {
@@ -1003,17 +1011,17 @@ int launch_with_options(struct Arguments *arguments, enum Options *option, enum 
                             {
                                 return 1;
                             }
-                        }                    
-                    }else
+                        }
+                    }
+                    else
                     {
                         perror("ENOENT");
-                        exit(EXIT_FAILURE);                     
+                        exit(EXIT_FAILURE);
                     }
-              
                 }
                 else
                 {
-                    //exit(EXIT_FAILURE); 
+                    //exit(EXIT_FAILURE);
                     //printf("not a directory %s \n", arguments->files[file].filename);
                     //no need to be converted
                 }
@@ -1054,7 +1062,7 @@ int launch_with_options(struct Arguments *arguments, enum Options *option, enum 
         {
             for (int file = 0; file < arguments->num_files; file++)
             {
-                watch2(arguments->files[file].filename);
+                watch(arguments->files[file].filename);
             }
             //printf("\nOption w Detected.\n");
             //Observe(false);
