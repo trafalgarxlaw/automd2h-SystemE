@@ -787,7 +787,6 @@ int Watch_fork(char *Dir, struct VisitedDirectories *Directories)
     else if (c_pid > 0) //parent
     {
         //Deleting the child after ? secondes
-        sleep(10);
         Delete_Child(c_pid, 10);
     }
     else
