@@ -786,7 +786,7 @@ int Watch_fork(char *Dir, struct VisitedDirectories *Directories)
     else if (c_pid > 0) //parent
     {
         //Deleting the child after ? secondes
-        Delete_Child(c_pid, 10);
+        Delete_Child(c_pid, 10); 
     }
     else
     {
@@ -798,13 +798,13 @@ int Watch_fork(char *Dir, struct VisitedDirectories *Directories)
 }
 bool RecursiveSearch(char *Dir, bool AddWatcher, struct VisitedDirectories *Directories)
 {
-    printf("Visited dir : %d\n", Directories->num_dir_visited);
+    //printf("Visited dir : %d\n", Directories->num_dir_visited);
     //Directory stuff
     DIR *Directory;
     struct dirent *entry;
     struct stat filestat;
 
-    printf("I am Reading %s Directory\n", Dir);
+    //printf("I am Reading %s Directory\n", Dir);
     // Open the current directory
     Directory = opendir(Dir);
     if (Directory == NULL)
@@ -834,9 +834,9 @@ bool RecursiveSearch(char *Dir, bool AddWatcher, struct VisitedDirectories *Dire
             if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) // to not infinite loop
             {
                 // Recursion happens here
-                printf("\n*Entering a subDirectory* : %s \n", entry->d_name);
+                //printf("\n*Entering a subDirectory* : %s \n", entry->d_name);
                 RecursiveSearch(fullname, AddWatcher, Directories);
-                printf("\n*Leaving a subDirectory*\n");
+               // printf("\n*Leaving a subDirectory*\n");
             }
         }
         else
@@ -1001,7 +1001,9 @@ int launch_with_options(struct Arguments *arguments, enum Options *option, enum 
 
     case r:
         printf("\nStarting Recursive Research..\n");
-        RecursiveSearch(".", false, NULL);
+        struct VisitedDirectories Directories;
+        Directories.num_dir_visited = 0;
+        RecursiveSearch(".", false, &Directories);
         break;
 
     case w:
