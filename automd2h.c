@@ -687,8 +687,6 @@ void Delete_Child(pid_t c_pid_To_Delete, int sec)
     //killing the child after a certain delay.
     kill(c_pid_To_Delete, SIGKILL);
 }
-#define EVENT_SIZE (sizeof(struct inotify_event))
-#define EVENT_BUF_LEN (1024 * (EVENT_SIZE + 16))
 // Listen in the current directories
 int watch(char *Dir)
 {
@@ -710,7 +708,7 @@ int watch(char *Dir)
         }
 
         /*adding the “/tmp” directory into watch list. Here, the suggestion is to validate the existence of the directory before adding into monitoring list.*/
-        wd = inotify_add_watch(fd, Dir, IN_CREATE | IN_DELETE | IN_MODIFY);
+        wd = inotify_add_watch(fd, Dir, IN_CREATE | IN_MODIFY);
 
         /*read to determine the event change happens on “/tmp” directory. Actually this read blocks until the change event occurs*/
         length = read(fd, buffer, EVENT_BUF_LEN);
@@ -739,17 +737,6 @@ int watch(char *Dir)
 			Convert_Directory(Dir, true);
                     }
                 }
-                else if (event->mask & IN_DELETE)
-                {
-                    if (event->mask & IN_ISDIR)
-                    {
-                        printf("Directory %s deleted.\n", event->name);
-                    }
-                    else
-                    {
-                        printf("File %s deleted.\n", event->name);
-                    }
-                }
                 else if (event->mask & IN_MODIFY)
                 {
                     Convert_Directory(Dir, true);
@@ -766,55 +753,6 @@ int watch(char *Dir)
     return 0;
 }
 
-int watch2(char *file)
-{
-    int inotifyFd, wd, j;
-    char buf[BUF_LEN] __attribute__((aligned(8)));
-    ssize_t numRead;
-    char *p;
-    struct inotify_event *event;
-
-    inotifyFd = inotify_init(); /* Create inotify instance */
-    if (inotifyFd == -1)
-        exit(EXIT_FAILURE);
-
-    /* For each command-line argument, add a watch for all events */
-    if (file_exist(file))
-    {
-        wd = inotify_add_watch(inotifyFd, file, IN_MODIFY);
-    }
-    if (wd == -1)
-        exit(EXIT_FAILURE);
-
-    //printf("Watching %s using wd %d\n", file, wd);
-
-    for (;;)
-    { /* Read events forever */
-        numRead = read(inotifyFd, buf, BUF_LEN);
-        if (numRead == 0)
-            exit(EXIT_FAILURE);
-
-        if (numRead == -1)
-            exit(EXIT_FAILURE);
-
-        /* Process all of the events in buffer returned by read() */
-
-        for (p = buf; p < buf + numRead;)
-        {
-            event = (struct inotify_event *)p;
-            //displayInotifyEvent(event);//
-            if (Pandoc(file) == 1)
-            {
-                return 1;
-            }
-            //printf("%s",event->len);
-
-            p += sizeof(struct inotify_event) + event->len;
-        }
-    }
-
-    exit(EXIT_SUCCESS);
-}
 
 int Watch_fork(char *Dir, struct VisitedDirectories *Directories)
 {
@@ -849,6 +787,7 @@ int Watch_fork(char *Dir, struct VisitedDirectories *Directories)
     else if (c_pid > 0) //parent
     {
         //Deleting the child after ? secondes
+        sleep(10);
         Delete_Child(c_pid, 10);
     }
     else
