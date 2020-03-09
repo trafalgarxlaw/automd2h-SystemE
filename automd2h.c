@@ -775,7 +775,7 @@ int watch2(char *file){
          if (numRead == -1)
              exit(EXIT_FAILURE);
  
-         /* Process all of the events in buffer returned by read() *//
+         /* Process all of the events in buffer returned by read() */
  
          for (p = buf; p < buf + numRead; ) {
              event = (struct inotify_event *) p;
