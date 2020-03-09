@@ -735,7 +735,8 @@ int watch(char *Dir)
                     }
                     else
                     {
-                        printf("New file %s created.\n", event->name);
+                        //printf("New file %s created.\n", event->name);
+			Convert_Directory(Dir, true);
                     }
                 }
                 else if (event->mask & IN_DELETE)
@@ -751,7 +752,7 @@ int watch(char *Dir)
                 }
                 else if (event->mask & IN_MODIFY)
                 {
-                    printf("File %s deleted.\n", event->name);
+                    Convert_Directory(Dir, true);
                 }
             }
             i += EVENT_SIZE + event->len;
