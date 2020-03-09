@@ -708,7 +708,7 @@ int watch(char *Dir)
         }
 
         /*adding the “/tmp” directory into watch list. Here, the suggestion is to validate the existence of the directory before adding into monitoring list.*/
-        wd = inotify_add_watch(fd, Dir, IN_CREATE | IN_MODIFY);
+        wd = inotify_add_watch(fd, Dir, IN_CREATE | IN_MODIFY | IN_MOVED_TO);
 
         /*read to determine the event change happens on “/tmp” directory. Actually this read blocks until the change event occurs*/
         length = read(fd, buffer, EVENT_BUF_LEN);
@@ -737,7 +737,7 @@ int watch(char *Dir)
 			Convert_Directory(Dir, true);
                     }
                 }
-                else if (event->mask & IN_MODIFY)
+                else if (event->mask & (IN_MODIFY | IN_MOVED_TO))
                 {
                     Convert_Directory(Dir, true);
                 }
