@@ -843,6 +843,13 @@ bool RecursiveSearch(char *Dir, bool AddWatcher, struct VisitedDirectories *Dire
         else
         {
             //its a file
+			if(is_Markdown(fullname)){
+
+				if (Pandoc(fullname) == 1)
+	            {
+	                return 1;
+	            }
+			}
         }
     }
     return true;
@@ -1005,8 +1012,13 @@ int launch_with_options(struct Arguments *arguments, enum Options *option, enum 
         break;
 
     case r:
-        //printf("\nStarting Recursive Research..\n");
-        RecursiveSearch(".", false, &Directories);
+		for (int file = 0; file < arguments->num_files; file++)
+		{
+			//printf("\nStarting Recursive Research..\n");
+			Directories.num_dir_visited = 0;
+			RecursiveSearch(arguments->files[file].filename, false, &Directories);
+		}
+        
         break;
 
     case w:
