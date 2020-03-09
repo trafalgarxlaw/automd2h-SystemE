@@ -719,7 +719,9 @@ int watch(char *Dir)
   }  
 
   /*actually read return the list of change events happens. Here, read the change event one by one and process it accordingly.*/
-  while ( i < length ) {     struct inotify_event *event = ( struct inotify_event * ) &buffer[ i ];     if ( event->len ) {
+  while ( i < length ) {     
+      struct inotify_event *event = ( struct inotify_event * ) &buffer[ i ];     
+      if ( event->len ) {
       if ( event->mask & IN_CREATE ) {
         if ( event->mask & IN_ISDIR ) {
           printf( "New directory %s created.\n", event->name );
