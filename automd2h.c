@@ -1031,11 +1031,10 @@ int launch_with_options(struct Arguments *arguments, enum Options *option, enum 
 		for (int file = 0; file < arguments->num_files; file++)
 		{
 			//printf("\nStarting Recursive Research..\n");
-            struct VisitedDirectories Directories;
+			struct VisitedDirectories Directories;
 			Directories.num_dir_visited = 0;
 			RecursiveSearch(arguments->files[file].filename, false, &Directories);
 		}
-        
         break;
 
     case w:
