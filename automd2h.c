@@ -783,7 +783,7 @@ int watch2(char *file){
 						if (Pandoc(file) == 1){
              		return 1;
             }
-//printf("%s",event->len);
+ //printf("%s",event->len);
  
              p += sizeof(struct inotify_event) + event->len;
          }
@@ -934,7 +934,7 @@ int launch_with_no_options(struct Arguments *arguments)
 
         }
         //   if the current argument is a Directory
-        else if (is_directory(arguments->files[i].filename))
+        else if (is_directory(arguments->files[i].filename)==true)
         {
             if (Convert_Directory(arguments->files[i].filename, false) == 1)
             {
@@ -996,19 +996,25 @@ int launch_with_options(struct Arguments *arguments, enum Options *option, enum 
                     //printf("DIR %s needs to be converted .\n", arguments->files[file].filename);
                     //elements of the directory needs to be converted, needs to checktime
                     // convertir juste les md avec une nouvelle version par rapport au html ou sans html du tout
-                    if (file_needs_conversion(arguments->files[file].filename))
+                    if (file_exist(arguments->files[file].filename))
                     {
-                        if (Pandoc(arguments->files[file].filename) == 1)
+                        if (file_needs_conversion(arguments->files[file].filename))
                         {
-                            return 1;
-                        }
-                        //exit(0);
+                            if (Pandoc(arguments->files[file].filename) == 1)
+                            {
+                                return 1;
+                            }
+                        }                    
+                    }else
+                    {
+                        perror("ENOENT");
+                        exit(EXIT_FAILURE);                     
                     }
+              
                 }
                 else
                 {
                     //printf("not a directory %s \n", arguments->files[file].filename);
-                    return 0;
                     //no need to be converted
                 }
             }
