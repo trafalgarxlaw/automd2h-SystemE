@@ -919,8 +919,7 @@ int launch_with_no_options(struct Arguments *arguments)
 // launching the program with options
 int launch_with_options(struct Arguments *arguments, enum Options *option, enum Options *next_option, int *option_index)
 {
-    struct VisitedDirectories Directories;
-    Directories.num_dir_visited = 0;
+
     switch (*option)
     {
     case no_option:
@@ -1015,6 +1014,7 @@ int launch_with_options(struct Arguments *arguments, enum Options *option, enum 
 		for (int file = 0; file < arguments->num_files; file++)
 		{
 			//printf("\nStarting Recursive Research..\n");
+            struct VisitedDirectories Directories;
 			Directories.num_dir_visited = 0;
 			RecursiveSearch(arguments->files[file].filename, false, &Directories);
 		}
