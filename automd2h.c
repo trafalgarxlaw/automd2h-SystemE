@@ -747,6 +747,51 @@ int watch(char *Dir)
     return 0;
 }
 
+int watch2(char *file){
+	int inotifyFd, wd, j;
+     char buf[BUF_LEN] __attribute__ ((aligned(8)));
+     ssize_t numRead;
+     char *p;
+     struct inotify_event *event;
+ 
+     inotifyFd = inotify_init();                 /* Create inotify instance */
+     if (inotifyFd == -1)
+         exit(EXIT_FAILURE);
+ 
+    /* For each command-line argument, add a watch for all events */
+	if(file_exist(file)){
+         wd = inotify_add_watch(inotifyFd, file, IN_MODIFY);
+	}
+         if (wd == -1)
+             exit(EXIT_FAILURE);
+ 
+         //printf("Watching %s using wd %d\n", file, wd);
+ 
+     for (;;) {                                  /* Read events forever */
+         numRead = read(inotifyFd, buf, BUF_LEN);
+         if (numRead == 0)
+             exit(EXIT_FAILURE);
+ 
+         if (numRead == -1)
+             exit(EXIT_FAILURE);
+ 
+         /* Process all of the events in buffer returned by read() */
+ 
+         for (p = buf; p < buf + numRead; ) {
+             event = (struct inotify_event *) p;
+             //displayInotifyEvent(event);//
+						if (Pandoc(file) == 1){
+             		return 1;
+            }
+//printf("%s",event->len);
+ 
+             p += sizeof(struct inotify_event) + event->len;
+         }
+     }
+ 
+     exit(EXIT_SUCCESS);
+}
+
 int Watch_fork(char *Dir, struct VisitedDirectories *Directories)
 {
     //Only watch the current directory if its not visited
@@ -1003,7 +1048,7 @@ int launch_with_options(struct Arguments *arguments, enum Options *option, enum 
         {
             for (int file = 0; file < arguments->num_files; file++)
             {
-                watch(arguments->files[file].filename);
+                watch2(arguments->files[file].filename);
             }
             //printf("\nOption w Detected.\n");
             //Observe(false);
