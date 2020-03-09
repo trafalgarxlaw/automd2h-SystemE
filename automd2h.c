@@ -1011,26 +1011,13 @@ int launch_with_options(struct Arguments *arguments, enum Options *option, enum 
         break;
 
     case r:
-		if (*next_option == w)
-        {
-			for (int file = 0; file < arguments->num_files; file++)
-			{
-				//printf("\nStarting Recursive Research..\n");
-				struct VisitedDirectories Directories;
-				Directories.num_dir_visited = 0;
-				RecursiveSearch(arguments->files[file].filename, true, &Directories);
-			}
+		for (int file = 0; file < arguments->num_files; file++)
+		{
+			//printf("\nStarting Recursive Research..\n");
+			struct VisitedDirectories Directories;
+			Directories.num_dir_visited = 0;
+			RecursiveSearch(arguments->files[file].filename, false, &Directories);
 		}
-		else{
-			for (int file = 0; file < arguments->num_files; file++)
-			{
-				//printf("\nStarting Recursive Research..\n");
-				struct VisitedDirectories Directories;
-				Directories.num_dir_visited = 0;
-				RecursiveSearch(arguments->files[file].filename, false, &Directories);
-			}
-		}
-        
         break;
 
     case w:
