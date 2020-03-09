@@ -22,9 +22,7 @@
 #define EVENT_SIZE (sizeof(struct inotify_event))
 #define BUF_LEN (1024 * (EVENT_SIZE + 16))
 #define USAGE "\n\
-Usage: [-h|--help] [-t|--???] [-n|--???]\n\
-    [-n|--num_steps VALUE] [-t|--type STRING] [-a|--allowed-cells STRING]\n\
-    [-d|--distribution VALUES] [-i|--interactive] [-s|--stdin]\n\
+Usage: [-h|--help] [-t| ] [-n| ] [-w| ] [-r| ] [-f| ]\n\
 \n\
 automd2h convertit les fichiers au format Markdown en fichiers au format HTML.\n\
 \n\
@@ -47,10 +45,11 @@ automd2h convertit les fichiers au format Markdown en fichiers au format HTML.\n
                               celui-ci est automatiquement reconverti. Si dans un répertoire surveillé un fichier .md \n\
                               apparait, est modifié, est déplacé ou est renommé, celui-ci aussi est automatiquement converti.\n\
                               \n\
+-r,                           L'option -r visite les répertoires récursivement et cherche les fichiers dont l'extension est .md pour les convertir.\n\
+                              \n\
   -f,                         Par défaut, avec -w, les fichiers ne sont convertis que si une modification future est détectée.\n\
                               Combiné avec -w, l'option -f force la conversion immédiate des fichiers trouvés puis surveille les modifications futures.\n\
 "
-
 /**
  * The status of the program.
  */
@@ -876,10 +875,18 @@ int launch_with_no_options(struct Arguments *arguments)
         //   if the current argument is a file
         if (is_directory(arguments->files[i].filename) == false)
         {
-            if (Pandoc(arguments->files[i].filename) == 1)
+            if (file_exist(arguments->files[i].filename))
             {
-                return 1;
-            }
+                if (Pandoc(arguments->files[i].filename) == 1)
+                {
+                    return 1;
+                }            
+            }else
+            {
+            perror("ENOENT");
+            exit(EXIT_FAILURE);            
+            }  
+
         }
         //   if the current argument is a Directory
         else if (is_directory(arguments->files[i].filename))
@@ -931,11 +938,15 @@ int launch_with_options(struct Arguments *arguments, enum Options *option, enum 
             {
                 if (is_directory(arguments->files[file].filename) == true)
                 {
-                    Convert_Directory(arguments->files[file].filename, true);
+                    if (Convert_Directory(arguments->files[file].filename, true) == 1)
+                    {
+                        return 1;
+                    }
+                    //Convert_Directory(arguments->files[file].filename, true);
                     //file Need to be converted
                     //printf("%s needs to be converted .\n", arguments->files[file].filename);
                 }
-                else if (file_exist(arguments->files[file].filename))
+                else if (is_directory(arguments->files[file].filename) == false)
                 {
                     //printf("DIR %s needs to be converted .\n", arguments->files[file].filename);
                     //elements of the directory needs to be converted, needs to checktime
@@ -946,11 +957,12 @@ int launch_with_options(struct Arguments *arguments, enum Options *option, enum 
                         {
                             return 1;
                         }
+                        //exit(0);
                     }
                 }
                 else
                 {
-                    printf("not a directory %s \n", arguments->files[file].filename);
+                    //printf("not a directory %s \n", arguments->files[file].filename);
                     return 0;
                     //no need to be converted
                 }
