@@ -658,7 +658,7 @@ bool Dir_is_Visited(char *Dir, struct VisitedDirectories *Directories)
     bool isVisited = false;
     for (int i = 0; i < Directories->num_dir_visited; i++)
     {
-        printf("comparing %s and %s, i = %d\n", Dir, Directories->DirectoriesTable[i].name, i);
+        //printf("comparing %s and %s, i = %d\n", Dir, Directories->DirectoriesTable[i].name, i);
         if (strcmp(Dir, Directories->DirectoriesTable[i].name) == 0)
         {
             isVisited = true;
@@ -683,7 +683,7 @@ void Delete_Child(pid_t c_pid_To_Delete, int sec)
         sleep(1); // sleep 1s.
         start = time(NULL);
     }
-    printf("*****************Deleted..*************\n");
+    //printf("*****************Deleted..*************\n");
     //killing the child after a certain delay.
     kill(c_pid_To_Delete, SIGKILL);
 }
@@ -729,7 +729,7 @@ int watch(char *Dir)
                 {
                     if (event->mask & IN_ISDIR)
                     {
-                        printf("New directory %s created.\n", event->name);
+                        //printf("New directory %s created.\n", event->name);
                     }
                     else
                     {
@@ -760,14 +760,14 @@ int Watch_fork(char *Dir, struct VisitedDirectories *Directories)
     if (Dir_is_Visited(Dir, Directories) == true)
     {
         //Already visited, no need to watch it again
-        printf("%s is already visited\n", Dir);
+        //printf("%s is already visited\n", Dir);
         //leave
         return 0;
     }
     else
     {
         //not vsited, Add it to the visited Directories table.
-        printf("adding %s Dir to the list at the positon : %d\n", Dir, Directories->num_dir_visited);
+        //printf("adding %s Dir to the list at the positon : %d\n", Dir, Directories->num_dir_visited);
         struct Directory directory;
         strncpy(directory.name, Dir, sizeof(directory.name));
         directory.name[sizeof(directory.name) - 1] = '\0';
@@ -857,7 +857,7 @@ bool RecursiveSearch(char *Dir, bool AddWatcher, struct VisitedDirectories *Dire
 
 void Observe(bool Immediate_Convertion)
 {
-    printf("\nStarting to observe Sub Directories ...\n");
+    //printf("\nStarting to observe Sub Directories ...\n");
 
     struct VisitedDirectories Directories;
     Directories.num_dir_visited = 0;
@@ -870,7 +870,7 @@ void Observe(bool Immediate_Convertion)
 
     while (RecursiveSearch(".", true, &Directories))
     {
-        printf("\nsleeping...\n");
+        //printf("\nsleeping...\n");
         sleep(2);
     }
 }
@@ -884,6 +884,8 @@ void No_arg_Failure(int argc)
 // launching the program with no option entered.
 int launch_with_no_options(struct Arguments *arguments)
 {
+    struct VisitedDirectories Directories;
+
     for (int i = 0; i < arguments->num_files; i++)
     {
         //   if the current argument is a file
@@ -917,6 +919,7 @@ int launch_with_no_options(struct Arguments *arguments)
 // launching the program with options
 int launch_with_options(struct Arguments *arguments, enum Options *option, enum Options *next_option, int *option_index)
 {
+
     switch (*option)
     {
     case no_option:
@@ -1034,7 +1037,7 @@ int launch_with_options(struct Arguments *arguments, enum Options *option, enum 
 
         if (*next_option == f)
         {
-            printf("\nOption w combined with f Detected...Immediate convertion\n");
+            //printf("\nOption w combined with f Detected...Immediate convertion\n");
             *option_index++; // because we already considered the next option (which is f)
             //Observe(true);
         }
