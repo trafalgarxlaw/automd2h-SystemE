@@ -670,22 +670,39 @@ bool Dir_is_Visited(char *Dir, struct VisitedDirectories *Directories)
 //Need to fork this function
 void Delete_Child(pid_t c_pid_To_Delete, int sec)
 {
+    pid_t c_pid;
+    c_pid = fork();
 
-    // It will be watching for an event in the current Directory for a certain amount of time
-    time_t endwait;
-    time_t start = time(NULL);
-    time_t seconds = sec; // end loop after this time has elapsed
-    endwait = start + seconds;
-
-    while (start < endwait)
+    if (c_pid == 0)
     {
+        // It will be watching for an event in the current Directory for a certain amount of time
+        time_t endwait;
+        time_t start = time(NULL);
+        time_t seconds = sec; // end loop after this time has elapsed
+        endwait = start + seconds;
 
-        sleep(1); // sleep 1s.
-        start = time(NULL);
+        while (start < endwait)
+        {
+
+            sleep(1); // sleep 1s.
+            start = time(NULL);
+        }
+        //printf("*****************Deleted..*************\n");
+        //killing the child after a certain delay.
+        kill(c_pid_To_Delete, SIGKILL);
     }
-    //printf("*****************Deleted..*************\n");
-    //killing the child after a certain delay.
-    kill(c_pid_To_Delete, SIGKILL);
+    else if (c_pid > 0) //parent
+    {
+ 
+    }
+    else
+    {
+        //error: The return of fork() is negative
+        perror("fork failed");
+        exit(EXIT_FAILURE);
+    }
+
+
 }
 // Listen in the current directories
 int watch(char *Dir)
@@ -943,7 +960,7 @@ int launch_with_options(struct Arguments *arguments, enum Options *option, enum 
                 else
                 {
                     //no need to be converted
-                    //  printf("no convertion needed for %s \n", arguments->files[file].filename);
+                    //printf("no convertion needed for %s \n", arguments->files[file].filename);
                 }
             }
             return 0;
