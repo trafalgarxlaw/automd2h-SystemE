@@ -707,7 +707,7 @@ int watch(char *Dir)
   }
 
   /*adding the “/tmp” directory into watch list. Here, the suggestion is to validate the existence of the directory before adding into monitoring list.*/
-  wd = inotify_add_watch( fd, Dir, IN_CREATE | IN_DELETE );
+  wd = inotify_add_watch( fd, Dir, IN_CREATE | IN_DELETE | IN_MODIFY );
 
   /*read to determine the event change happens on “/tmp” directory. Actually this read blocks until the change event occurs*/ 
 
@@ -736,6 +736,9 @@ int watch(char *Dir)
           printf( "File %s deleted.\n", event->name );
         }
       }
+	else if( event->mask & IN_MODIFY ) {
+	printf( "File %s deleted.\n", event->name );
+	}
     }
     i += EVENT_SIZE + event->len;
   }
