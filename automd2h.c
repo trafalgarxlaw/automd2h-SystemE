@@ -722,24 +722,23 @@ int watch(char *Dir)
             if (event->wd == wd[0])
                 printf("In %s\n", Dir);
             else
-                continue;
-            //if (event->mask & IN_CREATE)
-            //{
-            //  if (event->mask & IN_ISDIR)
-            //  {
-            //     printf("The directory %s was created.\n", event->name);
-            // }
-            // else
-            //  {
-            //     printf("The file %s was created.\n", event->name);
-            // }
-            //}
-            //if (event->mask & IN_MODIFY)
+            if (event->mask & IN_CREATE)
             {
-                //if (Pandoc(event->name) == 1){
-                // 		return 1;
-                //}
+             if (event->mask & IN_ISDIR)
+             {
+                printf("The directory %s was created.\n", event->name);
             }
+            else
+             {
+                printf("The file %s was created.\n", event->name);
+            }
+            }
+            if (event->mask & IN_MODIFY)
+            {
+                if (Pandoc(event->name) == 1){
+                		return 1;
+                }
+           }
         }
     }
     (void)inotify_rm_watch(fd, wd[0]);
@@ -1014,6 +1013,7 @@ int launch_with_options(struct Arguments *arguments, enum Options *option, enum 
                 }
                 else
                 {
+                    //exit(EXIT_FAILURE); 
                     //printf("not a directory %s \n", arguments->files[file].filename);
                     //no need to be converted
                 }
