@@ -667,7 +667,7 @@ bool Dir_is_Visited(char *Dir, struct VisitedDirectories *Directories)
     return isVisited;
 }
 
-//Need to fork this function
+//creates indepedant timers to delete process
 void Delete_Child(pid_t c_pid_To_Delete, int sec)
 {
     pid_t c_pid;
@@ -701,8 +701,6 @@ void Delete_Child(pid_t c_pid_To_Delete, int sec)
         perror("fork failed");
         exit(EXIT_FAILURE);
     }
-
-
 }
 // Listen in the current directories
 int watch(char *Dir)
