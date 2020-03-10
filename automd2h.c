@@ -740,30 +740,23 @@ int watch_File(char *Dir,char *filename){
             struct inotify_event *event = (struct inotify_event *)&buffer[i];
             if (event->len)
             {
-                if (event->mask & IN_CREATE)
+                if (event->mask & (IN_CREATE | IN_MODIFY | IN_MOVED_TO))
                 {
-                    //something was created IN the given Directory
+                    //something was created,modified or moved IN the given Directory
                     if (event->mask & IN_ISDIR)
                     {
                         //dir
                     }
                     else
                     {
-                        //file
-
-                    }
-                }
-                else if (event->mask & (IN_MODIFY | IN_MOVED_TO))
-                {
-                    //something was modified IN the given Directory
-
-                    if (event->mask & IN_ISDIR)
-                    {
-                        //dir
-                    }
-                    else
-                    {
-                        //file
+                        printf("something happened with : %s\n", event->name);
+                        //file (only the one we are interested in)
+                        if (strcmp(filename,event->name==0))
+                        {
+                            printf("Its the file we are interested in : %s\n", event->name);
+                            Pandoc(filename);
+                        }
+                        
 
                     }                
                 }
@@ -822,13 +815,15 @@ int watch_Dir(char *Dir) //need to be sure that its a dir
                     if (event->mask & IN_ISDIR)
                     {
                         //printf("New directory %s created.\n", event->name);
+
+                        
                     }
                     else
                     {
-                        //printf("New file %s created.\n", event->name);
-			            Convert_Directory(Dir, true);
+                        printf("New file %s created.\n", event->name);
+			            //Convert_Directory(Dir, true);			
                     }
-                }`
+                }
                 else if (event->mask & (IN_MODIFY | IN_MOVED_TO))
                 {
                     //something was modified IN the given Directory
@@ -836,10 +831,12 @@ int watch_Dir(char *Dir) //need to be sure that its a dir
                     if (event->mask & IN_ISDIR)
                     {
                         //dir
+                        
                     }
                     else
                     {
                         //file
+                        printf("%s was modified\n",event->name);
 
                         //printf("New file %s modif.\n", event->name);
                     }                
@@ -1137,7 +1134,13 @@ int launch_with_options(struct Arguments *arguments, enum Options *option, enum 
             
             for (int file = 0; file < arguments->num_files; file++)
             {
-                watch_Dir(arguments->files[file].filename);
+                if (is_directory(arguments->files[file].filename))
+                {
+                    watch_Dir(arguments->files[file].filename);
+                }else if (file_exist(arguments->files[file].filename))
+                {
+                    watch_File(arguments->files[file].filename);
+                }          
             }
             //printf("\nOption w Detected.\n");
         }
