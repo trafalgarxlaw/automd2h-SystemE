@@ -661,7 +661,7 @@ bool Dir_is_Visited(char *Dir, struct VisitedDirectories *Directories)
     for (int i = 0; i < Directories->num_dir_visited; i++)
     {
         //printf("comparing %s and %s, i = %d\n", Dir, Directories->DirectoriesTable[i].name, i);
-        if (strcmp(Dir, Directories->DirectoriesTable[i].name) == 0)
+        if(strcmp(Dir, Directories->DirectoriesTable[i].name) == 0)
         {
             isVisited = true;
         }
@@ -749,9 +749,9 @@ int watch_File(char *Dir,char *filename){
                     }
                     else
                     {
-                        printf("something happened with : %s\n", event->name);
+                        printf("something happened in the dir\n");
                         //file (only the one we are interested in)
-                        if (strcmp(filename,event->name==0))
+                        if (strcmp(filename,event->name)==0)
                         {
                             printf("Its the file we are interested in : %s\n", event->name);
                             Pandoc(filename);
@@ -1139,7 +1139,7 @@ int launch_with_options(struct Arguments *arguments, enum Options *option, enum 
                     watch_Dir(arguments->files[file].filename);
                 }else if (file_exist(arguments->files[file].filename))
                 {
-                    watch_File(arguments->files[file].filename);
+                    watch_File(".",arguments->files[file].filename);
                 }          
             }
             //printf("\nOption w Detected.\n");
