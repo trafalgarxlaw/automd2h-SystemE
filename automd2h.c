@@ -431,6 +431,7 @@ bool file_needs_conversion(char *filename)
         }
         else
         {
+            
             //printf("Unable to get file properties.\n");
             //printf("Please check whether '%s' file exists.\n", filename);
         }
@@ -533,7 +534,8 @@ int Pandoc(char *file)
         // printf("status: %d\n",status);
     }
     // printf("pandoc ends with stat 0\n");
-    return 0;
+    //return 0;
+    exit(EXIT_SUCCESS);
 }
 
 // Check if the user entered the same option twice.
@@ -703,9 +705,83 @@ void Delete_Child(pid_t c_pid_To_Delete, int sec)
     }
 }
 // Listen in the current directories
-int watch(char *Dir)
-{
+//this is a sub process
+int watch_File(char *Dir,char *filename){
+    while (true)
+    {
+        int length, i = 0;
+        int fd;
+        int wd;
+        char buffer[EVENT_BUF_LEN];
 
+        /*creating the INOTIFY instance*/
+        fd = inotify_init();
+
+        /*checking for error*/
+        if (fd < 0)
+        {
+            perror("inotify_init");
+        }
+
+        /*adding the “/tmp” directory into watch list. Here, the suggestion is to validate the existence of the directory before adding into monitoring list.*/
+        wd = inotify_add_watch(fd, Dir, IN_CREATE | IN_MODIFY | IN_MOVED_TO);
+
+        /*read to determine the event change happens on “/tmp” directory. Actually this read blocks until the change event occurs*/
+        length = read(fd, buffer, EVENT_BUF_LEN);
+
+        /*checking for error*/
+        if (length < 0)
+        {
+            perror("read");
+        }
+        /*actually read return the list of change events happens. Here, read the change event one by one and process it accordingly.*/
+        while (i < length)
+        {
+            struct inotify_event *event = (struct inotify_event *)&buffer[i];
+            if (event->len)
+            {
+                if (event->mask & IN_CREATE)
+                {
+                    //something was created IN the given Directory
+                    if (event->mask & IN_ISDIR)
+                    {
+                        //dir
+                    }
+                    else
+                    {
+                        //file
+
+                    }
+                }
+                else if (event->mask & (IN_MODIFY | IN_MOVED_TO))
+                {
+                    //something was modified IN the given Directory
+
+                    if (event->mask & IN_ISDIR)
+                    {
+                        //dir
+                    }
+                    else
+                    {
+                        //file
+
+                    }                
+                }
+            }
+            i += EVENT_SIZE + event->len;
+        }
+        /*removing the “/tmp” directory from the watch list.*/
+        inotify_rm_watch(fd, wd);
+        /*closing the INOTIFY instance*/
+        close(fd);    
+    }
+
+    return 0;
+}
+
+
+int watch_Dir(char *Dir) //need to be sure that its a dir
+{
     while (true)
     {
         int length, i = 0;
@@ -742,6 +818,7 @@ int watch(char *Dir)
             {
                 if (event->mask & IN_CREATE)
                 {
+                    //something was created IN the given Directory
                     if (event->mask & IN_ISDIR)
                     {
                         //printf("New directory %s created.\n", event->name);
@@ -749,12 +826,23 @@ int watch(char *Dir)
                     else
                     {
                         //printf("New file %s created.\n", event->name);
-			Convert_Directory(Dir, true);
+			            Convert_Directory(Dir, true);
                     }
-                }
+                }`
                 else if (event->mask & (IN_MODIFY | IN_MOVED_TO))
                 {
-                    Convert_Directory(Dir, true);
+                    //something was modified IN the given Directory
+
+                    if (event->mask & IN_ISDIR)
+                    {
+                        //dir
+                    }
+                    else
+                    {
+                        //file
+
+                        //printf("New file %s modif.\n", event->name);
+                    }                
                 }
             }
             i += EVENT_SIZE + event->len;
@@ -797,7 +885,7 @@ int Watch_fork(char *Dir, struct VisitedDirectories *Directories)
     if (c_pid == 0)
     {
         //the child will be watching this unvisited directory...
-        watch(Dir);
+        //watch(Dir);
     }
     else if (c_pid > 0) //parent
     {
@@ -1045,12 +1133,13 @@ int launch_with_options(struct Arguments *arguments, enum Options *option, enum 
         }
         else
         {
+            // Here we need to clear up if the user entered a directory or a file to watch
+            
             for (int file = 0; file < arguments->num_files; file++)
             {
-                watch(arguments->files[file].filename);
+                watch_Dir(arguments->files[file].filename);
             }
             //printf("\nOption w Detected.\n");
-            //Observe(false);
         }
 
         break;
