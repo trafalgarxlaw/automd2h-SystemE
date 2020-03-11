@@ -11,7 +11,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
-
+#include <libgen.h>
 #include <time.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -704,39 +704,39 @@ void Delete_Child(pid_t c_pid_To_Delete, int sec)
     }
 }
 
-char * removeSubstring(char *s,const char *toremove)
-{
-  char *String[100];
-  strncpy( String, s ,sizeof(s));
-  while( String=strstr(String,toremove) )
-    memmove(String,String+strlen(toremove),1+strlen(String+strlen(toremove)));
-  return *String;
-}
+//char * removeSubstring(char *s,const char *toremove)
+//{
+ // char *String[100];
+ // strncpy( String, s ,sizeof(s));
+ // while( String=strstr(String,toremove) )
+  //  memmove(String,String+strlen(toremove),1+strlen(String+strlen(toremove)));
+ // return *String;
+//}
 
 //from a given filepath, get the name of the file
-char *get_filename_from_Path(char *filePath){
-    // initializing variables 
-    char slash = '/'; 
-    char* val; 
+//char *get_filename_from_Path(char *filePath){
+   // // initializing variables 
+    //char slash = '/'; 
+    //char* val; 
     
-    //string after '/'
-    val = strrchr(filePath, slash); 
+   // //string after '/'
+    //val = strrchr(filePath, slash); 
 
-    return val;
+  //  return val;
 
-}
+//}
 //from a given filePath (...path/filename), get the path (...path)
-char *get_filePath(char *filePath){
+//char *get_filePath(char *filePath){
     // initializing variables 
-    char slash = '/'; 
-    char* val; 
+    //char slash = '/'; 
+    //char* val; 
 
-    //string after '/'
-    val = strrchr(filePath, slash); 
-    removeSubstring(filePath,val);
-  
-    return (filePath); 
-}
+  //  //string after '/'
+  //  val = strrchr(filePath, slash); 
+ //   removeSubstring(filePath,val);
+ // 
+//    return (filePath); 
+//}
 
 // Listen in the current directories
 //this is a sub process
@@ -784,9 +784,10 @@ int watch_File(char *Dir,char *filename){
                     }
                     else
                     {
-                        printf("something happened in the dir\n");
+
+                        //printf("something happened in the dir\n");
                         //file (only the one we are interested in)
-                        if (strcmp(filename,event->name)==0)
+                        if (file_exist(filename))
                         {
                             printf("Its the file we are interested in : %s\n", event->name);
                             Pandoc(filename);
@@ -1169,14 +1170,15 @@ int launch_with_options(struct Arguments *arguments, enum Options *option, enum 
                 if (is_directory(arguments->files[file].filename))
                 {
                     watch_Dir(arguments->files[file].filename);
-                }else if (file_exist(arguments->files[file].filename))
+                }else
                 {
                     //we need to give the directory associated with the file but how?
-                    char * Dir = get_filePath(arguments->files[file].filename);
-                    char * filename = get_filename_from_Path(arguments->files[file].filename);
-                    printf("dir : %s\n",Dir);
-                    printf("name : %s\n",filename);
-                    watch_File(Dir,filename);
+                    char * Dir = dirname(arguments->files[file].filename);
+printf("%s\n", Dir);                    
+//char * filename = get_filename_from_Path(arguments->files[file].filename);
+                    //printf("dir : %s\n",Dir);
+                    //printf("name : %s\n",filename);
+                    watch_File(Dir, arguments->files[file].filename);
                 }          
             }
             //printf("\nOption w Detected.\n");
