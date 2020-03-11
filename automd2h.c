@@ -534,8 +534,7 @@ int Pandoc(char *file)
         // printf("status: %d\n",status);
     }
     // printf("pandoc ends with stat 0\n");
-    //return 0;
-    exit(EXIT_SUCCESS);
+    return 0;
 }
 
 // Check if the user entered the same option twice.
@@ -721,6 +720,7 @@ int watch_File(char *Dir,char *filename){
         if (fd < 0)
         {
             perror("inotify_init");
+            exit(EXIT_FAILURE);
         }
 
         /*adding the “/tmp” directory into watch list. Here, the suggestion is to validate the existence of the directory before adding into monitoring list.*/
@@ -757,7 +757,6 @@ int watch_File(char *Dir,char *filename){
                             Pandoc(filename);
                         }
                         
-
                     }                
                 }
             }
@@ -837,7 +836,6 @@ int watch_Dir(char *Dir) //need to be sure that its a dir
                     {
                         //file
                         printf("%s was modified\n",event->name);
-
                         //printf("New file %s modif.\n", event->name);
                     }                
                 }
@@ -911,7 +909,7 @@ bool RecursiveSearch(char *Dir, bool AddWatcher, struct VisitedDirectories *Dire
     if (Directory == NULL)
     {
         //error
-        perror("Unable to read directory.. i'm leaving\n");
+        //perror("Unable to read directory.. i'm leaving\n");
         return (1); // leave
     }
 
@@ -1131,7 +1129,6 @@ int launch_with_options(struct Arguments *arguments, enum Options *option, enum 
         else
         {
             // Here we need to clear up if the user entered a directory or a file to watch
-            
             for (int file = 0; file < arguments->num_files; file++)
             {
                 if (is_directory(arguments->files[file].filename))
@@ -1139,6 +1136,7 @@ int launch_with_options(struct Arguments *arguments, enum Options *option, enum 
                     watch_Dir(arguments->files[file].filename);
                 }else if (file_exist(arguments->files[file].filename))
                 {
+                    //we need to give the directory associated with the file but how?
                     watch_File(".",arguments->files[file].filename);
                 }          
             }
