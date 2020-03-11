@@ -703,6 +703,41 @@ void Delete_Child(pid_t c_pid_To_Delete, int sec)
         exit(EXIT_FAILURE);
     }
 }
+
+char * removeSubstring(char *s,const char *toremove)
+{
+  char *String[100];
+  strncpy( String, s ,sizeof(s));
+  while( String=strstr(String,toremove) )
+    memmove(String,String+strlen(toremove),1+strlen(String+strlen(toremove)));
+  return *String;
+}
+
+//from a given filepath, get the name of the file
+char *get_filename_from_Path(char *filePath){
+    // initializing variables 
+    char slash = '/'; 
+    char* val; 
+    
+    //string after '/'
+    val = strrchr(filePath, slash); 
+
+    return val;
+
+}
+//from a given filePath (...path/filename), get the path (...path)
+char *get_filePath(char *filePath){
+    // initializing variables 
+    char slash = '/'; 
+    char* val; 
+
+    //string after '/'
+    val = strrchr(filePath, slash); 
+    removeSubstring(filePath,val);
+  
+    return (filePath); 
+}
+
 // Listen in the current directories
 //this is a sub process
 int watch_File(char *Dir,char *filename){
@@ -1137,7 +1172,11 @@ int launch_with_options(struct Arguments *arguments, enum Options *option, enum 
                 }else if (file_exist(arguments->files[file].filename))
                 {
                     //we need to give the directory associated with the file but how?
-                    watch_File(".",arguments->files[file].filename);
+                    char * Dir = get_filePath(arguments->files[file].filename);
+                    char * filename = get_filename_from_Path(arguments->files[file].filename);
+                    printf("dir : %s\n",Dir);
+                    printf("name : %s\n",filename);
+                    watch_File(Dir,filename);
                 }          
             }
             //printf("\nOption w Detected.\n");
