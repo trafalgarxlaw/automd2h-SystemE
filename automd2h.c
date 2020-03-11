@@ -1169,8 +1169,6 @@ int launch_with_options(struct Arguments *arguments, enum Options *option, enum 
                     strncpy(Copy1,arguments->files[file].filename,100);
                     strncpy(Coppy2,arguments->files[file].filename,100);
 
-
-                    //we need to give the directory associated with the file but how?
                     char * filename = get_filename_from_Path(Copy1);
                     char * Dir_of_file = dirname(Coppy2);
                    // printf("dir : %s\n",Dir_of_file);
