@@ -19,6 +19,9 @@
 #include <sys/inotify.h>
 #include <signal.h>
 
+//directroy management
+#include <libgen.h>
+
 #define EVENT_SIZE (sizeof(struct inotify_event))
 #define EVENT_BUF_LEN (1024 * (EVENT_SIZE + 16))
 #define BUF_LEN (1024 * (EVENT_SIZE + 16))
@@ -183,12 +186,12 @@ bool is_HTML(char *filename)
     return strcmp(get_filename_ext(filename), ".html") == 0;
 }
 
-bool is_directory(char *filename)
+bool is_directory(char *Dir_name)
 {
     bool is_directory = false;
     DIR *dir;
 
-    dir = opendir(filename);
+    dir = opendir(Dir_name);
     if (dir == NULL)
     {
         // printf("Couldn't open dir\n");
@@ -704,15 +707,6 @@ void Delete_Child(pid_t c_pid_To_Delete, int sec)
     }
 }
 
-char * removeSubstring(char *s,const char *toremove)
-{
-  char *String[100];
-  strncpy( String, s ,sizeof(s));
-  while( String=strstr(String,toremove) )
-    memmove(String,String+strlen(toremove),1+strlen(String+strlen(toremove)));
-  return *String;
-}
-
 //from a given filepath, get the name of the file
 char *get_filename_from_Path(char *filePath){
     // initializing variables 
@@ -720,27 +714,16 @@ char *get_filename_from_Path(char *filePath){
     char* val; 
     
     //string after '/'
-    val = strrchr(filePath, slash); 
+    val = strrchr(filePath, slash);
+    val++; 
 
     return val;
 
 }
-//from a given filePath (...path/filename), get the path (...path)
-char *get_filePath(char *filePath){
-    // initializing variables 
-    char slash = '/'; 
-    char* val; 
-
-    //string after '/'
-    val = strrchr(filePath, slash); 
-    removeSubstring(filePath,val);
-  
-    return (filePath); 
-}
 
 // Listen in the current directories
 //this is a sub process
-int watch_File(char *Dir,char *filename){
+int watch_File(char *Dir,char *filename,char *FullPath){
     while (true)
     {
         int length, i = 0;
@@ -789,7 +772,7 @@ int watch_File(char *Dir,char *filename){
                         if (strcmp(filename,event->name)==0)
                         {
                             printf("Its the file we are interested in : %s\n", event->name);
-                            Pandoc(filename);
+                            Pandoc(FullPath);
                         }
                         
                     }                
@@ -1171,12 +1154,19 @@ int launch_with_options(struct Arguments *arguments, enum Options *option, enum 
                     watch_Dir(arguments->files[file].filename);
                 }else if (file_exist(arguments->files[file].filename))
                 {
+                    //Create a new variable that include a copy of 
+                    char filepath1[100];
+                    char filepath2[100];
+                    strncpy(filepath1,arguments->files[file].filename,100);
+                    strncpy(filepath2,arguments->files[file].filename,100);
+
+
                     //we need to give the directory associated with the file but how?
-                    char * Dir = get_filePath(arguments->files[file].filename);
-                    char * filename = get_filename_from_Path(arguments->files[file].filename);
-                    printf("dir : %s\n",Dir);
+                    char * filename = get_filename_from_Path(filepath1);
+                    char * Dir_of_file = dirname(filepath2);
+                    printf("dir : %s\n",Dir_of_file);
                     printf("name : %s\n",filename);
-                    watch_File(Dir,filename);
+                    watch_File(Dir_of_file,filename,arguments->files[file].filename);
                 }          
             }
             //printf("\nOption w Detected.\n");
