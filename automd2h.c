@@ -709,6 +709,13 @@ void Delete_Child(pid_t c_pid_To_Delete, int sec)
 
 //from a given filepath, get the name of the file
 char *get_filename_from_Path(char *filePath){
+    // if its not a path
+    if (strchr(filePath,'/')==NULL)
+    {
+        /* code */
+        return filePath;
+    }
+    
     // initializing variables 
     char slash = '/'; 
     char* val; 
@@ -767,11 +774,11 @@ int watch_File(char *Dir,char *filename,char *FullPath){
                     }
                     else
                     {
-                        printf("something happened in the dir\n");
+                       // printf("something happened in the dir\n");
                         //file (only the one we are interested in)
                         if (strcmp(filename,event->name)==0)
                         {
-                            printf("Its the file we are interested in : %s\n", event->name);
+                            //printf("Its the file we are interested in : %s\n", event->name);
                             Pandoc(FullPath);
                         }
                         
@@ -1151,21 +1158,23 @@ int launch_with_options(struct Arguments *arguments, enum Options *option, enum 
             {
                 if (is_directory(arguments->files[file].filename))
                 {
+                   // printf("dir : %s\n",arguments->files[file].filename);
                     watch_Dir(arguments->files[file].filename);
                 }else if (file_exist(arguments->files[file].filename))
                 {
-                    //Create a new variable that include a copy of 
-                    char filepath1[100];
-                    char filepath2[100];
-                    strncpy(filepath1,arguments->files[file].filename,100);
-                    strncpy(filepath2,arguments->files[file].filename,100);
+                    //Create a new variable that include a copy of the path entered as argument
+                    //this is because dirname and get_filename_from_Path may modify the original string
+                    char Copy1[100];
+                    char Coppy2[100];
+                    strncpy(Copy1,arguments->files[file].filename,100);
+                    strncpy(Coppy2,arguments->files[file].filename,100);
 
 
                     //we need to give the directory associated with the file but how?
-                    char * filename = get_filename_from_Path(filepath1);
-                    char * Dir_of_file = dirname(filepath2);
-                    printf("dir : %s\n",Dir_of_file);
-                    printf("name : %s\n",filename);
+                    char * filename = get_filename_from_Path(Copy1);
+                    char * Dir_of_file = dirname(Coppy2);
+                   // printf("dir : %s\n",Dir_of_file);
+                    //printf("name : %s\n",filename);
                     watch_File(Dir_of_file,filename,arguments->files[file].filename);
                 }          
             }
