@@ -750,9 +750,14 @@ int watch_File(struct Arguments *arguments, bool usePandoc){
 
         /*adding the “/tmp” directory into watch list. Here, the suggestion is to validate the existence of the directory before adding into monitoring list.*/
 		for (int file = 0; file < arguments->num_files; file++){
-			char *dup = strdup(arguments->files[file].filename);
-			char *dir = dirname(dup);
-    		wd = inotify_add_watch(fd, dir, IN_MODIFY);
+			if(is_directory(arguments->files[file].filename) == false){
+				char *dup = strdup(arguments->files[file].filename);
+				char *dir = dirname(dup);
+	    			wd = inotify_add_watch(fd, dir, IN_MODIFY);
+			}
+			else {
+				wd = inotify_add_watch(fd, arguments->files[file].filename, IN_CREATE | IN_MODIFY | IN_MOVED_TO);	
+			}
 		}
 
         /*read to determine the event change happens on “/tmp” directory. Actually this read blocks until the change event occurs*/
@@ -779,13 +784,20 @@ int watch_File(struct Arguments *arguments, bool usePandoc){
                     else
                     {
 						for (int file = 0; file < arguments->num_files; file++){
+							char tmp[310];
+							if(is_directory(arguments->files[file].filename)){
+								sprintf(tmp, "%s/%s", arguments->files[file].filename, event->name);	
+							}
+							else{
+								strcpy(tmp, arguments->files[file].filename);
+							}
 							if(strstr(arguments->files[file].filename, event->name) != NULL){
 								//printf("something happened in the dir333\n");
 								if(usePandoc){
-									Pandoc(arguments->files[file].filename);
+									Pandoc(tmp);
 								}
 								else{
-									printf("%s\n", arguments->files[file].filename);
+									printf("%s\n", tmp);
 								}
 							}
 						}
@@ -1097,15 +1109,7 @@ int launch_with_options2(struct Arguments *arguments)
 		}
 	}
 	if(watch == true){
-		if(arguments->num_files > 0){
-            if (is_directory(arguments->files[0].filename))
-            {
-                watch_Dir(arguments, usePandoc);
-            }else
-            {
-                watch_File(arguments, usePandoc);
-            }  
-		}        
+            watch_File(arguments, usePandoc);       
 	}
 	//if(recursive == true){
 	//	for (int file = 0; file < arguments->num_files; file++)
