@@ -1086,6 +1086,17 @@ int launch_with_options2(struct Arguments *arguments)
 			}
 		}
 	}
+	else if(watch == true){
+		if(arguments->num_files > 0){
+            if (is_directory(arguments->files[0].filename))
+            {
+                watch_Dir(arguments);
+            }else
+            {
+                watch_File(arguments, false);
+            }  
+		}        
+	}
     return 0;
 }
 
