@@ -852,8 +852,10 @@ int watch_Dir(struct Arguments *arguments) //need to be sure that its a dir
 							char tmp[256];
 							strcpy(tmp, arguments->files[file].filename);
 							strcat(tmp, event->name);
+							strcat(tmp, "/");
+							//printf("%s\n", tmp);
 							if(file_exist(tmp)){
-								//printf("something happened in the dir333\n");
+								//printf("something happened in the dir333 %s\n", event->name);
 								Convert_Directory(arguments->files[file].filename, true);
 							}
 						}		
