@@ -482,7 +482,9 @@ void print_arguments_files(struct Arguments *arguments, bool checkTime)
         }
         else
         {
-            printf("%s\n", arguments->files[i].filename);
+			if (file_needs_conversion(arguments->files[i].filename) || checkTime == false){
+            	printf("%s\n", arguments->files[i].filename);
+			}
         }
     }
 }
