@@ -725,7 +725,7 @@ char *get_filename_from_Path(char *filePath){
 
 // Listen in the current directories
 //this is a sub process
-int watch_File(struct Arguments *arguments, bool show){
+int watch_File(struct Arguments *arguments, bool usePandoc){
     while (true)
     {
         int length, i = 0;
@@ -777,11 +777,11 @@ printf("something happened in the dir\n");
 						for (int file = 0; file < arguments->num_files; file++){
 							if(strstr(arguments->files[file].filename, event->name) != NULL){
 								//printf("something happened in the dir333\n");
-								if(show){
-									printf("%s\n", arguments->files[file].filename);
+								if(usePandoc){
+									Pandoc(arguments->files[file].filename);
 								}
 								else{
-									Pandoc(arguments->files[file].filename);
+									printf("%s\n", arguments->files[file].filename);
 								}
 							}
 						}
@@ -1088,14 +1088,14 @@ int launch_with_options2(struct Arguments *arguments)
 			}
 		}
 	}
-	if(watch == true && forceConversion == false){
+	if(watch == true){
 		if(arguments->num_files > 0){
             if (is_directory(arguments->files[0].filename))
             {
                 watch_Dir(arguments);
             }else
             {
-                watch_File(arguments, true);
+                watch_File(arguments, usePandoc);
             }  
 		}        
 	}
