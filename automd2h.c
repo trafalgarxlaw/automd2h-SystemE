@@ -723,7 +723,7 @@ char *get_filename_from_Path(char *filePath){
 
 // Listen in the current directories
 //this is a sub process
-int watch_File(char *Dir,char *filename,char *FullPath){
+int watch_File(struct Arguments *arguments){
     while (true)
     {
         int length, i = 0;
@@ -742,7 +742,10 @@ int watch_File(char *Dir,char *filename,char *FullPath){
         }
 
         /*adding the “/tmp” directory into watch list. Here, the suggestion is to validate the existence of the directory before adding into monitoring list.*/
-        wd = inotify_add_watch(fd, Dir, IN_CREATE | IN_MODIFY | IN_MOVED_TO);
+		for (int file = 0; file < arguments->num_files; file++)
+            {
+        		wd = inotify_add_watch(fd, arguments->files[file].filename, IN_CREATE | IN_MODIFY | IN_MOVED_TO);
+		}
 
         /*read to determine the event change happens on “/tmp” directory. Actually this read blocks until the change event occurs*/
         length = read(fd, buffer, EVENT_BUF_LEN);
@@ -769,11 +772,9 @@ int watch_File(char *Dir,char *filename,char *FullPath){
                     {
                         printf("something happened in the dir\n");
                         //file (only the one we are interested in)
-                        if (strcmp(filename,event->name)==0)
-                        {
                             printf("Its the file we are interested in : %s\n", event->name);
-                            Pandoc(FullPath);
-                        }
+                            //Pandoc(event->name);
+                        
                         
                     }                
                 }
@@ -790,7 +791,7 @@ int watch_File(char *Dir,char *filename,char *FullPath){
 }
 
 
-int watch_Dir(char *Dir) //need to be sure that its a dir
+int watch_Dir(struct Arguments *arguments) //need to be sure that its a dir
 {
     while (true)
     {
@@ -809,7 +810,10 @@ int watch_Dir(char *Dir) //need to be sure that its a dir
         }
 
         /*adding the “/tmp” directory into watch list. Here, the suggestion is to validate the existence of the directory before adding into monitoring list.*/
-        wd = inotify_add_watch(fd, Dir, IN_CREATE | IN_MODIFY | IN_MOVED_TO);
+	for (int file = 0; file < arguments->num_files; file++)
+            {
+        wd = inotify_add_watch(fd, arguments->files[file].filename, IN_CREATE | IN_MODIFY | IN_MOVED_TO);
+	}
 
         /*read to determine the event change happens on “/tmp” directory. Actually this read blocks until the change event occurs*/
         length = read(fd, buffer, EVENT_BUF_LEN);
@@ -1147,28 +1151,30 @@ int launch_with_options(struct Arguments *arguments, enum Options *option, enum 
         else
         {
             // Here we need to clear up if the user entered a directory or a file to watch
-            for (int file = 0; file < arguments->num_files; file++)
-            {
-                if (is_directory(arguments->files[file].filename))
+            //for (int file = 0; file < arguments->num_files; file++)
+            //{
+			if(arguments->num_files > 0){
+                if (is_directory(arguments->files[0].filename))
                 {
-                    watch_Dir(arguments->files[file].filename);
-                }else if (file_exist(arguments->files[file].filename))
+                    watch_Dir(arguments);
+                }else if (file_exist(arguments->files[0].filename))
                 {
                     //Create a new variable that include a copy of 
-                    char filepath1[100];
-                    char filepath2[100];
-                    strncpy(filepath1,arguments->files[file].filename,100);
-                    strncpy(filepath2,arguments->files[file].filename,100);
+                    //char filepath1[100];
+                    //char filepath2[100];
+                    //strncpy(filepath1,arguments->files[file].filename,100);
+                    //strncpy(filepath2,arguments->files[file].filename,100);
 
 
                     //we need to give the directory associated with the file but how?
-                    char * filename = get_filename_from_Path(filepath1);
-                    char * Dir_of_file = dirname(filepath2);
-                    printf("dir : %s\n",Dir_of_file);
-                    printf("name : %s\n",filename);
-                    watch_File(Dir_of_file,filename,arguments->files[file].filename);
-                }          
-            }
+                    //char * filename = get_filename_from_Path(filepath1);
+                    //char * Dir_of_file = dirname(filepath2);
+                    //printf("dir : %s\n",Dir_of_file);
+                    //printf("name : %s\n",filename);
+                    watch_File(arguments);
+                }  
+			}        
+            //}
             //printf("\nOption w Detected.\n");
         }
 
