@@ -742,9 +742,10 @@ int watch_File(struct Arguments *arguments){
         }
 
         /*adding the “/tmp” directory into watch list. Here, the suggestion is to validate the existence of the directory before adding into monitoring list.*/
-		for (int file = 0; file < arguments->num_files; file++)
-            {
-        		wd = inotify_add_watch(fd, arguments->files[file].filename, IN_CREATE | IN_MODIFY | IN_MOVED_TO);
+		for (int file = 0; file < arguments->num_files; file++){
+			char *dup = strdup(arguments->files[file].filename);
+			char *dir = dirname(dup);
+    		wd = inotify_add_watch(fd, dir, IN_CREATE | IN_MODIFY | IN_MOVED_TO);
 		}
 
         /*read to determine the event change happens on “/tmp” directory. Actually this read blocks until the change event occurs*/
@@ -770,10 +771,16 @@ int watch_File(struct Arguments *arguments){
                     }
                     else
                     {
-                        printf("something happened in the dir\n");
+printf("something happened in the dir\n");
+						for (int file = 0; file < arguments->num_files; file++){
+							if(strstr(arguments->files[file].filename, event->name) != NULL){
+								//printf("something happened in the dir333\n");
+								Pandoc(arguments->files[file].filename);
+							}
+						}
+                        //
                         //file (only the one we are interested in)
-                            printf("Its the file we are interested in : %s\n", event->name);
-                            //Pandoc(event->name);
+                            
                         
                         
                     }                
@@ -1141,7 +1148,6 @@ int launch_with_options(struct Arguments *arguments, enum Options *option, enum 
         break;
 
     case w:
-
         if (*next_option == f)
         {
             //printf("\nOption w combined with f Detected...Immediate convertion\n");
@@ -1157,7 +1163,7 @@ int launch_with_options(struct Arguments *arguments, enum Options *option, enum 
                 if (is_directory(arguments->files[0].filename))
                 {
                     watch_Dir(arguments);
-                }else if (file_exist(arguments->files[0].filename))
+                }else
                 {
                     //Create a new variable that include a copy of 
                     //char filepath1[100];
