@@ -791,7 +791,7 @@ int watch_File(struct Arguments *arguments, bool usePandoc){
 							else{
 								strcpy(tmp, arguments->files[file].filename);
 							}
-							if(strstr(arguments->files[file].filename, event->name) != NULL){
+							if(strstr(tmp, event->name) != NULL){
 								//printf("something happened in the dir333\n");
 								if(usePandoc){
 									Pandoc(tmp);
