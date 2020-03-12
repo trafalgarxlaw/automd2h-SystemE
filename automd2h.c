@@ -805,7 +805,7 @@ printf("something happened in the dir\n");
 }
 
 
-int watch_Dir(struct Arguments *arguments) //need to be sure that its a dir
+int watch_Dir(struct Arguments *arguments, bool usePandoc) //need to be sure that its a dir
 {
     while (true)
     {
@@ -860,8 +860,13 @@ int watch_Dir(struct Arguments *arguments) //need to be sure that its a dir
 							sprintf(tmp, "%s/%s", arguments->files[file].filename, event->name);
 							//printf("%s\n", tmp);
 							if(file_exist(tmp)){
+								if(usePandoc){
+									Convert_Directory(arguments->files[file].filename, true);
+								}
+								else{
+									printf("%s\n", arguments->files[file].filename);
+								}
 								//printf("something happened in the dir333 %s\n", event->name);
-								Convert_Directory(arguments->files[file].filename, true);
 							}
 						}		
                     }       
@@ -1061,7 +1066,7 @@ int launch_with_options2(struct Arguments *arguments)
 		watch = true;
 	}
 
-	if(usePandoc == false){
+	if(usePandoc == false && watch == false){
 		print_arguments_files(arguments, checkTime);
 	}
 	else if(watch == false || (watch ==true && forceConversion == true)){
@@ -1092,7 +1097,7 @@ int launch_with_options2(struct Arguments *arguments)
 		if(arguments->num_files > 0){
             if (is_directory(arguments->files[0].filename))
             {
-                watch_Dir(arguments);
+                watch_Dir(arguments, usePandoc);
             }else
             {
                 watch_File(arguments, usePandoc);
@@ -1221,7 +1226,7 @@ int launch_with_options(struct Arguments *arguments, enum Options *option, enum 
 			if(arguments->num_files > 0){
                 if (is_directory(arguments->files[0].filename))
                 {
-                    watch_Dir(arguments);
+                    watch_Dir(arguments, true);
                 }else
                 {
                     watch_File(arguments, true);
@@ -1236,7 +1241,7 @@ int launch_with_options(struct Arguments *arguments, enum Options *option, enum 
 			if(arguments->num_files > 0){
                 if (is_directory(arguments->files[0].filename))
                 {
-                    watch_Dir(arguments);
+                    watch_Dir(arguments, false);
                 }else
                 {
                     //Create a new variable that include a copy of 
