@@ -773,7 +773,6 @@ int watch_File(struct Arguments *arguments, bool usePandoc){
                     }
                     else
                     {
-printf("something happened in the dir\n");
 						for (int file = 0; file < arguments->num_files; file++){
 							if(strstr(arguments->files[file].filename, event->name) != NULL){
 								//printf("something happened in the dir333\n");
