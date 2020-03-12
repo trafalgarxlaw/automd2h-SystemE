@@ -723,7 +723,7 @@ char *get_filename_from_Path(char *filePath){
 
 // Listen in the current directories
 //this is a sub process
-int watch_File(struct Arguments *arguments){
+int watch_File(struct Arguments *arguments, bool show){
     while (true)
     {
         int length, i = 0;
@@ -775,7 +775,12 @@ printf("something happened in the dir\n");
 						for (int file = 0; file < arguments->num_files; file++){
 							if(strstr(arguments->files[file].filename, event->name) != NULL){
 								//printf("something happened in the dir333\n");
-								Pandoc(arguments->files[file].filename);
+								if(show){
+									printf("%s\n", arguments->files[file].filename);
+								}
+								else{
+									Pandoc(arguments->files[file].filename);
+								}
 							}
 						}
                         //
@@ -1145,6 +1150,29 @@ int launch_with_options(struct Arguments *arguments, enum Options *option, enum 
             *option_index++; // because we already considered the next option (which is f)
             //Observe(true);
         }
+		else if(*next_option == n){
+			if(arguments->num_files > 0){
+                if (is_directory(arguments->files[0].filename))
+                {
+                    watch_Dir(arguments);
+                }else
+                {
+                    //Create a new variable that include a copy of 
+                    //char filepath1[100];
+                    //char filepath2[100];
+                    //strncpy(filepath1,arguments->files[file].filename,100);
+                    //strncpy(filepath2,arguments->files[file].filename,100);
+
+
+                    //we need to give the directory associated with the file but how?
+                    //char * filename = get_filename_from_Path(filepath1);
+                    //char * Dir_of_file = dirname(filepath2);
+                    //printf("dir : %s\n",Dir_of_file);
+                    //printf("name : %s\n",filename);
+                    watch_File(arguments, true);
+                }  
+			}
+		}
         else
         {
             // Here we need to clear up if the user entered a directory or a file to watch
@@ -1168,7 +1196,7 @@ int launch_with_options(struct Arguments *arguments, enum Options *option, enum 
                     //char * Dir_of_file = dirname(filepath2);
                     //printf("dir : %s\n",Dir_of_file);
                     //printf("name : %s\n",filename);
-                    watch_File(arguments);
+                    watch_File(arguments, false);
                 }  
 			}        
             //}
