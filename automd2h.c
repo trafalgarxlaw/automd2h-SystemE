@@ -1107,14 +1107,14 @@ int launch_with_options2(struct Arguments *arguments)
             }  
 		}        
 	}
-	if(recursive == true){
-		for (int file = 0; file < arguments->num_files; file++)
-		{
-			struct VisitedDirectories Directories;
-			Directories.num_dir_visited = 0;
-			RecursiveSearch(arguments->files[file].filename, false, &Directories);
-		}
-	}
+	//if(recursive == true){
+	//	for (int file = 0; file < arguments->num_files; file++)
+	//	{
+		//	struct VisitedDirectories Directories;
+		//	Directories.num_dir_visited = 0;
+		//	RecursiveSearch(arguments->files[file].filename, false, &Directories);
+		//}
+	//}
     return 0;
 }
 
