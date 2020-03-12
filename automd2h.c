@@ -1095,7 +1095,7 @@ int launch_with_options2(struct Arguments *arguments)
                 watch_Dir(arguments);
             }else
             {
-                watch_File(arguments, checkTime);
+                watch_File(arguments, usePandoc);
             }  
 		}        
 	}
