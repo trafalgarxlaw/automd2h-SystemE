@@ -643,6 +643,11 @@ bool Option_w(struct Arguments *arguments)
     return arguments->option1 == w || arguments->option2 == w || arguments->option3 == w || arguments->option4 == w;
 }
 
+bool Option_r(struct Arguments *arguments)
+{
+    return arguments->option1 == r || arguments->option2 == r || arguments->option3 == r || arguments->option4 == r;
+}
+
 bool Option_f(struct Arguments *arguments)
 {
     return arguments->option1 == f || arguments->option2 == f || arguments->option3 == f || arguments->option4 == f;
