@@ -747,7 +747,7 @@ int watch_File(struct Arguments *arguments, bool usePandoc){
 		for (int file = 0; file < arguments->num_files; file++){
 			char *dup = strdup(arguments->files[file].filename);
 			char *dir = dirname(dup);
-    		wd = inotify_add_watch(fd, dir, IN_CREATE | IN_MODIFY | IN_MOVED_TO);
+    		wd = inotify_add_watch(fd, dir, IN_MODIFY);
 		}
 
         /*read to determine the event change happens on “/tmp” directory. Actually this read blocks until the change event occurs*/
@@ -764,7 +764,7 @@ int watch_File(struct Arguments *arguments, bool usePandoc){
             struct inotify_event *event = (struct inotify_event *)&buffer[i];
             if (event->len)
             {
-                if (event->mask & (IN_CREATE | IN_MODIFY | IN_MOVED_TO))
+                if (event->mask & (IN_MODIFY))
                 {
                     //something was created,modified or moved IN the given Directory
                     if (event->mask & IN_ISDIR)
