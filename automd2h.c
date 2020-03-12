@@ -1088,7 +1088,7 @@ int launch_with_options2(struct Arguments *arguments)
 			}
 		}
 	}
-	if(watch == true){
+	if(watch == true && forceConversion == false){
 		if(arguments->num_files > 0){
             if (is_directory(arguments->files[0].filename))
             {
