@@ -837,7 +837,7 @@ int watch_Dir(struct Arguments *arguments) //need to be sure that its a dir
             struct inotify_event *event = (struct inotify_event *)&buffer[i];
             if (event->len)
             {
-                if (event->mask & IN_CREATE)
+                if (event->mask & (IN_CREATE | IN_MODIFY | IN_MOVED_TO))
                 {
                     //something was created IN the given Directory
                     if (event->mask & IN_ISDIR)
@@ -848,25 +848,16 @@ int watch_Dir(struct Arguments *arguments) //need to be sure that its a dir
                     }
                     else
                     {
-                        printf("New file %s created.\n", event->name);
-			            //Convert_Directory(Dir, true);			
-                    }
-                }
-                else if (event->mask & (IN_MODIFY | IN_MOVED_TO))
-                {
-                    //something was modified IN the given Directory
-
-                    if (event->mask & IN_ISDIR)
-                    {
-                        //dir
-                        
-                    }
-                    else
-                    {
-                        //file
-                        printf("%s was modified\n",event->name);
-                        //printf("New file %s modif.\n", event->name);
-                    }                
+						for (int file = 0; file < arguments->num_files; file++){
+							char tmp[256];
+							strcpy(tmp, arguments->files[file].filename);
+							strcat(tmp, event->name);
+							if(file_exist(tmp)){
+								//printf("something happened in the dir333\n");
+								Convert_Directory(arguments->files[file].filename, true);
+							}
+						}		
+                    }       
                 }
             }
             i += EVENT_SIZE + event->len;
