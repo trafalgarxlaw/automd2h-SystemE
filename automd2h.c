@@ -1064,7 +1064,7 @@ int launch_with_options2(struct Arguments *arguments)
 	if(usePandoc == false){
 		print_arguments_files(arguments, checkTime);
 	}
-	else if(watch == false || (watch ==true && forceConversion == true){
+	else if(watch == false || (watch ==true && forceConversion == true)){
 		for (int file = 0; file < arguments->num_files; file++){
 			if (is_directory(arguments->files[file].filename) == true)
 			{
