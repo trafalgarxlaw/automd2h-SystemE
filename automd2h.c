@@ -1151,6 +1151,8 @@ int launch_with_options(struct Arguments *arguments, enum Options *option, enum 
             //Observe(true);
         }
 		else if(*next_option == n){
+			*next_option = no_option;
+            *option_index++;
 			if(arguments->num_files > 0){
                 if (is_directory(arguments->files[0].filename))
                 {
