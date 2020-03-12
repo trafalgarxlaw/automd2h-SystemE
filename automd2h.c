@@ -1040,6 +1040,58 @@ int launch_with_no_options(struct Arguments *arguments)
 }
 
 // launching the program with options
+int launch_with_options2(struct Arguments *arguments)
+{
+	bool usePandoc = true;
+	bool checkTime = false;
+	bool forceConversion = false;
+	bool watch = false;
+    if(Option_n(arguments)){
+		usePandoc = false;
+	}
+	if(Option_t(arguments)){
+		checkTime = true;
+	}
+	if(Option_f(arguments)){
+		forceConversion = true;
+	}
+	if(Option_w(arguments)){
+		watch = true;
+	}
+
+	if(usePandoc == false){
+		print_arguments_files(arguments, checkTime);
+	}
+	else if(watch == false){
+		for (int file = 0; file < arguments->num_files; file++){
+			if (is_directory(arguments->files[file].filename) == true)
+			{
+				if (Convert_Directory(arguments->files[file].filename, checkTime) == 1)
+				{
+				    return 1;
+				}
+			}
+			else if (is_directory(arguments->files[file].filename) == false){
+				if (file_exist(arguments->files[file].filename)){
+				    if (file_needs_conversion(arguments->files[file].filename) || !checkTime){
+				        if (Pandoc(arguments->files[file].filename) == 1){
+				            return 1;
+				        }
+				    }
+				}
+				else{
+				    perror("ENOENT");
+				    exit(EXIT_FAILURE);
+				}
+			}
+		}
+	}
+    return 0;
+}
+
+
+
+// launching the program with options
 int launch_with_options(struct Arguments *arguments, enum Options *option, enum Options *next_option, int *option_index)
 {
 
@@ -1159,18 +1211,6 @@ int launch_with_options(struct Arguments *arguments, enum Options *option, enum 
                     watch_Dir(arguments);
                 }else
                 {
-                    //Create a new variable that include a copy of 
-                    //char filepath1[100];
-                    //char filepath2[100];
-                    //strncpy(filepath1,arguments->files[file].filename,100);
-                    //strncpy(filepath2,arguments->files[file].filename,100);
-
-
-                    //we need to give the directory associated with the file but how?
-                    //char * filename = get_filename_from_Path(filepath1);
-                    //char * Dir_of_file = dirname(filepath2);
-                    //printf("dir : %s\n",Dir_of_file);
-                    //printf("name : %s\n",filename);
                     watch_File(arguments, true);
                 }  
 			}
@@ -1243,16 +1283,18 @@ int lauchProgram(struct Arguments *arguments)
         }
         return 0;
     }
-
+	if (launch_with_options2(arguments) == 1){
+		return 1;
+	}
     //if there are options
     //looping through the options // 4 options max
-    for (int index_option = 0; index_option < 4; index_option++)
-    {
-        if (launch_with_options(arguments, &OptionArray[index_option], &OptionArray[index_option + 1], &index_option) == 1)
-        {
-            return 1;
-        }
-    }
+    //for (int index_option = 0; index_option < 4; index_option++)
+    //{
+        //if (launch_with_options(arguments, &OptionArray[index_option], &OptionArray[index_option + 1], &index_option) == 1)
+        //{
+        //    return 1;
+        //}
+    //}
     // printf("lauchProgram ends with stat 0\n");
     return 0;
 }
