@@ -858,7 +858,7 @@ int watch_Dir(struct Arguments *arguments, bool usePandoc) //need to be sure tha
 							char tmp[310];
 							sprintf(tmp, "%s/%s", arguments->files[file].filename, event->name);
 							//printf("%s\n", tmp);
-							if(file_exist(tmp)){
+							if(strstr(tmp, event->name) != NULL){
 								if(usePandoc){
 									Convert_Directory(arguments->files[file].filename, true);
 								}
