@@ -1283,7 +1283,7 @@ int lauchProgram(struct Arguments *arguments)
         }
         return 0;
     }
-	if (launch_with_options2(arguments) == 1){
+	else if (launch_with_options2(arguments) == 1){
 		return 1;
 	}
     //if there are options
