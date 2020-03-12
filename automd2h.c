@@ -1047,6 +1047,7 @@ int launch_with_options2(struct Arguments *arguments)
 	bool checkTime = false;
 	bool forceConversion = false;
 	bool watch = false;
+	bool recursive = false;
     if(Option_n(arguments)){
 		usePandoc = false;
 	}
@@ -1058,6 +1059,9 @@ int launch_with_options2(struct Arguments *arguments)
 	}
 	if(Option_w(arguments)){
 		watch = true;
+	}
+	if(Option_r(arguments)){
+		recursive = true;
 	}
 
 	if(usePandoc == false && watch == false){
@@ -1097,6 +1101,14 @@ int launch_with_options2(struct Arguments *arguments)
                 watch_File(arguments, usePandoc);
             }  
 		}        
+	}
+	if(recursive == true){
+		for (int file = 0; file < arguments->num_files; file++)
+		{
+			struct VisitedDirectories Directories;
+			Directories.num_dir_visited = 0;
+			RecursiveSearch(arguments->files[file].filename, false, &Directories);
+		}
 	}
     return 0;
 }
