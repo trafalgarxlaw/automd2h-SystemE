@@ -764,7 +764,7 @@ int watch_File(struct Arguments *arguments, bool usePandoc){
             struct inotify_event *event = (struct inotify_event *)&buffer[i];
             if (event->len)
             {
-                if (event->mask & (IN_MODIFY))
+                if (event->mask & (IN_CREATE | IN_MODIFY | IN_MOVED_TO | IN_MOVED_FROM))
                 {
                     //something was created,modified or moved IN the given Directory
                     if (event->mask & IN_ISDIR)
@@ -784,11 +784,6 @@ int watch_File(struct Arguments *arguments, bool usePandoc){
 								}
 							}
 						}
-                        //
-                        //file (only the one we are interested in)
-                            
-                        
-                        
                     }                
                 }
             }
@@ -843,7 +838,7 @@ int watch_Dir(struct Arguments *arguments, bool usePandoc) //need to be sure tha
             struct inotify_event *event = (struct inotify_event *)&buffer[i];
             if (event->len)
             {
-                if (event->mask & (IN_CREATE | IN_MODIFY | IN_MOVED_TO))
+                if (event->mask & (IN_CREATE | IN_MODIFY | IN_MOVED_TO | IN_MOVED_FROM))
                 {
                     //something was created IN the given Directory
                     if (event->mask & IN_ISDIR)
