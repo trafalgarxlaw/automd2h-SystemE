@@ -789,12 +789,13 @@ int Watch(struct Arguments *arguments, bool usePandoc){
                                 // then we only need the name of the event file to call pandoc.
 								strcpy(target, arguments->files[file].filename);
 							}
-                            printf("%s\n",event->name);
+                            //printf("%s\n",event->name);
 
                             //now we check if the target matches the event, if the modified file is the target,
                             //then we have to convert that file using pandoc.
-							if(strstr(target, event->name) != NULL){
-								if(usePandoc){
+							if(strstr(target, event->name) != NULL && file_exist(target)){
+//printf("%s\n", target);								
+if(usePandoc){
 									Pandoc(target);
 								}
                                 //option -n, desactivate the use of pandoc and prints the modifications
