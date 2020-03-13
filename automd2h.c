@@ -797,6 +797,7 @@ int Watch(struct Arguments *arguments, bool usePandoc){
 								if(usePandoc){
 									Pandoc(target);
 								}
+                                //option -n, desactivate the use of pandoc and prints the modifications
 								else{
 									printf("%s\n", target);
 								}
