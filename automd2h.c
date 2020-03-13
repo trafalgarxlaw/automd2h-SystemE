@@ -714,9 +714,9 @@ void Delete_Child(pid_t c_pid_To_Delete, int sec)
     }
 }
 
-// Listen in the current directories
-//this is a sub process
-int watch(struct Arguments *arguments, bool usePandoc){
+
+int Watch(struct Arguments *arguments, bool usePandoc){
+
     while (true)
     {
         int length, i = 0;
@@ -778,16 +778,21 @@ int watch(struct Arguments *arguments, bool usePandoc){
                         //Checks if the file detected was in our arguments target
 						for (int file = 0; file < arguments->num_files; file++){
 							char target[310];
-
+                            // if the given argument is a directory, create the Target Path of the modified file so
+                            // pandoc knows where and what to convert
 							if(is_directory(arguments->files[file].filename)){
-                                
+                                //creating the path of the file event
 								sprintf(target, "%s/%s", arguments->files[file].filename, event->name);	
 							}
 							else{
+                                //if the given argument is not a directory it means that the file is in the root dir
+                                // then we only need the name of the event file to call pandoc.
 								strcpy(target, arguments->files[file].filename);
 							}
+                            printf("%s\n",event->name);
 
-
+                            //now we check if the target matches the event, if the modified file is the target,
+                            //then we have to convert that file using pandoc.
 							if(strstr(target, event->name) != NULL){
 								if(usePandoc){
 									Pandoc(target);
@@ -1105,7 +1110,7 @@ int launch_with_options(struct Arguments *arguments)
 		}
 	}
 	if(watch == true){
-            watch(arguments, usePandoc);       
+        Watch(arguments, usePandoc);       
 	}
 	//if(recursive == true){
 	//	for (int file = 0; file < arguments->num_files; file++)
