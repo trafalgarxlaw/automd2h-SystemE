@@ -775,24 +775,25 @@ int watch(struct Arguments *arguments, bool usePandoc){
                     //file was created,modified or moved IN the given Directory
                     else
                     {
+                        //Checks if the file detected was in our arguments target
 						for (int file = 0; file < arguments->num_files; file++){
-							char tmp[310];
+							char target[310];
 
 							if(is_directory(arguments->files[file].filename)){
                                 
-								sprintf(tmp, "%s/%s", arguments->files[file].filename, event->name);	
+								sprintf(target, "%s/%s", arguments->files[file].filename, event->name);	
 							}
 							else{
-								strcpy(tmp, arguments->files[file].filename);
+								strcpy(target, arguments->files[file].filename);
 							}
 
 
-							if(strstr(tmp, event->name) != NULL){
+							if(strstr(target, event->name) != NULL){
 								if(usePandoc){
-									Pandoc(tmp);
+									Pandoc(target);
 								}
 								else{
-									printf("%s\n", tmp);
+									printf("%s\n", target);
 								}
 							}
 						}
