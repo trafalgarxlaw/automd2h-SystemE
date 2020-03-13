@@ -714,23 +714,9 @@ void Delete_Child(pid_t c_pid_To_Delete, int sec)
     }
 }
 
-//from a given filepath, get the name of the file
-char *get_filename_from_Path(char *filePath){
-    // initializing variables 
-    char slash = '/'; 
-    char* val; 
-    
-    //string after '/'
-    val = strrchr(filePath, slash);
-    val++; 
-
-    return val;
-
-}
-
 // Listen in the current directories
 //this is a sub process
-int watch_File(struct Arguments *arguments, bool usePandoc){
+int watch(struct Arguments *arguments, bool usePandoc){
     while (true)
     {
         int length, i = 0;
@@ -748,14 +734,18 @@ int watch_File(struct Arguments *arguments, bool usePandoc){
             exit(EXIT_FAILURE);
         }
 
-        /*adding the “/tmp” directory into watch list. Here, the suggestion is to validate the existence of the directory before adding into monitoring list.*/
 		for (int file = 0; file < arguments->num_files; file++){
+            //check if the argument is a directory or not
 			if(is_directory(arguments->files[file].filename) == false){
+                //copy of the file path
 				char *dup = strdup(arguments->files[file].filename);
+                //extract the name of the directory
 				char *dir = dirname(dup);
-	    			wd = inotify_add_watch(fd, dir, IN_MODIFY);
+                //add the file to watch in the watch list
+	    		wd = inotify_add_watch(fd, dir, IN_MODIFY);
 			}
 			else {
+                //its a directory, add it to the watch list
 				wd = inotify_add_watch(fd, arguments->files[file].filename, IN_CREATE | IN_MODIFY | IN_MOVED_TO);	
 			}
 		}
@@ -774,25 +764,30 @@ int watch_File(struct Arguments *arguments, bool usePandoc){
             struct inotify_event *event = (struct inotify_event *)&buffer[i];
             if (event->len)
             {
+                //If something was detected run this code
                 if (event->mask & (IN_CREATE | IN_MODIFY | IN_MOVED_TO | IN_MOVED_FROM))
                 {
-                    //something was created,modified or moved IN the given Directory
+                    //Directory was created,modified or moved IN the given Directory
                     if (event->mask & IN_ISDIR)
                     {
-                        //dir
+
                     }
+                    //file was created,modified or moved IN the given Directory
                     else
                     {
 						for (int file = 0; file < arguments->num_files; file++){
 							char tmp[310];
+
 							if(is_directory(arguments->files[file].filename)){
+                                
 								sprintf(tmp, "%s/%s", arguments->files[file].filename, event->name);	
 							}
 							else{
 								strcpy(tmp, arguments->files[file].filename);
 							}
+
+
 							if(strstr(tmp, event->name) != NULL){
-								//printf("something happened in the dir333\n");
 								if(usePandoc){
 									Pandoc(tmp);
 								}
@@ -1058,7 +1053,7 @@ int launch_with_no_options(struct Arguments *arguments)
 }
 
 // launching the program with options
-int launch_with_options2(struct Arguments *arguments)
+int launch_with_options(struct Arguments *arguments)
 {
 	bool usePandoc = true;
 	bool checkTime = false;
@@ -1109,7 +1104,7 @@ int launch_with_options2(struct Arguments *arguments)
 		}
 	}
 	if(watch == true){
-            watch_File(arguments, usePandoc);       
+            watch(arguments, usePandoc);       
 	}
 	//if(recursive == true){
 	//	for (int file = 0; file < arguments->num_files; file++)
@@ -1123,174 +1118,6 @@ int launch_with_options2(struct Arguments *arguments)
 }
 
 
-
-// launching the program with options
-int launch_with_options(struct Arguments *arguments, enum Options *option, enum Options *next_option, int *option_index)
-{
-
-    switch (*option)
-    {
-    case no_option:
-        return 0;
-        break;
-    case t:
-        // OPTION -T -N
-        if (*next_option == n)
-        {
-            *next_option = no_option;
-            *option_index++; // because we already considered the next option (which is n)
-
-            //t combined with n
-            for (int file = 0; file < arguments->num_files; file++)
-            {
-                //printf("file name : %s \n", arguments->files[file].filename);
-                if (file_needs_conversion(arguments->files[file].filename))
-                {
-                    printf("%s\n", arguments->files[file].filename);
-                }
-                else
-                {
-                    //no need to be converted
-                    //printf("no convertion needed for %s \n", arguments->files[file].filename);
-                }
-            }
-            return 0;
-        }
-        else // OPTION T
-        {
-            //printf("option t detected\n");
-            for (int file = 0; file < arguments->num_files; file++)
-            {
-                if (is_directory(arguments->files[file].filename) == true)
-                {
-                    if (Convert_Directory(arguments->files[file].filename, true) == 1)
-                    {
-                        return 1;
-                    }
-                    //Convert_Directory(arguments->files[file].filename, true);
-                    //file Need to be converted
-                    //printf("%s needs to be converted .\n", arguments->files[file].filename);
-                }
-                else if (is_directory(arguments->files[file].filename) == false)
-                {
-                    //printf("DIR %s needs to be converted .\n", arguments->files[file].filename);
-                    //elements of the directory needs to be converted, needs to checktime
-                    // convertir juste les md avec une nouvelle version par rapport au html ou sans html du tout
-                    if (file_exist(arguments->files[file].filename))
-                    {
-                        if (file_needs_conversion(arguments->files[file].filename))
-                        {
-                            if (Pandoc(arguments->files[file].filename) == 1)
-                            {
-                                return 1;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        perror("ENOENT");
-                        exit(EXIT_FAILURE);
-                    }
-                }
-                else
-                {
-                    //exit(EXIT_FAILURE);
-                    //printf("not a directory %s \n", arguments->files[file].filename);
-                    //no need to be converted
-                }
-            }
-            return 0;
-        }
-        break;
-
-    case n:
-
-        if (*next_option == t)
-        {
-            ///printf("\nOption n combined with t Detected.\n");
-            print_arguments_files(arguments, true);
-            *option_index++; // because we already considered the next option (which is t)
-        }
-        else
-        {
-            //printf("\nOption n Detected.\n");
-            print_arguments_files(arguments, false);
-        }
-        break;
-
-    case r:
-		for (int file = 0; file < arguments->num_files; file++)
-		{
-			//printf("\nStarting Recursive Research..\n");
-			struct VisitedDirectories Directories;
-			Directories.num_dir_visited = 0;
-			RecursiveSearch(arguments->files[file].filename, false, &Directories);
-		}
-        break;
-
-    case w:
-        if (*next_option == f)
-        {
-            //printf("\nOption w combined with f Detected...Immediate convertion\n");
-            *option_index++; // because we already considered the next option (which is f)
-            //Observe(true);
-        }
-		else if(*next_option == n){
-			*next_option = no_option;
-            *option_index++;
-			if(arguments->num_files > 0){
-                if (is_directory(arguments->files[0].filename))
-                {
-                    watch_Dir(arguments, true);
-                }else
-                {
-                    watch_File(arguments, true);
-                }  
-			}
-		}
-        else
-        {
-            // Here we need to clear up if the user entered a directory or a file to watch
-            //for (int file = 0; file < arguments->num_files; file++)
-            //{
-			if(arguments->num_files > 0){
-                if (is_directory(arguments->files[0].filename))
-                {
-                    watch_Dir(arguments, false);
-                }else
-                {
-                    //Create a new variable that include a copy of 
-                    //char filepath1[100];
-                    //char filepath2[100];
-                    //strncpy(filepath1,arguments->files[file].filename,100);
-                    //strncpy(filepath2,arguments->files[file].filename,100);
-
-
-                    //we need to give the directory associated with the file but how?
-                    //char * filename = get_filename_from_Path(filepath1);
-                    //char * Dir_of_file = dirname(filepath2);
-                    //printf("dir : %s\n",Dir_of_file);
-                    //printf("name : %s\n",filename);
-                    watch_File(arguments, false);
-                }  
-			}        
-            //}
-            //printf("\nOption w Detected.\n");
-        }
-
-        break;
-
-    case Optionerror:
-        //fprintf(stderr, "Option parsing failed\n");
-        arguments->status = WRONG_VALUE;
-        //exit(EXIT_FAILURE);
-        break;
-
-    default:
-        break;
-    }
-    return 0;
-}
 int lauchProgram(struct Arguments *arguments)
 {
     //Array of options
@@ -1316,19 +1143,9 @@ int lauchProgram(struct Arguments *arguments)
         }
         return 0;
     }
-	else if (launch_with_options2(arguments) == 1){
+	else if (launch_with_options(arguments) == 1){
 		return 1;
 	}
-    //if there are options
-    //looping through the options // 4 options max
-    //for (int index_option = 0; index_option < 4; index_option++)
-    //{
-        //if (launch_with_options(arguments, &OptionArray[index_option], &OptionArray[index_option + 1], &index_option) == 1)
-        //{
-        //    return 1;
-        //}
-    //}
-    // printf("lauchProgram ends with stat 0\n");
     return 0;
 }
 void initialise_Arguments(struct Arguments *arguments)
