@@ -466,6 +466,8 @@ void print_current_directory(char *currentDir, bool checkTime)
             if (!checkTime || file_needs_conversion(d->d_name))
             {
                 printf("%s\n", d->d_name);
+		fflush(stdout);
+
             }
         }
     }
@@ -483,7 +485,9 @@ void print_arguments_files(struct Arguments *arguments, bool checkTime)
         else
         {
 			if (file_needs_conversion(arguments->files[i].filename) || checkTime == false){
-            	printf("%s\n", arguments->files[i].filename);
+            			printf("%s\n", arguments->files[i].filename);
+				fflush(stdout);
+
 			}
         }
     }
@@ -714,9 +718,8 @@ void Delete_Child(pid_t c_pid_To_Delete, int sec)
     }
 }
 
-
 int Watch(struct Arguments *arguments, bool usePandoc){
-
+    //  keep watching EVERY file or directories given as arguments
     while (true)
     {
         int length, i = 0;
@@ -789,18 +792,20 @@ int Watch(struct Arguments *arguments, bool usePandoc){
                                 // then we only need the name of the event file to call pandoc.
 								strcpy(target, arguments->files[file].filename);
 							}
-                            printf("event name :%s\n",event->name);
-                            printf("target:%s\n",target);
+                            //printf("%s\n",event->name);
 
                             //now we check if the target matches the event, if the modified file is the target,
-                            //then we have to convert that file using pandoc.
-							if(strstr(target, event->name) != NULL){
-								if(usePandoc){
+                            //then we have to convert that file using pandoc. The target file have to exists.
+							if(strstr(target, event->name) != NULL && file_exist(target)){
+                                //printf("%s\n", target);								
+                                if(usePandoc){
 									Pandoc(target);
 								}
                                 //option -n, desactivate the use of pandoc and prints the modifications
 								else{
 									printf("%s\n", target);
+									fflush(stdout);
+
 								}
 							}
 						}
@@ -813,85 +818,6 @@ int Watch(struct Arguments *arguments, bool usePandoc){
         inotify_rm_watch(fd, wd);
         /*closing the INOTIFY instance*/
         close(fd);    
-    }
-
-    return 0;
-}
-
-
-int watch_Dir(struct Arguments *arguments, bool usePandoc) //need to be sure that its a dir
-{
-    while (true)
-    {
-        int length, i = 0;
-        int fd;
-        int wd;
-        char buffer[EVENT_BUF_LEN];
-
-        /*creating the INOTIFY instance*/
-        fd = inotify_init();
-
-        /*checking for error*/
-        if (fd < 0)
-        {
-            perror("inotify_init");
-        }
-
-        /*adding the “/tmp” directory into watch list. Here, the suggestion is to validate the existence of the directory before adding into monitoring list.*/
-	for (int file = 0; file < arguments->num_files; file++)
-            {
-        wd = inotify_add_watch(fd, arguments->files[file].filename, IN_CREATE | IN_MODIFY | IN_MOVED_TO);
-	}
-
-        /*read to determine the event change happens on “/tmp” directory. Actually this read blocks until the change event occurs*/
-        length = read(fd, buffer, EVENT_BUF_LEN);
-
-        /*checking for error*/
-        if (length < 0)
-        {
-            perror("read");
-        }
-
-        /*actually read return the list of change events happens. Here, read the change event one by one and process it accordingly.*/
-        while (i < length)
-        {
-            struct inotify_event *event = (struct inotify_event *)&buffer[i];
-            if (event->len)
-            {
-                if (event->mask & (IN_CREATE | IN_MODIFY | IN_MOVED_TO | IN_MOVED_FROM))
-                {
-                    //something was created IN the given Directory
-                    if (event->mask & IN_ISDIR)
-                    {
-                        //printf("New directory %s created.\n", event->name);
-
-                        
-                    }
-                    else
-                    {
-						for (int file = 0; file < arguments->num_files; file++){
-							char tmp[310];
-							sprintf(tmp, "%s/%s", arguments->files[file].filename, event->name);
-							//printf("%s\n", tmp);
-							if(strstr(tmp, event->name) != NULL){
-								if(usePandoc){
-									Convert_Directory(arguments->files[file].filename, true);
-								}
-								else{
-									printf("%s\n", arguments->files[file].filename);
-								}
-								//printf("something happened in the dir333 %s\n", event->name);
-							}
-						}		
-                    }       
-                }
-            }
-            i += EVENT_SIZE + event->len;
-        }
-        /*removing the “/tmp” directory from the watch list.*/
-        inotify_rm_watch(fd, wd);
-        /*closing the INOTIFY instance*/
-        close(fd);
     }
 
     return 0;
@@ -1059,7 +985,6 @@ int launch_with_no_options(struct Arguments *arguments)
     }
     return 0;
 }
-
 // launching the program with options
 int launch_with_options(struct Arguments *arguments)
 {
@@ -1124,7 +1049,6 @@ int launch_with_options(struct Arguments *arguments)
 	//}
     return 0;
 }
-
 
 int lauchProgram(struct Arguments *arguments)
 {
