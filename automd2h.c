@@ -1287,6 +1287,7 @@ int main(int argc, char *argv[])
         }
     }
     free_arguments(arguments);
+    fflush(stdout);
     //printf("MAIN ends with stat 0\n");
     return 0;
 }
