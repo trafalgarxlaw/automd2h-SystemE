@@ -466,6 +466,8 @@ void print_current_directory(char *currentDir, bool checkTime)
             if (!checkTime || file_needs_conversion(d->d_name))
             {
                 printf("%s\n", d->d_name);
+		fflush(stdout);
+
             }
         }
     }
@@ -483,7 +485,9 @@ void print_arguments_files(struct Arguments *arguments, bool checkTime)
         else
         {
 			if (file_needs_conversion(arguments->files[i].filename) || checkTime == false){
-            	printf("%s\n", arguments->files[i].filename);
+            			printf("%s\n", arguments->files[i].filename);
+				fflush(stdout);
+
 			}
         }
     }
@@ -801,6 +805,8 @@ if(usePandoc){
                                 //option -n, desactivate the use of pandoc and prints the modifications
 								else{
 									printf("%s\n", target);
+									fflush(stdout);
+
 								}
 							}
 						}
@@ -879,6 +885,7 @@ int watch_Dir(struct Arguments *arguments, bool usePandoc) //need to be sure tha
 								}
 								else{
 									printf("%s\n", arguments->files[file].filename);
+									fflush(stdout);
 								}
 								//printf("something happened in the dir333 %s\n", event->name);
 							}
@@ -1287,7 +1294,6 @@ int main(int argc, char *argv[])
         }
     }
     free_arguments(arguments);
-    fflush(stdout);
     //printf("MAIN ends with stat 0\n");
     return 0;
 }
