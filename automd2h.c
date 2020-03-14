@@ -1033,7 +1033,7 @@ int launch_with_options(struct Arguments *arguments)
 		recursive = true;
 	}
 	
-	if(recursive == true && (watch == false || (watch ==true && forceConversion == true))){
+	if(recursive == true){
 		if(watch == false || forceConversion == true){		
 			for (int file = 0; file < arguments->num_files; file++){
 				if (is_directory(arguments->files[file].filename) == true)
@@ -1049,7 +1049,7 @@ int launch_with_options(struct Arguments *arguments)
 	else if(usePandoc == false && watch == false){
 		print_arguments_files(arguments, checkTime);
 	}
-	else if(watch == false || (watch ==true && forceConversion == true)){
+	else{
 		if(watch == false || forceConversion == true){
 			for (int file = 0; file < arguments->num_files; file++){
 				if (is_directory(arguments->files[file].filename) == true)
