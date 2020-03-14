@@ -1068,10 +1068,11 @@ int launch_with_options(struct Arguments *arguments)
 				}
 			}
 		}
+		if(watch == true){
+        	Watch(arguments, usePandoc);       
+		}
 	}
-	if(watch == true){
-        Watch(arguments, usePandoc);       
-	}
+	
 	//if(recursive == true){
 	//	for (int file = 0; file < arguments->num_files; file++)
 	//	{
