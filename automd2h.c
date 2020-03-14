@@ -1034,52 +1034,50 @@ int launch_with_options(struct Arguments *arguments)
 	}
 	
 	if(recursive == true && (watch == false || (watch ==true && forceConversion == true))){
-		for (int file = 0; file < arguments->num_files; file++){
-			if (is_directory(arguments->files[file].filename) == true)
-			{
-				RecursiveConversion(arguments->files[file].filename, checkTime);	
-			}
-		}		
+		if(watch == false || forceConversion == true){		
+			for (int file = 0; file < arguments->num_files; file++){
+				if (is_directory(arguments->files[file].filename) == true)
+				{
+					RecursiveConversion(arguments->files[file].filename, checkTime);	
+				}
+			}	
+		}
+		if(watch == true){
 
+		}
 	}
 	else if(usePandoc == false && watch == false){
 		print_arguments_files(arguments, checkTime);
 	}
 	else if(watch == false || (watch ==true && forceConversion == true)){
-		for (int file = 0; file < arguments->num_files; file++){
-			if (is_directory(arguments->files[file].filename) == true)
-			{
-				if (Convert_Directory(arguments->files[file].filename, checkTime) == 1)
+		if(watch == false || forceConversion == true){
+			for (int file = 0; file < arguments->num_files; file++){
+				if (is_directory(arguments->files[file].filename) == true)
 				{
-				    return 1;
+					if (Convert_Directory(arguments->files[file].filename, checkTime) == 1)
+					{
+						return 1;
+					}
 				}
-			}
-			else if (is_directory(arguments->files[file].filename) == false){
-				if (file_exist(arguments->files[file].filename)){
-				    if (file_needs_conversion(arguments->files[file].filename) || !checkTime){
-				        if (Pandoc(arguments->files[file].filename) == 1){
-				            return 1;
-				        }
-				    }
-				}
-				else{
-				    perror("ENOENT");
-				    exit(EXIT_FAILURE);
+				else if (is_directory(arguments->files[file].filename) == false){
+					if (file_exist(arguments->files[file].filename)){
+						if (file_needs_conversion(arguments->files[file].filename) || !checkTime){
+						    if (Pandoc(arguments->files[file].filename) == 1){
+						        return 1;
+						    }
+						}
+					}
+					else{
+						perror("ENOENT");
+						exit(EXIT_FAILURE);
+					}
 				}
 			}
 		}
+		if(watch == true){
+        	Watch(arguments, usePandoc);       
+		}
 	}
-	if(watch == true && recursive == false){
-        Watch(arguments, usePandoc);       
-	}
-	//if(recursive == true){
-	//	for (int file = 0; file < arguments->num_files; file++)
-	//	{
-		//	struct VisitedDirectories Directories;
-		//	Directories.num_dir_visited = 0;
-		//	RecursiveSearch(arguments->files[file].filename, false, &Directories);
-		//}
-	//}
     return 0;
 }
 
