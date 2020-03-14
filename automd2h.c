@@ -967,26 +967,6 @@ int RecursiveConversion(char *dir, bool checkTime){
 	return 0;
 }
 
-
-void Observe(bool Immediate_Convertion)
-{
-    //printf("\nStarting to observe Sub Directories ...\n");
-
-    struct VisitedDirectories Directories;
-    Directories.num_dir_visited = 0;
-
-    //This will converte immediatly any files (option f)
-    if (Immediate_Convertion)
-    {
-        RecursiveSearch(".", false, &Directories);
-    }
-
-    while (RecursiveSearch(".", true, &Directories))
-    {
-        //printf("\nsleeping...\n");
-        sleep(2);
-    }
-}
 void No_arg_Failure(int argc)
 {
     if (argc == 1)
@@ -994,6 +974,7 @@ void No_arg_Failure(int argc)
         exit(EXIT_FAILURE);
     }
 }
+
 // launching the program with no option entered.
 int launch_with_no_options(struct Arguments *arguments)
 {
@@ -1031,26 +1012,16 @@ int launch_with_no_options(struct Arguments *arguments)
 // launching the program with options
 int launch_with_options(struct Arguments *arguments)
 {
-	bool usePandoc = true;
-	bool checkTime = false;
-	bool forceConversion = false;
-	bool watch = false;
-	bool recursive = false;
-    if(Option_n(arguments)){
-		usePandoc = false;
-	}
-	if(Option_t(arguments)){
-		checkTime = true;
-	}
-	if(Option_f(arguments)){
-		forceConversion = true;
-	}
-	if(Option_w(arguments)){
-		watch = true;
-	}
-	if(Option_r(arguments)){
-		recursive = true;
-	}
+	//option n
+	bool usePandoc = Option_n(arguments) == true;
+	//option t
+	bool checkTime = Option_t(arguments);
+	//option f
+	bool forceConversion = Option_f(arguments);
+	//option w
+	bool watch = Option_w(arguments);
+	//option r
+	bool recursive = Option_r(arguments);
 	
 	if(recursive == true){
 		for (int file = 0; file < arguments->num_files; file++){
@@ -1091,14 +1062,6 @@ int launch_with_options(struct Arguments *arguments)
 	if(watch == true){
         Watch(arguments, usePandoc);       
 	}
-	//if(recursive == true){
-	//	for (int file = 0; file < arguments->num_files; file++)
-	//	{
-		//	struct VisitedDirectories Directories;
-		//	Directories.num_dir_visited = 0;
-		//	RecursiveSearch(arguments->files[file].filename, false, &Directories);
-		//}
-	//}
     return 0;
 }
 
