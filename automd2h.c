@@ -265,8 +265,6 @@ enum Options option_detection(char *option)
     else
     {
         Detected_option = Optionerror;
-        //fprintf(stderr, "Option detection error");
-        //return 1;
     }
 
     return Detected_option;
@@ -392,14 +390,12 @@ bool has_new_doc_version(time_t sourceFile, time_t destFile)
 //Check if documents has a new version to convert
 bool file_needs_conversion(char *filename)
 {
-    //printf("analysing %s\n",filename);
     bool convert = false;
     struct stat attrib;
     struct stat newAttrib;
 
     char *newFileName = concatenate_file_extension(filename);
 
-    //printf("\nChecking if %s needs to be converted\n", filename);
     //Checking if the given file exists and if its a .md
     if (file_exist(filename))
     {
@@ -417,26 +413,14 @@ bool file_needs_conversion(char *filename)
                     {
                         //If there is, a convertion is needed
                         convert = true;
-                        //printf("..Convertion needed for: %s\n",filename);
                     }
-                }
-                else
-                {
-                    //printf("Unable to get file properties.\n");
                 }
             }
             else
             {
                 //destFile does not exists, need to convert the source file
-                //printf("'%s' file do not exists, i can't compare them.\n", newFileName);
                 convert = true;
             }
-        }
-        else
-        {
-            
-            //printf("Unable to get file properties.\n");
-            //printf("Please check whether '%s' file exists.\n", filename);
         }
     }
     else
@@ -466,8 +450,7 @@ void print_current_directory(char *currentDir, bool checkTime)
             if (!checkTime || file_needs_conversion(d->d_name))
             {
                 printf("%s\n", d->d_name);
-		fflush(stdout);
-
+				fflush(stdout);
             }
         }
     }
@@ -485,7 +468,7 @@ void print_arguments_files(struct Arguments *arguments, bool checkTime)
         else
         {
 			if (file_needs_conversion(arguments->files[i].filename) || checkTime == false){
-            			printf("%s\n", arguments->files[i].filename);
+				printf("%s\n", arguments->files[i].filename);
 				fflush(stdout);
 
 			}
@@ -540,9 +523,7 @@ int Pandoc(char *file)
                 exit(EXIT_FAILURE);
             }
         }
-        // printf("status: %d\n",status);
     }
-    // printf("pandoc ends with stat 0\n");
     return 0;
 }
 
@@ -583,13 +564,9 @@ int Convert_Directory(char *Dir, bool checktime)
     struct dirent *entry;
     struct stat filestat;
 
-    //printf("I am converting (%s) Directory\n", Dir);
-
     Directory = opendir(Dir);
     if (Directory == NULL)
     {
-        //perror("Unable to read directory.. i'm leaving\n");
-        // printf("Convert_Directory ends with stat 0\n");
         return (0); // leave
     }
     else
@@ -607,20 +584,17 @@ int Convert_Directory(char *Dir, bool checktime)
             }
             else
             {
-                //printf("%4s: %s\n", "File", fullname);
                 //its a file
                 if (is_Markdown(fullname) && (file_needs_conversion(fullname) || checktime == false))
                 {
-                    //printf("%s needs to be converted\n",fullname);
                     if (Pandoc(fullname) == 1)
-                    { //printf("pandoc ends with stat 0\n");
+                    {
                         return 1;
                     }
                 }
             }
         }
         closedir(Directory);
-        // printf("Convert_Directory ends with stat 0\n");
     }
     return (0);
 }
@@ -702,7 +676,6 @@ void Delete_Child(pid_t c_pid_To_Delete, int sec)
             sleep(1); // sleep 1s.
             start = time(NULL);
         }
-        //printf("*****************Deleted..*************\n");
         //killing the child after a certain delay.
         kill(c_pid_To_Delete, SIGKILL);
     }
@@ -867,63 +840,6 @@ int Watch_fork(char *Dir, struct VisitedDirectories *Directories)
     }
     return 0;
 }
-bool RecursiveSearch(char *Dir, bool AddWatcher, struct VisitedDirectories *Directories)
-{
-    //printf("Visited dir : %d\n", Directories->num_dir_visited);
-    //Directory stuff
-    DIR *Directory;
-    struct dirent *entry;
-    struct stat filestat;
-
-    //printf("I am Reading %s Directory\n", Dir);
-    // Open the current directory
-    Directory = opendir(Dir);
-    if (Directory == NULL)
-    {
-        //error
-        //perror("Unable to read directory.. i'm leaving\n");
-        return (1); // leave
-    }
-
-    //Adding a watcher in the current Directory of the recursion
-    if (AddWatcher)
-    {
-        Watch_fork(Dir, Directories);
-    }
-
-    /* Read directory entries */
-    while ((entry = readdir(Directory)))
-    {
-        char fullname[257];
-        sprintf(fullname, "%s/%s", Dir, entry->d_name);
-        stat(fullname, &filestat);
-
-        //Checking if we are dealing with a file or a directory
-        if (S_ISDIR(filestat.st_mode))
-        {
-            //its a dir
-            if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) // to not infinite loop
-            {
-                // Recursion happens here
-                //printf("\n*Entering a subDirectory* : %s \n", entry->d_name);
-                RecursiveSearch(fullname, AddWatcher, Directories);
-               // printf("\n*Leaving a subDirectory*\n");
-            }
-        }
-        else
-        {
-            //its a file
-			if(is_Markdown(fullname)){
-
-				if (Pandoc(fullname) == 1)
-	            {
-	                return 1;
-	            }
-			}
-        }
-    }
-    return true;
-}
 
 int RecursiveConversion(char *dir, bool checkTime){
 	DIR *Directory;
@@ -965,6 +881,34 @@ int RecursiveConversion(char *dir, bool checkTime){
         }
     }
 	return 0;
+}
+
+int addRecursiveWatcher(struct Arguments *arguments){
+	DIR *Directory;
+	struct dirent *entry;
+    struct stat filestat;
+	Directory = opendir(arguments->files[arguments->num_files-1].filename);
+
+    if (Directory == NULL){
+		return (1); // leave
+    }
+
+	/* Read directory entries */
+    while ((entry = readdir(Directory)))
+    {
+        char fullname[600];
+        sprintf(fullname, "%s/%s", arguments->files[arguments->num_files-1].filename, entry->d_name);
+        stat(fullname, &filestat);
+
+        //Checking if we are dealing with a file or a directory
+        if (S_ISDIR(filestat.st_mode))
+        {
+			strcpy(arguments->files[arguments->num_files-1].filename, fullname);
+			arguments->num_files++;
+			addRecursiveWatcher(arguments);
+		}
+	}
+	return 0;;
 }
 
 void No_arg_Failure(int argc)
@@ -1043,7 +987,9 @@ int launch_with_options(struct Arguments *arguments)
 			}	
 		}
 		if(watch == true){
-
+			//add all subDirectories in arg struct
+			addRecursiveWatcher(arguments);
+			Watch(arguments, usePandoc);
 		}
 	}
 	else if(usePandoc == false && watch == false){
