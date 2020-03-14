@@ -50,7 +50,7 @@ automd2h convertit les fichiers au format Markdown en fichiers au format HTML.\n
                               celui-ci est automatiquement reconverti. Si dans un répertoire surveillé un fichier .md \n\
                               apparait, est modifié, est déplacé ou est renommé, celui-ci aussi est automatiquement converti.\n\
                               \n\
--r,                           L'option -r visite les répertoires récursivement et cherche les fichiers dont l'extension est .md pour les convertir.\n\
+  -r,                         L'option -r visite les répertoires récursivement et cherche les fichiers dont l'extension est .md pour les convertir.\n\
                               \n\
   -f,                         Par défaut, avec -w, les fichiers ne sont convertis que si une modification future est détectée.\n\
                               Combiné avec -w, l'option -f force la conversion immédiate des fichiers trouvés puis surveille les modifications futures.\n\
