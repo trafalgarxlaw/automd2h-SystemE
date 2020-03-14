@@ -908,7 +908,7 @@ int addRecursiveWatcher(struct Arguments *arguments){
 			addRecursiveWatcher(arguments);
 		}
 	}
-	return 0;;
+	return 0;
 }
 
 void No_arg_Failure(int argc)
@@ -988,8 +988,8 @@ int launch_with_options(struct Arguments *arguments)
 		}
 		if(watch == true){
 			//add all subDirectories in arg struct
-			addRecursiveWatcher(arguments);
-			Watch(arguments, usePandoc);
+			//addRecursiveWatcher(arguments);
+			//Watch(arguments, usePandoc);
 		}
 	}
 	else if(usePandoc == false && watch == false){
