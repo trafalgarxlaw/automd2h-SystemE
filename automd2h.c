@@ -925,6 +925,49 @@ bool RecursiveSearch(char *Dir, bool AddWatcher, struct VisitedDirectories *Dire
     return true;
 }
 
+int RecursiveConversion(char *dir, bool checkTime){
+	DIR *Directory;
+	struct dirent *entry;
+    struct stat filestat;
+	Directory = opendir(dir);
+
+    if (Directory == NULL){
+		return (1); // leave
+    }
+
+	/* Read directory entries */
+    while ((entry = readdir(Directory)))
+    {
+        char fullname[257];
+        sprintf(fullname, "%s/%s", dir, entry->d_name);
+        stat(fullname, &filestat);
+
+        //Checking if we are dealing with a file or a directory
+        if (S_ISDIR(filestat.st_mode))
+        {
+            //its a dir
+            if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) // to not infinite loop
+            {
+                // Recursion happens here
+                RecursiveConversion(fullname, checkTime);
+            }
+        }
+        else
+        {
+            //its a file
+			if(is_Markdown(fullname) && (checkTime == false || file_needs_conversion(fullname))){
+
+				if (Pandoc(fullname) == 1)
+	            {
+	                return 1;
+	            }
+			}
+        }
+    }
+	return 0;
+}
+
+
 void Observe(bool Immediate_Convertion)
 {
     //printf("\nStarting to observe Sub Directories ...\n");
@@ -1008,8 +1051,17 @@ int launch_with_options(struct Arguments *arguments)
 	if(Option_r(arguments)){
 		recursive = true;
 	}
+	
+	if(recursive == true){
+		for (int file = 0; file < arguments->num_files; file++){
+			if (is_directory(arguments->files[file].filename) == true)
+			{
+				RecursiveConversion(arguments->files[file].filename, checkTime);	
+			}
+		}		
 
-	if(usePandoc == false && watch == false){
+	}
+	else if(usePandoc == false && watch == false){
 		print_arguments_files(arguments, checkTime);
 	}
 	else if(watch == false || (watch ==true && forceConversion == true)){
