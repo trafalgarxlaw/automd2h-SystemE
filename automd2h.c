@@ -906,7 +906,7 @@ int addRecursiveWatcher(struct Arguments *arguments){
 			if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) // to not infinite loop
         	{
 				//printf("%s\n", fullname);
-				strcpy(arguments->files[arguments->num_files-1].filename, fullname);
+				strcpy(arguments->files[arguments->num_files].filename, fullname);
 				arguments->num_files++;
 				addRecursiveWatcher(arguments);
 			}
@@ -995,6 +995,9 @@ int launch_with_options(struct Arguments *arguments)
 			//printf("%d\n", arguments->num_files);
 			addRecursiveWatcher(arguments);
 			//printf("%d\n", arguments->num_files);
+			//for (int file = 0; file < arguments->num_files; file++){
+			//	printf("%s\n", arguments->files[file].filename);
+			//}
 			Watch(arguments, usePandoc);
 		}
 	}
