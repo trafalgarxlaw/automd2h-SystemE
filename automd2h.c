@@ -106,17 +106,6 @@ struct Arguments
     struct File files[200]; // Array of Files to convert. It can be unlimited
 };
 
-struct Directory
-{
-    char name[300];
-};
-
-struct VisitedDirectories
-{
-    int num_dir_visited;
-    struct Directory DirectoriesTable[100];
-};
-
 // Check if file exists in Current repository
 bool file_exist(char *filePath)
 {
@@ -545,17 +534,6 @@ bool Check_Duplicates(enum Options OptionArray[])
     }
     return DuplicateOption;
 }
-bool if_html_version_exists(char *file)
-{
-    char *newFileName = concatenate_file_extension(file); //will return file if fails
-    bool htmlExists = false;
-    //Checking if the html version of a md file exists if its a md file
-    if (file_exist(newFileName) && strcmp(file, newFileName) != 0)
-    {
-        htmlExists = true;
-    }
-    return htmlExists;
-}
 
 //Convert all md (ASKED SPECIFICALLY) files inside Directory if there is no html version of them
 int Convert_Directory(char *Dir, bool checktime)
@@ -828,7 +806,6 @@ void No_arg_Failure(int argc)
 // launching the program with no option entered.
 int launch_with_no_options(struct Arguments *arguments)
 {
-    struct VisitedDirectories Directories;
 
     for (int i = 0; i < arguments->num_files; i++)
     {
