@@ -903,9 +903,13 @@ int addRecursiveWatcher(struct Arguments *arguments){
         //Checking if we are dealing with a file or a directory
         if (S_ISDIR(filestat.st_mode))
         {
-			strcpy(arguments->files[arguments->num_files-1].filename, fullname);
-			arguments->num_files++;
-			addRecursiveWatcher(arguments);
+			if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) // to not infinite loop
+        	{
+				//printf("%s\n", fullname);
+				strcpy(arguments->files[arguments->num_files-1].filename, fullname);
+				arguments->num_files++;
+				addRecursiveWatcher(arguments);
+			}
 		}
 	}
 	return 0;
@@ -988,8 +992,10 @@ int launch_with_options(struct Arguments *arguments)
 		}
 		if(watch == true){
 			//add all subDirectories in arg struct
-			//addRecursiveWatcher(arguments);
-			//Watch(arguments, usePandoc);
+			//printf("%d\n", arguments->num_files);
+			addRecursiveWatcher(arguments);
+			//printf("%d\n", arguments->num_files);
+			Watch(arguments, usePandoc);
 		}
 	}
 	else if(usePandoc == false && watch == false){
