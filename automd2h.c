@@ -106,17 +106,6 @@ struct Arguments
     struct File files[200]; // Array of Files to convert. It can be unlimited
 };
 
-struct Directory
-{
-    char name[300];
-};
-
-struct VisitedDirectories
-{
-    int num_dir_visited;
-    struct Directory DirectoriesTable[100];
-};
-
 // Check if file exists in Current repository
 bool file_exist(char *filePath)
 {
@@ -545,17 +534,6 @@ bool Check_Duplicates(enum Options OptionArray[])
     }
     return DuplicateOption;
 }
-bool if_html_version_exists(char *file)
-{
-    char *newFileName = concatenate_file_extension(file); //will return file if fails
-    bool htmlExists = false;
-    //Checking if the html version of a md file exists if its a md file
-    if (file_exist(newFileName) && strcmp(file, newFileName) != 0)
-    {
-        htmlExists = true;
-    }
-    return htmlExists;
-}
 
 //Convert all md (ASKED SPECIFICALLY) files inside Directory if there is no html version of them
 int Convert_Directory(char *Dir, bool checktime)
@@ -641,56 +619,6 @@ void Print_num_Options(struct Arguments *arguments)
     printf("Number of options entered :%d \n", arguments->num_options);
 }
 
-// Checks if the given Directory has been visited
-bool Dir_is_Visited(char *Dir, struct VisitedDirectories *Directories)
-{
-    bool isVisited = false;
-    for (int i = 0; i < Directories->num_dir_visited; i++)
-    {
-        //printf("comparing %s and %s, i = %d\n", Dir, Directories->DirectoriesTable[i].name, i);
-        if(strcmp(Dir, Directories->DirectoriesTable[i].name) == 0)
-        {
-            isVisited = true;
-        }
-    }
-    return isVisited;
-}
-
-//creates indepedant timers to delete process
-void Delete_Child(pid_t c_pid_To_Delete, int sec)
-{
-    pid_t c_pid;
-    c_pid = fork();
-
-    if (c_pid == 0)
-    {
-        // It will be watching for an event in the current Directory for a certain amount of time
-        time_t endwait;
-        time_t start = time(NULL);
-        time_t seconds = sec; // end loop after this time has elapsed
-        endwait = start + seconds;
-
-        while (start < endwait)
-        {
-
-            sleep(1); // sleep 1s.
-            start = time(NULL);
-        }
-        //killing the child after a certain delay.
-        kill(c_pid_To_Delete, SIGKILL);
-    }
-    else if (c_pid > 0) //parent
-    {
- 
-    }
-    else
-    {
-        //error: The return of fork() is negative
-        perror("fork failed");
-        exit(EXIT_FAILURE);
-    }
-}
-
 int Watch(struct Arguments *arguments, bool usePandoc){
     //  keep watching EVERY file or directories given as arguments
     while (true)
@@ -699,6 +627,7 @@ int Watch(struct Arguments *arguments, bool usePandoc){
         int fd;
         int wd;
         char buffer[EVENT_BUF_LEN];
+		char target[310];
 
         /*creating the INOTIFY instance*/
         fd = inotify_init();
@@ -726,7 +655,6 @@ int Watch(struct Arguments *arguments, bool usePandoc){
 			}
 		}
 
-        /*read to determine the event change happens on “/tmp” directory. Actually this read blocks until the change event occurs*/
         length = read(fd, buffer, EVENT_BUF_LEN);
 
         /*checking for error*/
@@ -753,7 +681,6 @@ int Watch(struct Arguments *arguments, bool usePandoc){
                     {
                         //Checks if the file detected was in our arguments target
 						for (int file = 0; file < arguments->num_files; file++){
-							char target[310];
                             // if the given argument is a directory, create the Target Path of the modified file so
                             // pandoc knows where and what to convert
 							if(is_directory(arguments->files[file].filename)){
@@ -787,57 +714,11 @@ int Watch(struct Arguments *arguments, bool usePandoc){
             }
             i += EVENT_SIZE + event->len;
         }
-        /*removing the “/tmp” directory from the watch list.*/
         inotify_rm_watch(fd, wd);
         /*closing the INOTIFY instance*/
         close(fd);    
     }
 
-    return 0;
-}
-
-
-int Watch_fork(char *Dir, struct VisitedDirectories *Directories)
-{
-    //Only watch the current directory if its not visited
-    if (Dir_is_Visited(Dir, Directories) == true)
-    {
-        //Already visited, no need to watch it again
-        //printf("%s is already visited\n", Dir);
-        //leave
-        return 0;
-    }
-    else
-    {
-        //not vsited, Add it to the visited Directories table.
-        //printf("adding %s Dir to the list at the positon : %d\n", Dir, Directories->num_dir_visited);
-        struct Directory directory;
-        strncpy(directory.name, Dir, sizeof(directory.name));
-        directory.name[sizeof(directory.name) - 1] = '\0';
-        Directories->DirectoriesTable[Directories->num_dir_visited] = directory;
-        Directories->num_dir_visited++;
-    }
-    //---------------------------------------------------------
-    // This code is executed only if its an unvisited directory
-    pid_t c_pid;
-    c_pid = fork();
-
-    if (c_pid == 0)
-    {
-        //the child will be watching this unvisited directory...
-        //watch(Dir);
-    }
-    else if (c_pid > 0) //parent
-    {
-        //Deleting the child after ? secondes
-        Delete_Child(c_pid, 10); 
-    }
-    else
-    {
-        //error: The return of fork() is negative
-        perror("fork failed");
-        exit(EXIT_FAILURE);
-    }
     return 0;
 }
 
@@ -903,9 +784,13 @@ int addRecursiveWatcher(struct Arguments *arguments){
         //Checking if we are dealing with a file or a directory
         if (S_ISDIR(filestat.st_mode))
         {
-			strcpy(arguments->files[arguments->num_files-1].filename, fullname);
-			arguments->num_files++;
-			addRecursiveWatcher(arguments);
+			if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) // to not infinite loop
+        	{
+				//printf("%s\n", fullname);
+				strcpy(arguments->files[arguments->num_files].filename, fullname);
+				arguments->num_files++;
+				addRecursiveWatcher(arguments);
+			}
 		}
 	}
 	return 0;
@@ -921,7 +806,6 @@ void No_arg_Failure(int argc)
 // launching the program with no option entered.
 int launch_with_no_options(struct Arguments *arguments)
 {
-    struct VisitedDirectories Directories;
 
     for (int i = 0; i < arguments->num_files; i++)
     {
@@ -988,8 +872,8 @@ int launch_with_options(struct Arguments *arguments)
 		}
 		if(watch == true){
 			//add all subDirectories in arg struct
-			//addRecursiveWatcher(arguments);
-			//Watch(arguments, usePandoc);
+			addRecursiveWatcher(arguments);
+			Watch(arguments, usePandoc);
 		}
 	}
 	else if(usePandoc == false && watch == false){
@@ -1169,7 +1053,6 @@ struct Arguments *parse_arguments(int argc, char *argv[])
 
 int main(int argc, char *argv[])
 {
-    //printf("\nStarting the program... \n");
     //printf(USAGE);
     struct Arguments *arguments = parse_arguments(argc, argv); //takes the arguments in the structure
     if (arguments->status != OK)
@@ -1180,14 +1063,11 @@ int main(int argc, char *argv[])
     else
     {
         // All good
-        //print_args(arguments);
-        //Print_num_Options(arguments);
         if (lauchProgram(arguments) == 1)
         {
             return 1;
         }
     }
     free_arguments(arguments);
-    //printf("MAIN ends with stat 0\n");
     return 0;
 }
