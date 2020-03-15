@@ -641,7 +641,7 @@ void Print_num_Options(struct Arguments *arguments)
     printf("Number of options entered :%d \n", arguments->num_options);
 }
 
-int Watch(struct Arguments *arguments, bool usePandoc, bool recursive){
+int Watch(struct Arguments *arguments, bool usePandoc){
     //  keep watching EVERY file or directories given as arguments
     while (true)
     {
@@ -694,16 +694,9 @@ int Watch(struct Arguments *arguments, bool usePandoc, bool recursive){
                 if (event->mask & (IN_CREATE | IN_MODIFY | IN_MOVED_TO | IN_MOVED_FROM))
                 {
                     //Directory was created,modified or moved IN the given Directory
-                    if (event->mask & IN_ISDIR & recursive == true)
+                    if (event->mask & IN_ISDIR)
                     {
-						for (int file = 0; file < arguments->num_files; file++){
-							sprintf(target, "%s/%s", arguments->files[file].filename, event->name);
-							if (is_directory(target)){
-								strcpy(arguments->files[arguments->num_files].filename, target);
-								arguments->num_files++;
-								wd = inotify_add_watch(fd, arguments->files[file].filename, IN_CREATE | IN_MODIFY | IN_MOVED_TO);
-							}
-						}
+
                     }
                     //file was created,modified or moved IN the given Directory
                     else
@@ -903,7 +896,7 @@ int launch_with_options(struct Arguments *arguments)
 		if(watch == true){
 			//add all subDirectories in arg struct
 			addRecursiveWatcher(arguments);
-			Watch(arguments, usePandoc, recursive);
+			Watch(arguments, usePandoc);
 		}
 	}
 	else if(usePandoc == false && watch == false){
@@ -935,7 +928,7 @@ int launch_with_options(struct Arguments *arguments)
 			}
 		}
 		if(watch == true){
-        	Watch(arguments, usePandoc, recursive);       
+        	Watch(arguments, usePandoc);       
 		}
 	}
     return 0;
