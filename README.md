@@ -1,12 +1,6 @@
-# automd2h - TP1
+# automd2h - TP1 by myself
 ## Manuel
 automd2h convertit les fichiers markdown d'une sous-arborescence vers des fichiers HTML
-
-## By me
-Utiliser un max d'appel system : opendir, closedir (pour se promenet dans les repertoire de facon recurive)
-fork() wait() etc...
-
-Note : Ne pas oublier de handle les erreurs des system calls, ca vaut des points.
 
 **System calls**
 - fork()
